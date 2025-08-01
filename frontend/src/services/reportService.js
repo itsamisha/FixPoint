@@ -1,0 +1,85 @@
+import api from './api';
+
+export const reportService = {
+  // Get all reports
+  getReports: (params = {}) => {
+    return api.get('/api/reports', { params });
+  },
+
+  // Get public reports
+  getPublicReports: (params = {}) => {
+    return api.get('/api/public/reports', { params });
+  },
+
+  // Get report by ID
+  getReportById: (id) => {
+    return api.get(`/api/reports/${id}`);
+  },
+
+  // Create new report
+  createReport: (reportData, image) => {
+    const formData = new FormData();
+    
+    // Append report data
+    Object.keys(reportData).forEach(key => {
+      if (reportData[key] !== null && reportData[key] !== undefined) {
+        formData.append(key, reportData[key]);
+      }
+    });
+    
+    // Append image if provided
+    if (image) {
+      formData.append('image', image);
+    }
+    
+    return api.post('/api/reports', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // Get user's reports
+  getUserReports: (params = {}) => {
+    return api.get('/api/reports/my-reports', { params });
+  },
+
+  // Get reports in area
+  getReportsInArea: (bounds) => {
+    return api.get('/api/reports/area', { params: bounds });
+  },
+
+  // Vote for report
+  voteForReport: (reportId) => {
+    return api.post(`/api/reports/${reportId}/vote`);
+  },
+
+  // Update report status (admin only)
+  updateReportStatus: (reportId, status, resolutionNotes) => {
+    return api.put(`/api/reports/${reportId}/status`, null, {
+      params: { status, resolutionNotes }
+    });
+  },
+
+  // Assign report (admin only)
+  assignReport: (reportId, assigneeId) => {
+    return api.put(`/api/reports/${reportId}/assign`, null, {
+      params: { assigneeId }
+    });
+  },
+
+  // Get report categories
+  getCategories: () => {
+    return api.get('/api/public/reports/categories');
+  },
+
+  // Get report statuses
+  getStatuses: () => {
+    return api.get('/api/public/reports/statuses');
+  },
+
+  // Get report priorities
+  getPriorities: () => {
+    return api.get('/api/public/reports/priorities');
+  },
+};
