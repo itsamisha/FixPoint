@@ -9,6 +9,28 @@ const api = axios.create({
   },
 });
 
+// Public API client (no auth)
+export const publicApi = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add response interceptor for public API to debug issues
+publicApi.interceptors.response.use(
+  (response) => {
+    console.log('PublicAPI Response:', response);
+    return response;
+  },
+  (error) => {
+    console.error('PublicAPI Error:', error);
+    console.error('PublicAPI Error Response:', error.response);
+    console.error('PublicAPI Error Message:', error.message);
+    return Promise.reject(error);
+  }
+);
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {

@@ -4,6 +4,7 @@ import com.ambiguous.fixpoint.dto.*;
 import com.ambiguous.fixpoint.entity.User;
 import com.ambiguous.fixpoint.repository.UserRepository;
 import com.ambiguous.fixpoint.security.JwtTokenProvider;
+import com.ambiguous.fixpoint.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,23 +29,48 @@ public class AuthService {
     JwtTokenProvider tokenProvider;
 
     public JwtAuthenticationResponse authenticateUser(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsernameOrEmail(),
-                        loginRequest.getPassword()
-                )
-        );
+        System.out.println("DEBUG: Attempting authentication for: " + loginRequest.getUsernameOrEmail());
+        
+        try {
+            // Manual authentication for debugging
+            User user = userRepository.findByUsername(loginRequest.getUsernameOrEmail())
+                    .orElse(userRepository.findByEmail(loginRequest.getUsernameOrEmail()).orElse(null));
+            
+            if (user == null) {
+                System.out.println("DEBUG: User not found");
+                throw new RuntimeException("User not found");
+            }
+            
+            System.out.println("DEBUG: User found: " + user.getUsername());
+            
+            // Check password manually
+            if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+                System.out.println("DEBUG: Password does not match");
+                throw new RuntimeException("Invalid password");
+            }
+            
+            System.out.println("DEBUG: Password matches, creating authentication");
+            
+            // Create authentication manually
+            UserPrincipal userPrincipal = UserPrincipal.create(user);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userPrincipal, null, userPrincipal.getAuthorities());
+            
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = tokenProvider.generateToken(authentication);
+            System.out.println("DEBUG: JWT token generated");
+            
+            System.out.println("DEBUG: User found: " + user.getUsername());
+            UserSummary userSummary = convertToUserSummary(user);
 
-        String jwt = tokenProvider.generateToken(authentication);
-        
-        User user = userRepository.findByUsername(loginRequest.getUsernameOrEmail())
-                .orElseGet(() -> userRepository.findByEmail(loginRequest.getUsernameOrEmail()).orElse(null));
-        
-        UserSummary userSummary = convertToUserSummary(user);
-        
-        return new JwtAuthenticationResponse(jwt, userSummary);
+            System.out.println("DEBUG: Returning authentication response");
+            return new JwtAuthenticationResponse(jwt, userSummary);
+        } catch (Exception e) {
+            System.out.println("DEBUG: Authentication failed: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public User registerUser(SignUpRequest signUpRequest) {

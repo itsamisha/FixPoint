@@ -30,9 +30,9 @@ const Navbar = () => {
         <div className="navbar-actions">
           {user ? (
             <>
-              <span style={{ color: 'white', marginRight: '1rem' }}>
-                Welcome, {user.fullName || user.username}
-              </span>
+              <div className="user-welcome">
+                <span>👋 Welcome, {user.fullName || user.username}!</span>
+              </div>
               <button onClick={handleLogout} className="btn btn-outline">
                 Logout
               </button>
@@ -40,10 +40,10 @@ const Navbar = () => {
           ) : (
             <>
               <Link to="/login" className="btn btn-outline">
-                Login
+                Sign In
               </Link>
               <Link to="/register" className="btn btn-primary">
-                Register
+                Get Started
               </Link>
             </>
           )}
