@@ -224,12 +224,48 @@ powershell -command "Compress-Archive -Path 'dist\%PACKAGE_NAME%\*' -Destination
 call :print_success "Deployment package created: dist\%PACKAGE_NAME%.zip"
 goto :eof
 
+REM Start development servers
+:start_dev_servers
+call :print_status "Starting development servers..."
+
+REM Check if frontend dependencies are installed
+if not exist "frontend\node_modules" (
+    call :print_status "Installing frontend dependencies..."
+    cd frontend
+    call npm install
+    if %errorlevel% neq 0 (
+        call :print_error "Failed to install frontend dependencies"
+        cd ..
+        pause
+        exit /b 1
+    )
+    cd ..
+)
+
+call :print_status "Starting Spring Boot backend on port 8080..."
+start "FixPoint Backend" cmd /k "cd /d %~dp0 && mvnw.cmd spring-boot:run"
+
+timeout /t 3 /nobreak >nul
+
+call :print_status "Starting React frontend on port 3000..."
+start "FixPoint Frontend" cmd /k "cd /d %~dp0frontend && npm start"
+
+call :print_success "Development servers are starting!"
+echo.
+echo Backend: http://localhost:8080
+echo Frontend: http://localhost:3000
+echo.
+echo Both servers will open in separate windows.
+pause
+goto :eof
+
 REM Main execution
 :main
 REM Parse command line arguments
 set RUN_TESTS=false
 set CREATE_PACKAGE=false
 set CLEAN_DEPS=false
+set DEV_MODE=false
 
 :parse_args
 if "%~1"=="--test" (
@@ -247,6 +283,11 @@ if "%~1"=="--clean-deps" (
     shift
     goto parse_args
 )
+if "%~1"=="--dev" (
+    set DEV_MODE=true
+    shift
+    goto parse_args
+)
 if "%~1"=="--help" goto show_help
 if "%~1"=="-h" goto show_help
 if "%~1"=="/?" goto show_help
@@ -259,6 +300,12 @@ REM Check prerequisites
 call :check_java
 call :check_node
 call :check_npm
+
+REM If development mode, start servers instead of building
+if "%DEV_MODE%"=="true" (
+    call :start_dev_servers
+    goto :eof
+)
 
 REM Clean previous builds
 if "%CLEAN_DEPS%"=="true" (
@@ -307,7 +354,12 @@ echo Options:
 echo   --test        Run tests after building
 echo   --package     Create deployment package
 echo   --clean-deps  Clean frontend dependencies before build
+echo   --dev         Start development servers (both frontend and backend)
 echo   --help, -h    Show this help message
+echo.
+echo Quick Start:
+echo   %0 --dev      Start both development servers
+echo   start-dev.bat Quick development startup (opens in separate windows)
 echo.
 pause
 goto :eof
