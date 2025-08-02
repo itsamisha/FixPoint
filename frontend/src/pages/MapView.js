@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Filter, List, Map } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -25,9 +25,88 @@ const MapView = () => {
     fetchInitialData();
   }, []);
 
+  const fetchReports = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = {
+        page: 0,
+        size: 100, // Get more reports for map view
+        sortBy: 'createdAt',
+        sortDir: 'desc',
+        ...filters
+      };
+      
+      console.log('MapView: Fetching reports with params:', params);
+      
+      // Try basic fetch first
+      try {
+        const url = new URL('http://localhost:8080/api/public/reports');
+        Object.keys(params).forEach(key => {
+          if (params[key]) url.searchParams.append(key, params[key]);
+        });
+        
+        console.log('MapView Fetch URL:', url.toString());
+        const fetchResponse = await fetch(url);
+        console.log('MapView Fetch Response Status:', fetchResponse.status);
+        
+        if (fetchResponse.ok) {
+          const data = await fetchResponse.json();
+          console.log('MapView Fetch Response Data:', data);
+          setReports(data.content);
+          return;
+        }
+      } catch (fetchError) {
+        console.error('MapView Fetch error:', fetchError);
+      }
+      
+      // Fallback to axios
+      const response = await reportService.getPublicReports(params);
+      console.log('MapView Response received:', response);
+      setReports(response.data.content);
+    } catch (error) {
+      console.error('MapView Error fetching reports:', error);
+      console.error('MapView Error details:', error.response?.data || error.message);
+      console.error('MapView Error status:', error.response?.status);
+      
+      // Add test data as fallback to check if map rendering works
+      console.log('MapView: Setting fallback test data');
+      setReports([{
+        id: 998,
+        title: "Test Map Report - API Failed",
+        description: "This is test data for map because API call failed",
+        category: "ROADS_INFRASTRUCTURE",
+        status: "SUBMITTED",
+        priority: "HIGH",
+        latitude: 23.8103,
+        longitude: 90.4125,
+        voteCount: 3,
+        commentCount: 1,
+        createdAt: new Date().toISOString(),
+        reporter: { fullName: "Test Map User" }
+      }, {
+        id: 997,
+        title: "Second Test Report",
+        description: "Another test report to verify map markers",
+        category: "SANITATION_WASTE", 
+        status: "IN_PROGRESS",
+        priority: "MEDIUM",
+        latitude: 23.815,
+        longitude: 90.420,
+        voteCount: 7,
+        commentCount: 3,
+        createdAt: new Date().toISOString(),
+        reporter: { fullName: "Test User 2" }
+      }]);
+      
+      toast.error('Failed to fetch reports - showing test data on map');
+    } finally {
+      setLoading(false);
+    }
+  }, [filters]);
+
   useEffect(() => {
     fetchReports();
-  }, [filters]);
+  }, [fetchReports]);
 
   const fetchInitialData = async () => {
     try {
@@ -39,27 +118,6 @@ const MapView = () => {
       setStatuses(statusesRes.data);
     } catch (error) {
       console.error('Error fetching initial data:', error);
-    }
-  };
-
-  const fetchReports = async () => {
-    setLoading(true);
-    try {
-      const params = {
-        page: 0,
-        size: 100, // Get more reports for map view
-        sortBy: 'createdAt',
-        sortDir: 'desc',
-        ...filters
-      };
-      
-      const response = await reportService.getPublicReports(params);
-      setReports(response.data.content);
-    } catch (error) {
-      console.error('Error fetching reports:', error);
-      toast.error('Failed to fetch reports');
-    } finally {
-      setLoading(false);
     }
   };
 

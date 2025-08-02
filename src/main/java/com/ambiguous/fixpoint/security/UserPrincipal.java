@@ -15,18 +15,20 @@ public class UserPrincipal implements UserDetails {
     private String fullName;
     private String username;
     private String email;
+    private boolean isActive;
 
     @JsonIgnore
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrincipal(Long id, String fullName, String username, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+    public UserPrincipal(Long id, String fullName, String username, String email, String password, boolean isActive, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.fullName = fullName;
         this.username = username;
         this.email = email;
         this.password = password;
+        this.isActive = isActive;
         this.authorities = authorities;
     }
 
@@ -39,6 +41,7 @@ public class UserPrincipal implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getIsActive(),
                 authorities
         );
     }
@@ -67,7 +70,7 @@ public class UserPrincipal implements UserDetails {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() { return this.isActive; }
 
     @Override
     public boolean equals(Object o) {

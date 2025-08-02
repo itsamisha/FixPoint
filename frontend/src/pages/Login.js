@@ -33,21 +33,62 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      padding: '2rem 1rem' 
+    }}>
+      <div style={{ 
+        maxWidth: '400px', 
+        width: '100%', 
+        background: 'white', 
+        borderRadius: '1rem', 
+        padding: '2rem', 
+        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
+        backdropFilter: 'blur(10px)'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h2 style={{ 
+            fontSize: '2rem', 
+            fontWeight: '700', 
+            color: '#1f2937', 
+            marginBottom: '0.5rem' 
+          }}>
+            Welcome Back! 👋
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+          <p style={{ color: '#6b7280' }}>
+            Sign in to continue to FixPoint
+          </p>
+          <p style={{ marginTop: '0.5rem', color: '#6b7280' }}>
+            Don't have an account?{' '}
             <Link
               to="/register"
-              className="font-medium text-blue-600 hover:text-blue-500"
+              style={{ 
+                color: '#667eea', 
+                fontWeight: '600', 
+                textDecoration: 'none' 
+              }}
             >
-              create a new account
+              Create one here
             </Link>
           </p>
+        </div>
+        
+        {/* Demo Credentials */}
+        <div style={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+          color: 'white', 
+          padding: '1rem', 
+          borderRadius: '0.75rem', 
+          marginBottom: '1.5rem',
+          fontSize: '0.875rem'
+        }}>
+          <p style={{ fontWeight: '600', marginBottom: '0.5rem' }}>🔧 Demo Credentials:</p>
+          <p style={{ margin: '0.25rem 0' }}>Username: <strong>test</strong></p>
+          <p style={{ margin: '0.25rem 0' }}>Password: <strong>password</strong></p>
         </div>
         
         <div className="card">

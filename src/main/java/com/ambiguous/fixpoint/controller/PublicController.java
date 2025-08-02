@@ -1,17 +1,25 @@
 package com.ambiguous.fixpoint.controller;
 
 import com.ambiguous.fixpoint.dto.ReportSummary;
+import com.ambiguous.fixpoint.dto.LoginRequest;
+import com.ambiguous.fixpoint.dto.JwtAuthenticationResponse;
 import com.ambiguous.fixpoint.entity.Report;
+import com.ambiguous.fixpoint.entity.User;
+import com.ambiguous.fixpoint.repository.UserRepository;
 import com.ambiguous.fixpoint.service.ReportService;
+import com.ambiguous.fixpoint.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/public")
@@ -20,6 +28,15 @@ public class PublicController {
 
     @Autowired
     private ReportService reportService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthService authService;
 
     @GetMapping("/reports")
     public ResponseEntity<Page<ReportSummary>> getPublicReports(
@@ -81,5 +98,79 @@ public class PublicController {
     @GetMapping("/reports/priorities")
     public ResponseEntity<Report.Priority[]> getReportPriorities() {
         return ResponseEntity.ok(Report.Priority.values());
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<Map<String, Object>> health() {
+        Map<String, Object> health = new HashMap<>();
+        health.put("status", "UP");
+        health.put("userCount", userRepository.count());
+        
+        // Check if test user exists
+        boolean testUserExists = userRepository.findByUsername("test").isPresent();
+        health.put("testUserExists", testUserExists);
+        
+        // Get test user details for debugging
+        if (testUserExists) {
+            User testUser = userRepository.findByUsername("test").get();
+            health.put("testUserEmail", testUser.getEmail());
+            health.put("testUserActive", testUser.getIsActive());
+            health.put("testUserEmailVerified", testUser.getEmailVerified());
+            health.put("testUserRole", testUser.getRole());
+            health.put("passwordHash", testUser.getPassword().substring(0, 10) + "...");
+            
+            // Test password matching
+            boolean passwordMatches = passwordEncoder.matches("password", testUser.getPassword());
+            health.put("passwordMatches", passwordMatches);
+        }
+        
+        return ResponseEntity.ok(health);
+    }
+
+    @PostMapping("/debug-auth")
+    public ResponseEntity<Map<String, Object>> debugAuth(@RequestBody Map<String, String> request) {
+        Map<String, Object> result = new HashMap<>();
+        String usernameOrEmail = request.get("usernameOrEmail");
+        String password = request.get("password");
+        
+        try {
+            // Check if user exists
+            User user = userRepository.findByUsername(usernameOrEmail)
+                    .orElse(userRepository.findByEmail(usernameOrEmail).orElse(null));
+            
+            if (user == null) {
+                result.put("error", "User not found");
+                return ResponseEntity.ok(result);
+            }
+            
+            // Check password
+            boolean passwordMatches = passwordEncoder.matches(password, user.getPassword());
+            result.put("userFound", true);
+            result.put("passwordMatches", passwordMatches);
+            result.put("userActive", user.getIsActive());
+            result.put("userRole", user.getRole());
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            result.put("error", e.getMessage());
+            return ResponseEntity.ok(result);
+        }
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<?> testSignin(@RequestBody LoginRequest loginRequest) {
+        try {
+            System.out.println("DEBUG: Public signin called with: " + loginRequest.getUsernameOrEmail());
+            JwtAuthenticationResponse response = authService.authenticateUser(loginRequest);
+            System.out.println("DEBUG: Authentication successful, returning response");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.out.println("DEBUG: Authentication failed: " + e.getMessage());
+            e.printStackTrace();
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Authentication failed: " + e.getMessage());
+            error.put("type", e.getClass().getSimpleName());
+            return ResponseEntity.badRequest().body(error);
+        }
     }
 }

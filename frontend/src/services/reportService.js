@@ -1,4 +1,4 @@
-import api from './api';
+import api, { publicApi } from './api';
 
 export const reportService = {
   // Get all reports
@@ -8,7 +8,12 @@ export const reportService = {
 
   // Get public reports
   getPublicReports: (params = {}) => {
-    return api.get('/api/public/reports', { params });
+    console.log('Fetching public reports with params:', params);
+    return publicApi.get('/api/public/reports', { params })
+      .catch(error => {
+        console.error('API Error in getPublicReports:', error.response || error);
+        throw error;
+      });
   },
 
   // Get report by ID
@@ -70,16 +75,16 @@ export const reportService = {
 
   // Get report categories
   getCategories: () => {
-    return api.get('/api/public/reports/categories');
+    return publicApi.get('/api/public/reports/categories');
   },
 
   // Get report statuses
   getStatuses: () => {
-    return api.get('/api/public/reports/statuses');
+    return publicApi.get('/api/public/reports/statuses');
   },
 
   // Get report priorities
   getPriorities: () => {
-    return api.get('/api/public/reports/priorities');
+    return publicApi.get('/api/public/reports/priorities');
   },
 };

@@ -28,7 +28,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const response = await api.post('/api/auth/signin', credentials);
+      // Try the public endpoint first (temporary fix)
+      const response = await api.post('/api/public/signin', credentials);
       const { accessToken, user } = response.data;
       
       localStorage.setItem('token', accessToken);

@@ -1,0 +1,10 @@
+{
+  "short_name": "FixPoint",
+  "name": "FixPoint - Civic Issue Reporting Platform",
+  "icons": [],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#667eea",
+  "background_color": "#ffffff",
+  "description": "Report and track civic issues in your community"
+}

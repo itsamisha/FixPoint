@@ -24,10 +24,14 @@ public class AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+        System.out.println("DEBUG: AuthController.signin called with username: " + loginRequest.getUsernameOrEmail());
         try {
             JwtAuthenticationResponse response = authService.authenticateUser(loginRequest);
+            System.out.println("DEBUG: Authentication successful, returning response");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            System.out.println("DEBUG: Authentication failed in controller: " + e.getMessage());
+            e.printStackTrace();
             Map<String, String> error = new HashMap<>();
             error.put("message", "Invalid username/email or password");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);

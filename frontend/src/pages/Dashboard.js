@@ -56,11 +56,56 @@ const Dashboard = () => {
         ...filters
       };
       
-      const response = await reportService.getReports(params);
+      console.log('Fetching all reports with params:', params);
+      
+      // Try basic fetch first
+      try {
+        const url = new URL('http://localhost:8080/api/public/reports');
+        Object.keys(params).forEach(key => {
+          if (params[key]) url.searchParams.append(key, params[key]);
+        });
+        
+        console.log('Fetch URL:', url.toString());
+        const fetchResponse = await fetch(url);
+        console.log('Fetch Response Status:', fetchResponse.status);
+        
+        if (fetchResponse.ok) {
+          const data = await fetchResponse.json();
+          console.log('Fetch Response Data:', data);
+          setReports(data.content);
+          return;
+        }
+      } catch (fetchError) {
+        console.error('Fetch error:', fetchError);
+      }
+      
+      // Fallback to axios
+      const response = await reportService.getPublicReports(params);
+      console.log('All reports response:', response);
       setReports(response.data.content);
     } catch (error) {
       console.error('Error fetching reports:', error);
-      toast.error('Failed to fetch reports');
+      console.error('Error details:', error.response?.data || error.message);
+      console.error('Error status:', error.response?.status);
+      
+      // Add test data as fallback to check if component rendering works
+      console.log('Setting fallback test data');
+      setReports([{
+        id: 999,
+        title: "Test Report - API Failed",
+        description: "This is test data because API call failed",
+        category: "ROADS_INFRASTRUCTURE",
+        status: "SUBMITTED",
+        priority: "HIGH",
+        latitude: 23.8103,
+        longitude: 90.4125,
+        voteCount: 0,
+        commentCount: 0,
+        createdAt: new Date().toISOString(),
+        reporter: { fullName: "Test User" }
+      }]);
+      
+      toast.error('Failed to fetch reports - showing test data');
     } finally {
       setLoading(false);
     }
@@ -69,10 +114,13 @@ const Dashboard = () => {
   const fetchUserReports = async () => {
     setLoading(true);
     try {
-      const response = await reportService.getUserReports({ 
+      const params = { 
         page: 0, 
         size: 20 
-      });
+      };
+      console.log('Fetching user reports with params:', params);
+      const response = await reportService.getUserReports(params);
+      console.log('User reports response:', response);
       setUserReports(response.data.content);
     } catch (error) {
       console.error('Error fetching user reports:', error);
