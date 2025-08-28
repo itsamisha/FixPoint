@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "comments")
@@ -29,6 +31,16 @@ public class Comment {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<CommentReaction> reactions = new HashSet<>();
+
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Comment> replies = new HashSet<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
+
     // Constructors
     public Comment() {}
 
@@ -36,6 +48,13 @@ public class Comment {
         this.content = content;
         this.report = report;
         this.user = user;
+    }
+
+    public Comment(String content, Report report, User user, Comment parentComment) {
+        this.content = content;
+        this.report = report;
+        this.user = user;
+        this.parentComment = parentComment;
     }
 
     // Getters and Setters
@@ -53,4 +72,13 @@ public class Comment {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public Set<CommentReaction> getReactions() { return reactions; }
+    public void setReactions(Set<CommentReaction> reactions) { this.reactions = reactions; }
+
+    public Set<Comment> getReplies() { return replies; }
+    public void setReplies(Set<Comment> replies) { this.replies = replies; }
+
+    public Comment getParentComment() { return parentComment; }
+    public void setParentComment(Comment parentComment) { this.parentComment = parentComment; }
 }

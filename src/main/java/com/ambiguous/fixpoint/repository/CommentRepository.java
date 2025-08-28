@@ -15,6 +15,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     
     List<Comment> findByReportOrderByCreatedAtAsc(Report report);
     
+    List<Comment> findByReportAndParentCommentIsNullOrderByCreatedAtAsc(Report report);
+    
+    List<Comment> findByParentCommentOrderByCreatedAtAsc(Comment parentComment);
+    
     List<Comment> findByUserOrderByCreatedAtDesc(User user);
     
     @Query("SELECT c FROM Comment c WHERE c.report = :report ORDER BY c.createdAt ASC")
@@ -22,6 +26,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     
     @Query("SELECT COUNT(c) FROM Comment c WHERE c.report = :report")
     Long countByReport(@Param("report") Report report);
+    
+    @Query("SELECT COUNT(c) FROM Comment c WHERE c.parentComment = :parentComment")
+    Long countByParentComment(@Param("parentComment") Comment parentComment);
     
     @Query("SELECT COUNT(c) FROM Comment c WHERE c.user = :user")
     Long countByUser(@Param("user") User user);
