@@ -116,4 +116,16 @@ export const reportService = {
       { type: reactionType }
     );
   },
+
+  // AI Image Analysis
+  analyzeImage: (image) => {
+    const formData = new FormData();
+    formData.append("image", image);
+
+    return api.post("/api/ai/analyze-image", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
