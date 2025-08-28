@@ -1,5 +1,5 @@
 // Example: e:\Competition\Hackathon\Fixpoint_javafest\FixPoint\frontend\src\components\ReportComments.js
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { reportService } from "../services/reportService";
 
 const ReportComments = ({ reportId }) => {

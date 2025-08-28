@@ -34,9 +34,30 @@ export const ChatProvider = ({ children }) => {
   // Fetch user list
   useEffect(() => {
     if (user) {
-      api.get(API_USERS).then((res) => {
-        setUsers(res.data.filter((u) => u.id !== user.id));
-      });
+      let cancelled = false;
+      api
+        .get(API_USERS)
+        .then((res) => {
+          const list = Array.isArray(res.data)
+            ? res.data
+            : Array.isArray(res.data?.users)
+            ? res.data.users
+            : [];
+          if (!cancelled && user) {
+            setUsers(list.filter((u) => u.id !== user.id));
+          }
+        })
+        .catch((err) => {
+          if (!cancelled) {
+            console.error("Failed to fetch chat users:", err);
+            setUsers([]);
+          }
+        });
+      return () => {
+        cancelled = true;
+      };
+    } else {
+      setUsers([]);
     }
   }, [user]);
 
