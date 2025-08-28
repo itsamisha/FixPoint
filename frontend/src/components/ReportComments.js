@@ -12,6 +12,7 @@ const CommentItem = ({ comment, reportId, onCommentUpdate }) => {
   const [replyText, setReplyText] = useState("");
   const [showReplyInput, setShowReplyInput] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showReactions, setShowReactions] = useState(false);
 
   const reactionTypes = [
     {
@@ -139,8 +140,8 @@ const CommentItem = ({ comment, reportId, onCommentUpdate }) => {
     return user?.fullName || user?.username || "Unknown";
   };
 
-  const ReactionButtons = ({ commentData, commentId }) => (
-    <div className="flex items-center space-x-1 mt-2">
+  const ReactionMenu = ({ commentData, commentId, onClose }) => (
+    <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-full shadow-lg px-2 py-1 flex items-center space-x-1 z-10">
       {reactionTypes.map(({ type, emoji, color, bgColor, hoverColor }) => {
         const isActive = commentData.userReaction === type;
         const count = commentData.reactionCounts?.[type] || 0;
@@ -148,23 +149,46 @@ const CommentItem = ({ comment, reportId, onCommentUpdate }) => {
         return (
           <button
             key={type}
-            onClick={() => handleReaction(type, commentId)}
-            className={`p-1.5 rounded-full transition-all duration-200 ${
+            onClick={() => {
+              handleReaction(type, commentId);
+              onClose();
+            }}
+            className={`p-2 rounded-full transition-all duration-200 transform hover:scale-110 ${
               isActive
                 ? `${bgColor} shadow-sm`
                 : `text-gray-400 ${hoverColor} hover:shadow-sm`
             }`}
             title={`${type} ${count > 0 ? `(${count})` : ""}`}
           >
-            <span className="text-sm">{emoji}</span>
-            {count > 0 && (
-              <span className="ml-1 text-xs font-medium">{count}</span>
-            )}
+            <span className="text-lg">{emoji}</span>
           </button>
         );
       })}
     </div>
   );
+
+  const ReactionDisplay = ({ commentData }) => {
+    const totalReactions = Object.values(
+      commentData.reactionCounts || {}
+    ).reduce((sum, count) => sum + count, 0);
+
+    if (totalReactions === 0) return null;
+
+    return (
+      <div className="flex items-center space-x-1 mt-2">
+        {reactionTypes.map(({ type, emoji }) => {
+          const count = commentData.reactionCounts?.[type] || 0;
+          if (count === 0) return null;
+
+          return (
+            <span key={type} className="text-sm">
+              {emoji} {count}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <div className="border-b border-gray-100 pb-4 mb-4">
@@ -176,12 +200,30 @@ const CommentItem = ({ comment, reportId, onCommentUpdate }) => {
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl px-4 py-3 inline-block max-w-full shadow-sm">
-            <div className="font-semibold text-sm text-gray-900 mb-2">
-              {getUserName(comment.user)}
+          <div
+            className="relative group"
+            onMouseEnter={() => setShowReactions(true)}
+            onMouseLeave={() => setShowReactions(false)}
+          >
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl px-4 py-3 inline-block max-w-full shadow-sm">
+              <div className="font-semibold text-sm text-gray-900 mb-2">
+                {getUserName(comment.user)}
+              </div>
+              <div className="text-sm text-gray-800">{comment.content}</div>
             </div>
-            <div className="text-sm text-gray-800">{comment.content}</div>
+
+            {/* Hover Reaction Menu */}
+            {showReactions && (
+              <ReactionMenu
+                commentData={comment}
+                commentId={comment.id}
+                onClose={() => setShowReactions(false)}
+              />
+            )}
           </div>
+
+          {/* Reaction Display */}
+          <ReactionDisplay commentData={comment} />
 
           {/* Action Bar */}
           <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
@@ -194,9 +236,6 @@ const CommentItem = ({ comment, reportId, onCommentUpdate }) => {
 
             <span>{formatTimeAgo(comment.createdAt)}</span>
           </div>
-
-          {/* Reaction Buttons */}
-          <ReactionButtons commentData={comment} commentId={comment.id} />
 
           {/* Reply Input */}
           {showReplyInput && (
@@ -239,31 +278,180 @@ const CommentItem = ({ comment, reportId, onCommentUpdate }) => {
           {showReplies && replies.length > 0 && (
             <div className="mt-3 space-y-3">
               {replies.map((reply) => (
-                <div key={reply.id} className="flex space-x-3 ml-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                      👤
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-2xl px-3 py-2 inline-block max-w-full shadow-sm">
-                      <div className="font-semibold text-xs text-gray-900 mb-1">
-                        {getUserName(reply.user)}
-                      </div>
-                      <div className="text-xs text-gray-800">
-                        {reply.content}
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2 mt-1 text-xs text-gray-500">
-                      <span>{formatTimeAgo(reply.createdAt)}</span>
-                    </div>
-                    {/* Reaction Buttons for Replies */}
-                    <ReactionButtons commentData={reply} commentId={reply.id} />
-                  </div>
-                </div>
+                <ReplyItem
+                  key={reply.id}
+                  reply={reply}
+                  reportId={reportId}
+                  onCommentUpdate={onCommentUpdate}
+                />
               ))}
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ReplyItem = ({ reply, reportId, onCommentUpdate }) => {
+  const { user } = useAuth();
+  const [showReactions, setShowReactions] = useState(false);
+
+  const reactionTypes = [
+    {
+      type: "LIKE",
+      emoji: "👍",
+      bgColor: "bg-blue-100",
+      hoverColor: "hover:bg-blue-200",
+    },
+    {
+      type: "LOVE",
+      emoji: "❤️",
+      bgColor: "bg-red-100",
+      hoverColor: "hover:bg-red-200",
+    },
+    {
+      type: "HAHA",
+      emoji: "😂",
+      bgColor: "bg-yellow-100",
+      hoverColor: "hover:bg-yellow-200",
+    },
+    {
+      type: "WOW",
+      emoji: "😮",
+      bgColor: "bg-purple-100",
+      hoverColor: "hover:bg-purple-200",
+    },
+    {
+      type: "SAD",
+      emoji: "😢",
+      bgColor: "bg-blue-50",
+      hoverColor: "hover:bg-blue-100",
+    },
+    {
+      type: "ANGRY",
+      emoji: "😠",
+      bgColor: "bg-red-50",
+      hoverColor: "hover:bg-red-100",
+    },
+  ];
+
+  const handleReaction = async (reactionType, commentId) => {
+    if (!user) {
+      toast.error("Please log in to react to comments");
+      return;
+    }
+
+    try {
+      await reportService.toggleReaction(reportId, commentId, reactionType);
+      onCommentUpdate();
+    } catch (error) {
+      console.error("Error toggling reaction:", error);
+      toast.error("Failed to update reaction");
+    }
+  };
+
+  const formatTimeAgo = (dateString) => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return "Just now";
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d`;
+    return date.toLocaleDateString();
+  };
+
+  const getUserName = (user) => {
+    return user?.fullName || user?.username || "Unknown";
+  };
+
+  const ReactionMenu = ({ commentData, commentId, onClose }) => (
+    <div className="absolute bottom-full left-0 mb-2 bg-white border border-gray-200 rounded-full shadow-lg px-2 py-1 flex items-center space-x-1 z-10">
+      {reactionTypes.map(({ type, emoji, bgColor, hoverColor }) => {
+        const isActive = commentData.userReaction === type;
+        const count = commentData.reactionCounts?.[type] || 0;
+
+        return (
+          <button
+            key={type}
+            onClick={() => {
+              handleReaction(type, commentId);
+              onClose();
+            }}
+            className={`p-1.5 rounded-full transition-all duration-200 transform hover:scale-110 ${
+              isActive
+                ? `${bgColor} shadow-sm`
+                : `text-gray-400 ${hoverColor} hover:shadow-sm`
+            }`}
+            title={`${type} ${count > 0 ? `(${count})` : ""}`}
+          >
+            <span className="text-sm">{emoji}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  const ReactionDisplay = ({ commentData }) => {
+    const totalReactions = Object.values(
+      commentData.reactionCounts || {}
+    ).reduce((sum, count) => sum + count, 0);
+
+    if (totalReactions === 0) return null;
+
+    return (
+      <div className="flex items-center space-x-1 mt-1">
+        {reactionTypes.map(({ type, emoji }) => {
+          const count = commentData.reactionCounts?.[type] || 0;
+          if (count === 0) return null;
+
+          return (
+            <span key={type} className="text-xs">
+              {emoji} {count}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex space-x-3 ml-4">
+      <div className="flex-shrink-0">
+        <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-teal-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+          👤
+        </div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div
+          className="relative group"
+          onMouseEnter={() => setShowReactions(true)}
+          onMouseLeave={() => setShowReactions(false)}
+        >
+          <div className="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-2xl px-3 py-2 inline-block max-w-full shadow-sm">
+            <div className="font-semibold text-xs text-gray-900 mb-1">
+              {getUserName(reply.user)}
+            </div>
+            <div className="text-xs text-gray-800">{reply.content}</div>
+          </div>
+
+          {/* Hover Reaction Menu */}
+          {showReactions && (
+            <ReactionMenu
+              commentData={reply}
+              commentId={reply.id}
+              onClose={() => setShowReactions(false)}
+            />
+          )}
+        </div>
+
+        {/* Reaction Display */}
+        <ReactionDisplay commentData={reply} />
+
+        <div className="flex items-center space-x-2 mt-1 text-xs text-gray-500">
+          <span>{formatTimeAgo(reply.createdAt)}</span>
         </div>
       </div>
     </div>
