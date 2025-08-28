@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "qrcode.react": "^4.2.0"
+    "@stomp/stompjs": "^7.1.1",
+    "qrcode.react": "^4.2.0",
+    "sockjs-client": "^1.6.1"
   }
 }
