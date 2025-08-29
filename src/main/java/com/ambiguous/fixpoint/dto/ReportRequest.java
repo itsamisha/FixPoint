@@ -4,6 +4,7 @@ import com.ambiguous.fixpoint.entity.Report;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 
 public class ReportRequest {
     @NotBlank
@@ -28,7 +29,9 @@ public class ReportRequest {
     @Size(max = 255)
     private String locationAddress;
 
-    private Long targetOrganizationId;
+    private List<Long> targetOrganizationIds;
+
+    private Boolean notifyVolunteers = false;
 
     // Constructors
     public ReportRequest() {}
@@ -55,6 +58,9 @@ public class ReportRequest {
     public String getLocationAddress() { return locationAddress; }
     public void setLocationAddress(String locationAddress) { this.locationAddress = locationAddress; }
 
-    public Long getTargetOrganizationId() { return targetOrganizationId; }
-    public void setTargetOrganizationId(Long targetOrganizationId) { this.targetOrganizationId = targetOrganizationId; }
+    public List<Long> getTargetOrganizationIds() { return targetOrganizationIds; }
+    public void setTargetOrganizationIds(List<Long> targetOrganizationIds) { this.targetOrganizationIds = targetOrganizationIds; }
+
+    public Boolean getNotifyVolunteers() { return notifyVolunteers; }
+    public void setNotifyVolunteers(Boolean notifyVolunteers) { this.notifyVolunteers = notifyVolunteers; }
 }

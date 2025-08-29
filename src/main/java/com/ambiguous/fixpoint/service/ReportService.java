@@ -3,6 +3,7 @@ package com.ambiguous.fixpoint.service;
 import com.ambiguous.fixpoint.dto.ReportRequest;
 import com.ambiguous.fixpoint.dto.ReportSummary;
 import com.ambiguous.fixpoint.dto.UserSummary;
+import com.ambiguous.fixpoint.entity.Organization;
 import com.ambiguous.fixpoint.entity.Report;
 import com.ambiguous.fixpoint.entity.User;
 import com.ambiguous.fixpoint.entity.Vote;
@@ -21,8 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -56,11 +59,16 @@ public class ReportService {
         report.setLongitude(reportRequest.getLongitude());
         report.setLocationAddress(reportRequest.getLocationAddress());
         report.setReporter(reporter);
+        report.setNotifyVolunteers(reportRequest.getNotifyVolunteers());
 
-        // Set target organization if provided
-        if (reportRequest.getTargetOrganizationId() != null) {
-            organizationService.getOrganizationById(reportRequest.getTargetOrganizationId())
-                .ifPresent(report::setTargetOrganization);
+        // Set target organizations if provided
+        if (reportRequest.getTargetOrganizationIds() != null && !reportRequest.getTargetOrganizationIds().isEmpty()) {
+            Set<Organization> targetOrganizations = new HashSet<>();
+            for (Long orgId : reportRequest.getTargetOrganizationIds()) {
+                organizationService.getOrganizationById(orgId)
+                    .ifPresent(targetOrganizations::add);
+            }
+            report.setTargetOrganizations(targetOrganizations);
         }
 
         // Handle image upload
@@ -227,5 +235,19 @@ public class ReportService {
         userSummary.setRole(user.getRole());
         userSummary.setIsVolunteer(user.getIsVolunteer());
         return userSummary;
+    }
+
+    public Page<ReportSummary> getReportsAssignedToUser(Long userId, Pageable pageable) {
+        Page<Report> reports = reportRepository.findByAssignedToId(userId, pageable);
+        return reports.map(this::convertToReportSummary);
+    }
+
+    public Page<ReportSummary> getReportsByTargetOrganization(Long organizationId, Pageable pageable) {
+        Page<Report> reports = reportRepository.findByTargetOrganizationsId(organizationId, pageable);
+        return reports.map(this::convertToReportSummary);
+    }
+
+    private ReportSummary convertToReportSummary(Report report) {
+        return convertToReportSummary(report, null);
     }
 }

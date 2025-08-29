@@ -54,4 +54,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     
     @Query("SELECT r FROM Report r ORDER BY r.voteCount DESC")
     Page<Report> findAllOrderByVoteCountDesc(Pageable pageable);
+    
+    // Find reports assigned to a specific user
+    Page<Report> findByAssignedToId(Long assignedToId, Pageable pageable);
+    
+    // Find reports targeted to a specific organization
+    @Query("SELECT r FROM Report r JOIN r.targetOrganizations o WHERE o.id = :organizationId")
+    Page<Report> findByTargetOrganizationsId(@Param("organizationId") Long organizationId, Pageable pageable);
 }

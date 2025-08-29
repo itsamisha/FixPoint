@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NGO Initialization</title>
+</head>
+<body>
+    <h1>Initialize NGOs</h1>
+    <button onclick="initializeNGOs()">Initialize NGOs</button>
+    <button onclick="checkOrganizations()">Check Organizations</button>
+    <div id="result"></div>
+
+    <script>
+        async function initializeNGOs() {
+            try {
+                const response = await fetch('http://localhost:8080/api/public/admin/data/initialize-ngos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+
+        async function checkOrganizations() {
+            try {
+                const response = await fetch('http://localhost:8080/api/organizations');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<h3>Organizations (' + data.length + '):</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

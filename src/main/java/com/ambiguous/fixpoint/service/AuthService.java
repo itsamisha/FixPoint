@@ -32,44 +32,31 @@ public class AuthService {
         System.out.println("DEBUG: Attempting authentication for: " + loginRequest.getUsernameOrEmail());
         
         try {
-            // Manual authentication for debugging
-            User user = userRepository.findByUsername(loginRequest.getUsernameOrEmail())
-                    .orElse(userRepository.findByEmail(loginRequest.getUsernameOrEmail()).orElse(null));
-            
-            if (user == null) {
-                System.out.println("DEBUG: User not found");
-                throw new RuntimeException("User not found");
-            }
-            
-            System.out.println("DEBUG: User found: " + user.getUsername());
-            
-            // Check password manually
-            if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-                System.out.println("DEBUG: Password does not match");
-                throw new RuntimeException("Invalid password");
-            }
-            
-            System.out.println("DEBUG: Password matches, creating authentication");
-            
-            // Create authentication manually
-            UserPrincipal userPrincipal = UserPrincipal.create(user);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    userPrincipal, null, userPrincipal.getAuthorities());
-            
+            // Use Spring Security's authentication manager for proper authentication
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsernameOrEmail(),
+                            loginRequest.getPassword()
+                    )
+            );
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String jwt = tokenProvider.generateToken(authentication);
-            System.out.println("DEBUG: JWT token generated");
+            System.out.println("DEBUG: JWT token generated successfully");
             
-            System.out.println("DEBUG: User found: " + user.getUsername());
+            // Get the authenticated user
+            UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+            User user = userRepository.findById(userPrincipal.getId())
+                    .orElseThrow(() -> new RuntimeException("User not found after authentication"));
+            
             UserSummary userSummary = convertToUserSummary(user);
 
-            System.out.println("DEBUG: Returning authentication response");
+            System.out.println("DEBUG: Authentication successful for user: " + user.getUsername());
             return new JwtAuthenticationResponse(jwt, userSummary);
         } catch (Exception e) {
             System.out.println("DEBUG: Authentication failed: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+            throw new RuntimeException("Invalid username/email or password");
         }
     }
 

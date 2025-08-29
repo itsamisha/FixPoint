@@ -35,18 +35,32 @@ const Register = () => {
   const fetchOrganizations = async () => {
     try {
       const response = await api.get('/api/organizations');
-      setOrganizations(response.data);
+      // Ensure we always set an array
+      if (response.data && Array.isArray(response.data)) {
+        setOrganizations(response.data);
+      } else {
+        console.warn('Organizations response is not an array:', response.data);
+        setOrganizations([]);
+      }
     } catch (error) {
       console.error('Error fetching organizations:', error);
+      setOrganizations([]); // Set empty array on error
     }
   };
 
   const fetchOrganizationTypes = async () => {
     try {
       const response = await api.get('/api/organizations/types');
-      setOrganizationTypes(response.data);
+      // Ensure we always set an array
+      if (response.data && Array.isArray(response.data)) {
+        setOrganizationTypes(response.data);
+      } else {
+        console.warn('Organization types response is not an array:', response.data);
+        setOrganizationTypes([]);
+      }
     } catch (error) {
       console.error('Error fetching organization types:', error);
+      setOrganizationTypes([]); // Set empty array on error
     }
   };
 
@@ -172,11 +186,13 @@ const Register = () => {
                     {...register('organizationType', { required: 'Organization type is required' })}
                   >
                     <option value="">Select Type</option>
-                    {organizationTypes.map((type) => (
+                    {Array.isArray(organizationTypes) && organizationTypes.length > 0 ? organizationTypes.map((type) => (
                       <option key={type} value={type}>
                         {type.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
                       </option>
-                    ))}
+                    )) : (
+                      <option value="" disabled>No organization types available</option>
+                    )}
                   </select>
                   {errors.organizationType && <p className="form-error">{errors.organizationType.message}</p>}
                 </div>
@@ -185,6 +201,113 @@ const Register = () => {
               <div className="mt-4">
                 <label>Description</label>
                 <textarea className="form-input" {...register('organizationDescription')} rows={3} />
+              </div>
+
+              <div className="grid-2 mt-4">
+                <div>
+                  <label>Contact Phone *</label>
+                  <input
+                    type="tel"
+                    className="form-input"
+                    {...register('organizationPhone', { required: 'Organization phone is required' })}
+                  />
+                  {errors.organizationPhone && <p className="form-error">{errors.organizationPhone.message}</p>}
+                </div>
+
+                <div>
+                  <label>Contact Email *</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    {...register('organizationEmail', { required: 'Organization email is required' })}
+                  />
+                  {errors.organizationEmail && <p className="form-error">{errors.organizationEmail.message}</p>}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label>Website</label>
+                <input
+                  type="url"
+                  className="form-input"
+                  placeholder="https://example.com"
+                  {...register('organizationWebsite')}
+                />
+              </div>
+
+              <div className="mt-4">
+                <label>Address *</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  {...register('organizationAddress', { required: 'Organization address is required' })}
+                />
+                {errors.organizationAddress && <p className="form-error">{errors.organizationAddress.message}</p>}
+              </div>
+
+              <div className="grid-2 mt-4">
+                <div>
+                  <label>City *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    {...register('organizationCity', { required: 'City is required' })}
+                  />
+                  {errors.organizationCity && <p className="form-error">{errors.organizationCity.message}</p>}
+                </div>
+
+                <div>
+                  <label>State/Division *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    {...register('organizationState', { required: 'State/Division is required' })}
+                  />
+                  {errors.organizationState && <p className="form-error">{errors.organizationState.message}</p>}
+                </div>
+              </div>
+
+              <div className="grid-2 mt-4">
+                <div>
+                  <label>ZIP/Postal Code</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    {...register('organizationZipCode')}
+                  />
+                </div>
+
+                <div>
+                  <label>Country</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    defaultValue="Bangladesh"
+                    {...register('organizationCountry')}
+                  />
+                </div>
+              </div>
+
+              <div className="grid-2 mt-4">
+                <div>
+                  <label>Service Areas</label>
+                  <textarea
+                    className="form-input"
+                    rows={2}
+                    placeholder="e.g., Dhaka, Chittagong, Sylhet"
+                    {...register('serviceAreas')}
+                  />
+                </div>
+
+                <div>
+                  <label>Service Categories</label>
+                  <textarea
+                    className="form-input"
+                    rows={2}
+                    placeholder="e.g., Infrastructure, Healthcare, Environment"
+                    {...register('categories')}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -274,6 +397,31 @@ const Register = () => {
               <input type="text" className="form-input" {...register('address')} />
             </div>
 
+            {/* Organization Admin Specific Fields */}
+            {registrationType === 'organization' && (
+              <div className="grid-2 mt-4">
+                <div>
+                  <label>Job Title</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g., Director, Manager, Administrator"
+                    {...register('jobTitle')}
+                  />
+                </div>
+
+                <div>
+                  <label>Department</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="e.g., Administration, Operations"
+                    {...register('department')}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Organization Staff Specific Fields */}
             {registrationType === 'organization_staff' && (
               <div className="organization-staff-section">
@@ -287,11 +435,13 @@ const Register = () => {
                     })}
                   >
                     <option value="">Choose your organization</option>
-                    {organizations.map((org) => (
+                    {Array.isArray(organizations) && organizations.length > 0 ? organizations.map((org) => (
                       <option key={org.id} value={org.id}>
                         {org.name} - {org.type?.replace(/_/g, ' ')} ({org.city})
                       </option>
-                    ))}
+                    )) : (
+                      <option value="" disabled>No organizations available</option>
+                    )}
                   </select>
                   {errors.organizationId && <p className="form-error">{errors.organizationId.message}</p>}
                 </div>

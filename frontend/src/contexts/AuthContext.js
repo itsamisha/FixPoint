@@ -22,6 +22,18 @@ export const AuthProvider = ({ children }) => {
     if (token && userData) {
       setUser(JSON.parse(userData));
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      // Validate token by making a test request to an authenticated endpoint
+      api.get('/api/organizations')
+        .then(response => {
+          // Token is valid, keep user logged in
+          console.log('Token validation successful');
+        })
+        .catch(error => {
+          // Token is invalid, logout the user
+          console.log('Token validation failed, logging out user:', error.response?.status);
+          logout();
+        });
     }
     setLoading(false);
   }, []);

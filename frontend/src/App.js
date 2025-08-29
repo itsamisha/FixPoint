@@ -9,7 +9,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import DashboardRouter from "./pages/DashboardRouter";
 import ReportForm from "./pages/ReportForm";
 import ReportDetails from "./pages/ReportDetails";
 import MapView from "./pages/MapView";
@@ -33,12 +33,12 @@ function App() {
                   path="/dashboard"
                   element={
                     <ProtectedRoute>
-                      <Dashboard />
+                      <DashboardRouter />
                     </ProtectedRoute>
                   }
                 />
                 <Route
-                  path="/report/new"
+                  path="/report"
                   element={
                     <ProtectedRoute>
                       <ReportForm />

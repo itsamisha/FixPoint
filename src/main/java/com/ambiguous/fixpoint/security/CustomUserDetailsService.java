@@ -23,13 +23,23 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         // Let people login with either username or email
         User user = userRepository.findByUsername(usernameOrEmail)
-                .orElseGet(() -> userRepository.findByEmail(usernameOrEmail)
-                        .orElseThrow(() -> {
-                            System.out.println("DEBUG: User not found: " + usernameOrEmail);
-                            return new UsernameNotFoundException("User not found with username or email : " + usernameOrEmail);
-                        }));
+                .orElseGet(() -> {
+                    System.out.println("DEBUG: Username not found, trying email: " + usernameOrEmail);
+                    return userRepository.findByEmail(usernameOrEmail)
+                            .orElseThrow(() -> {
+                                System.out.println("DEBUG: User not found with username or email: " + usernameOrEmail);
+                                return new UsernameNotFoundException("User not found with username or email : " + usernameOrEmail);
+                            });
+                });
 
         System.out.println("DEBUG: User found: " + user.getUsername() + ", Active: " + user.getIsActive());
+        
+        // Check if user is active
+        if (!user.getIsActive()) {
+            System.out.println("DEBUG: User account is inactive: " + user.getUsername());
+            throw new UsernameNotFoundException("User account is inactive: " + usernameOrEmail);
+        }
+        
         return UserPrincipal.create(user);
     }
 

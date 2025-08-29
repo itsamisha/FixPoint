@@ -64,39 +64,59 @@ export const ChatProvider = ({ children }) => {
   // Connect to WebSocket only once
   useEffect(() => {
     if (!user) return;
-    const socket = new SockJS(WS_URL);
-    const client = Stomp.over(socket);
-    setIsConnected(false);
-    client.connect(
-      {},
-      () => {
-        setIsConnected(true);
-        client.subscribe(`/user/${user.username}/queue/messages`, (msg) => {
-          const body = JSON.parse(msg.body);
-          // Only add message if it is between the logged-in user and the selected user (using ref)
-          setMessages((prev) => {
-            const selUser = selectedUserRef.current;
-            if (!selUser) return prev;
-            const isBetween =
-              (body.sender.id === user.id && body.receiver.id === selUser.id) ||
-              (body.sender.id === selUser.id && body.receiver.id === user.id);
-            if (isBetween) {
-              return [...prev, body];
-            }
-            return prev;
-          });
-        });
-      },
-      (err) => {
-        setIsConnected(false);
-        console.error("STOMP connection error:", err);
-      }
-    );
-    stompClientRef.current = client;
-    return () => {
-      client.disconnect();
+    
+    let isCancelled = false;
+    
+    try {
+      const socket = new SockJS(WS_URL);
+      const client = Stomp.over(socket);
+      
+      // Disable console debug logs
+      client.debug = () => {};
+      
       setIsConnected(false);
-    };
+      
+      client.connect(
+        {},
+        () => {
+          if (isCancelled) return;
+          setIsConnected(true);
+          client.subscribe(`/user/${user.username}/queue/messages`, (msg) => {
+            const body = JSON.parse(msg.body);
+            // Only add message if it is between the logged-in user and the selected user (using ref)
+            setMessages((prev) => {
+              const selUser = selectedUserRef.current;
+              if (!selUser) return prev;
+              const isBetween =
+                (body.sender.id === user.id && body.receiver.id === selUser.id) ||
+                (body.sender.id === selUser.id && body.receiver.id === user.id);
+              if (isBetween) {
+                return [...prev, body];
+              }
+              return prev;
+            });
+          });
+        },
+        (err) => {
+          if (isCancelled) return;
+          setIsConnected(false);
+          console.warn("WebSocket connection failed (this is normal if chat is not needed):", err.message || err);
+        }
+      );
+      
+      stompClientRef.current = client;
+      
+      return () => {
+        isCancelled = true;
+        if (client && client.connected) {
+          client.disconnect();
+        }
+        setIsConnected(false);
+      };
+    } catch (error) {
+      console.warn("Failed to initialize WebSocket connection:", error.message);
+      setIsConnected(false);
+    }
   }, [user]);
 
   // Fetch chat history when selected user changes

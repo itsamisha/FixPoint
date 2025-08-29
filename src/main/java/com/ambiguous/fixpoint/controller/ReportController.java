@@ -173,24 +173,75 @@ public class ReportController {
         }
     }
 
-    @PutMapping("/{id}/assign")
-    public ResponseEntity<?> assignReport(
+    @GetMapping("/assigned")
+    public ResponseEntity<?> getAssignedReports(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<ReportSummary> reports = reportService.getReportsAssignedToUser(user.getId(), pageable);
+            return ResponseEntity.ok(reports);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @GetMapping("/organization/{organizationId}")
+    public ResponseEntity<?> getOrganizationReports(
+            @PathVariable Long organizationId,
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Only organization admin/staff can access their organization's reports
+        if (!user.getOrganization().getId().equals(organizationId) || 
+            (user.getUserType() != User.UserType.ORGANIZATION_ADMIN && 
+             user.getUserType() != User.UserType.ORGANIZATION_STAFF)) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Unauthorized to access organization reports");
+            return ResponseEntity.status(403).body(error);
+        }
+
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+            Page<ReportSummary> reports = reportService.getReportsByTargetOrganization(organizationId, pageable);
+            return ResponseEntity.ok(reports);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PutMapping("/{id}/assign-staff")
+    public ResponseEntity<?> assignReportToStaff(
             @PathVariable Long id,
-            @RequestParam Long assigneeId,
+            @RequestBody Map<String, Long> requestBody,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
         User user = userRepository.findById(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Only admins can assign reports
-        if (user.getRole() != User.Role.ADMIN) {
+        // Only organization admins can assign reports
+        if (user.getUserType() != User.UserType.ORGANIZATION_ADMIN) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Unauthorized to assign reports");
             return ResponseEntity.status(403).body(error);
         }
 
         try {
-            ReportSummary report = reportService.assignReport(id, assigneeId, user);
+            Long assignedToId = requestBody.get("assignedToId");
+            ReportSummary report = reportService.assignReport(id, assignedToId, user);
             return ResponseEntity.ok(report);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();

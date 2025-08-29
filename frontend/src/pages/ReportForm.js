@@ -4,8 +4,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import { MapPin, Upload, Save, Sparkles, Edit3 } from "lucide-react";
+import { MapPin, Upload, Save, Sparkles, Edit3, Users, Building2, ChevronDown } from "lucide-react";
 import { reportService } from "../services/reportService";
+import "./ReportForm.css";
 
 // Fix for default markers in react-leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -51,6 +52,10 @@ const ReportForm = () => {
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [aiGeneratedDescription, setAiGeneratedDescription] = useState("");
   const [showAiDescription, setShowAiDescription] = useState(false);
+  const [selectedOrganizations, setSelectedOrganizations] = useState([]);
+  const [organizationSearch, setOrganizationSearch] = useState("");
+  const [showOrganizationDropdown, setShowOrganizationDropdown] = useState(false);
+  const [notifyVolunteers, setNotifyVolunteers] = useState(false);
 
   const {
     register,
@@ -63,12 +68,97 @@ const ReportForm = () => {
     },
   });
 
+  // Filter and group organizations
+  const getFilteredOrganizations = () => {
+    if (!organizationSearch) return organizations;
+    
+    return organizations.filter(org => 
+      org.name.toLowerCase().includes(organizationSearch.toLowerCase()) ||
+      org.type.toLowerCase().includes(organizationSearch.toLowerCase()) ||
+      org.city.toLowerCase().includes(organizationSearch.toLowerCase())
+    );
+  };
+
+  const getGroupedOrganizations = () => {
+    const filtered = getFilteredOrganizations();
+    const grouped = filtered.reduce((groups, org) => {
+      const key = org.type.replace(/_/g, ' ');
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(org);
+      return groups;
+    }, {});
+    
+    return grouped;
+  };
+
+  const getSelectedOrganizationNames = () => {
+    const selected = organizations.filter(org => selectedOrganizations.includes(org.id.toString()));
+    return selected.map(org => `${org.name} (${org.city})`).join(', ');
+  };
+
+  const toggleOrganization = (orgId) => {
+    const orgIdStr = orgId.toString();
+    if (selectedOrganizations.includes(orgIdStr)) {
+      setSelectedOrganizations(selectedOrganizations.filter(id => id !== orgIdStr));
+    } else {
+      setSelectedOrganizations([...selectedOrganizations, orgIdStr]);
+    }
+  };
+
+  const getCurrentLocation = useCallback(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setMapPosition([latitude, longitude]);
+          setSelectedLocation({ lat: latitude, lng: longitude });
+          setValue("latitude", latitude);
+          setValue("longitude", longitude);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          toast.info("Please select your location on the map");
+        }
+      );
+    }
+  }, [setValue]);
+
   useEffect(() => {
     fetchCategories();
     fetchPriorities();
     fetchOrganizations();
     getCurrentLocation();
   }, [getCurrentLocation]);
+
+  // Handle clicking outside dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.organization-selector')) {
+        setShowOrganizationDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const organizationSelector = event.target.closest('.organization-selector');
+      if (!organizationSelector && showOrganizationDropdown) {
+        setShowOrganizationDropdown(false);
+        setOrganizationSearch("");
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showOrganizationDropdown]);
 
   const fetchCategories = async () => {
     try {
@@ -91,29 +181,39 @@ const ReportForm = () => {
   const fetchOrganizations = async () => {
     try {
       const response = await reportService.getOrganizations();
-      setOrganizations(response.data);
+      console.log('Organizations API response:', response.data);
+      // Ensure we always set an array and handle potential circular references
+      if (response.data && Array.isArray(response.data)) {
+        // Filter out any invalid entries and clean the data
+        const cleanOrgs = response.data
+          .filter(org => org && org.id && org.name)
+          .map(org => ({
+            id: org.id,
+            name: org.name,
+            type: org.type || 'UNKNOWN',
+            city: org.city || 'Unknown',
+            serviceAreas: org.serviceAreas || '',
+            categories: org.categories || '',
+            description: org.description || '',
+            isActive: org.isActive !== false
+          }));
+        console.log('Cleaned organizations:', cleanOrgs);
+        setOrganizations(cleanOrgs);
+      } else {
+        console.warn('Organizations response is not an array:', response.data);
+        setOrganizations([]);
+      }
     } catch (error) {
       console.error('Error fetching organizations:', error);
+      setOrganizations([]); // Set empty array on error
+      // Show user-friendly error
+      if (error.response?.status === 401) {
+        toast.error('Please log in to view organizations');
+      } else {
+        toast.error('Unable to load organizations. Please try again.');
+      }
     }
   };
-
-  const getCurrentLocation = useCallback(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setMapPosition([latitude, longitude]);
-          setSelectedLocation({ lat: latitude, lng: longitude });
-          setValue("latitude", latitude);
-          setValue("longitude", longitude);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          toast.info("Please select your location on the map");
-        }
-      );
-    }
-  }, [setValue]);
 
   const handleLocationSelect = useCallback(
     (lat, lng) => {
@@ -159,16 +259,18 @@ const ReportForm = () => {
 
       if (success) {
         setAiGeneratedDescription(description);
-        setShowAiDescription(true);
+        setValue("description", description); // Directly set in the form
+        setShowAiDescription(false); // Don't show the preview box
         toast.success(
-          "AI analysis completed! You can now edit the description."
+          "AI analysis completed! Description has been added to the form. You can edit it now."
         );
       } else {
         setAiGeneratedDescription(description);
-        setShowAiDescription(true);
+        setValue("description", description); // Still set it in the form even if not perfect
+        setShowAiDescription(false); // Don't show the preview box
         toast.warning(
           error ||
-            "AI analysis completed with limitations. Please review and edit."
+            "AI analysis completed with limitations. Please review and edit the description."
         );
       }
     } catch (error) {
@@ -198,12 +300,19 @@ const ReportForm = () => {
       return;
     }
 
+    if (selectedOrganizations.length === 0) {
+      toast.error("Please select at least one organization to handle this issue");
+      return;
+    }
+
     setLoading(true);
     try {
       const reportData = {
         ...data,
         latitude: selectedLocation.lat,
         longitude: selectedLocation.lng,
+        targetOrganizationIds: selectedOrganizations,
+        notifyVolunteers: notifyVolunteers,
       };
 
       await reportService.createReport(reportData, selectedImage);
@@ -225,38 +334,44 @@ const ReportForm = () => {
   };
 
   return (
-    <div className="container py-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="page-title mb-8">Report New Issue</h1>
+    <div className="report-form-container">
+      <div className="report-form-wrapper">
+        {/* Header */}
+        <div className="report-form-header">
+          <h1 className="report-form-title">Report New Issue</h1>
+          <p className="report-form-subtitle">
+            Help improve your community by reporting issues that need attention
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          {/* Basic Information */}
-          <div className="card">
-            <div className="card-header">
-              <h2 className="card-title">Issue Details</h2>
-            </div>
-            <div className="card-body space-y-6">
-              <div className="form-group">
-                <label htmlFor="title" className="form-label">
-                  Issue Title *
-                </label>
-                <input
-                  id="title"
-                  type="text"
-                  className="form-input"
-                  placeholder="Brief description of the issue"
-                  {...register("title", {
-                    required: "Title is required",
-                    maxLength: {
-                      value: 200,
-                      message: "Title must be less than 200 characters",
-                    },
-                  })}
-                />
-                {errors.title && (
-                  <div className="form-error">{errors.title.message}</div>
-                )}
-              </div>
+        {/* Main Form Card */}
+        <div className="report-form-card">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="report-form-grid">
+            {/* Form Content */}
+            <div className="report-form-content">
+                {/* Basic Information */}
+                <div className="form-group">
+                  <label htmlFor="title" className="form-label">
+                    Issue Title *
+                  </label>
+                  <input
+                    id="title"
+                    type="text"
+                    className="form-input"
+                    placeholder="Brief description of the issue"
+                    {...register("title", {
+                      required: "Title is required",
+                      maxLength: {
+                        value: 200,
+                        message: "Title must be less than 200 characters",
+                      },
+                    })}
+                  />
+                  {errors.title && (
+                    <div className="error-message">{errors.title.message}</div>
+                  )}
+                </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="form-group">
@@ -301,28 +416,136 @@ const ReportForm = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="targetOrganizationId" className="form-label">
-                  Report To (Organization) *
+                <label className="form-label">
+                  Report To (Organizations) *
                 </label>
-                <select
-                  id="targetOrganizationId"
-                  className="form-select"
-                  {...register('targetOrganizationId', {
-                    required: 'Please select an organization to report to'
-                  })}
-                >
-                  <option value="">Select organization to handle this issue</option>
-                  {organizations.map(org => (
-                    <option key={org.id} value={org.id}>
-                      {org.name} - {org.type.replace(/_/g, ' ')} ({org.city})
-                    </option>
-                  ))}
-                </select>
-                {errors.targetOrganizationId && (
-                  <div className="form-error">{errors.targetOrganizationId.message}</div>
+                <div className="form-help mb-3">
+                  Select one or more organizations that should handle this type of issue in your area.
+                </div>
+                
+                {/* Custom Searchable Multi-Select Dropdown */}
+                <div className="organization-selector">
+                  <div className="organization-input-wrapper">
+                    <input
+                      type="text"
+                      className="form-input organization-search"
+                      placeholder={selectedOrganizations.length > 0 ? `${selectedOrganizations.length} organization(s) selected` : "Search and select organizations..."}
+                      value={organizationSearch}
+                      onChange={(e) => setOrganizationSearch(e.target.value)}
+                      onFocus={() => setShowOrganizationDropdown(true)}
+                      autoComplete="off"
+                    />
+                    <button
+                      type="button"
+                      className="organization-dropdown-toggle"
+                      onClick={() => setShowOrganizationDropdown(!showOrganizationDropdown)}
+                    >
+                      <ChevronDown size={20} />
+                    </button>
+                  </div>
+                  
+                  {showOrganizationDropdown && (
+                    <div className="organization-dropdown">
+                      {Object.keys(getGroupedOrganizations()).length > 0 ? (
+                        Object.entries(getGroupedOrganizations()).map(([type, orgs]) => (
+                          <div key={type} className="organization-group">
+                            <div className="organization-group-header">
+                              {type} ({orgs.length})
+                            </div>
+                            {orgs.map(org => (
+                              <button
+                                key={org.id}
+                                type="button"
+                                className={`organization-option ${selectedOrganizations.includes(org.id.toString()) ? 'selected' : ''}`}
+                                onClick={() => toggleOrganization(org.id)}
+                              >
+                                <div className="organization-checkbox">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedOrganizations.includes(org.id.toString())}
+                                    onChange={() => {}} // Handled by button click
+                                    className="organization-checkbox-input"
+                                  />
+                                </div>
+                                <div className="organization-info">
+                                  <div className="organization-name">{org.name}</div>
+                                  <div className="organization-details">
+                                    {org.city}
+                                    {org.serviceAreas && (
+                                      <span className="service-areas"> • {org.serviceAreas}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="organization-no-results">
+                          {organizationSearch ? 'No organizations found' : 'No organizations available'}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                
+                {selectedOrganizations.length > 0 && (
+                  <div className="selected-organizations-preview">
+                    <div className="selected-organizations-header">
+                      <Building2 size={16} />
+                      <span>Selected Organizations ({selectedOrganizations.length})</span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrganizations([])}
+                        className="clear-all-selections"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                    <div className="selected-organizations-list">
+                      {organizations
+                        .filter(org => selectedOrganizations.includes(org.id.toString()))
+                        .map(org => (
+                          <div key={org.id} className="selected-org-item">
+                            <span>{org.name} ({org.city})</span>
+                            <button
+                              type="button"
+                              onClick={() => toggleOrganization(org.id)}
+                              className="remove-selection"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))
+                      }
+                    </div>
+                  </div>
                 )}
-                <div className="form-help">
-                  Choose the appropriate organization that should handle this type of issue in your area.
+                
+                {selectedOrganizations.length === 0 && organizations.length === 0 && (
+                  <div className="form-error mt-2">
+                    No organizations available. Please check your connection and try again.
+                  </div>
+                )}
+              </div>
+
+              {/* Volunteer Option */}
+              <div className="form-group">
+                <div className="volunteer-option">
+                  <input
+                    type="checkbox"
+                    className="volunteer-checkbox"
+                    id="volunteer-notification"
+                    onChange={(e) => setNotifyVolunteers(e.target.checked)}
+                  />
+                  <div className="volunteer-content">
+                    <label className="volunteer-title" htmlFor="volunteer-notification">
+                      Notify Community Volunteers
+                    </label>
+                    <p className="volunteer-description">
+                      Check this if you want to notify local volunteers who can help with this issue. Local volunteers will be notified and can offer assistance.
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -522,6 +745,7 @@ const ReportForm = () => {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

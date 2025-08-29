@@ -1,5 +1,6 @@
 package com.ambiguous.fixpoint.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -74,9 +75,11 @@ public class Organization {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<User> users = new HashSet<>();
 
-    @OneToMany(mappedBy = "targetOrganization", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "targetOrganizations", fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<Report> assignedReports = new HashSet<>();
 
     // Constructors

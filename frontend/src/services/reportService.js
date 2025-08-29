@@ -27,7 +27,14 @@ export const reportService = {
     // Append report data
     Object.keys(reportData).forEach((key) => {
       if (reportData[key] !== null && reportData[key] !== undefined) {
-        formData.append(key, reportData[key]);
+        if (key === 'targetOrganizationIds' && Array.isArray(reportData[key])) {
+          // Handle array of organization IDs
+          reportData[key].forEach((id, index) => {
+            formData.append(`targetOrganizationIds[${index}]`, id);
+          });
+        } else {
+          formData.append(key, reportData[key]);
+        }
       }
     });
 
@@ -46,6 +53,26 @@ export const reportService = {
   // Get user's reports
   getUserReports: (params = {}) => {
     return api.get("/api/reports/my-reports", { params });
+  },
+
+  // Get reports assigned to current user
+  getAssignedReports: (params = {}) => {
+    return api.get("/api/reports/assigned", { params });
+  },
+
+  // Get reports for a specific organization (admin only)
+  getOrganizationReports: (organizationId, params = {}) => {
+    return api.get(`/api/reports/organization/${organizationId}`, { params });
+  },
+
+  // Assign a report to a staff member (admin only)
+  assignReport: (reportId, staffMemberId) => {
+    return api.put(`/api/reports/${reportId}/assign-staff`, { assignedToId: staffMemberId });
+  },
+
+  // Update report status
+  updateReportStatus: (reportId, status) => {
+    return api.put(`/api/reports/${reportId}/status`, { status });
   },
 
   // Get reports in area
@@ -90,5 +117,48 @@ export const reportService = {
   // Get organizations
   getOrganizations: () => {
     return publicApi.get("/api/organizations");
+  },
+
+  // Analyze image with AI
+  analyzeImage: (imageFile) => {
+    const formData = new FormData();
+    formData.append("image", imageFile);
+    
+    return api.post("/api/ai/analyze-image", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  // Comments functionality
+  // Get comments for a report
+  getComments: (reportId) => {
+    return api.get(`/api/reports/${reportId}/comments`);
+  },
+
+  // Add a comment to a report
+  addComment: (reportId, content) => {
+    return api.post(`/api/reports/${reportId}/comments`, { content });
+  },
+
+  // Add a reply to a comment
+  addReply: (reportId, commentId, content) => {
+    return api.post(`/api/reports/${reportId}/comments/${commentId}/replies`, { content });
+  },
+
+  // Toggle reaction on a comment
+  toggleReaction: (reportId, commentId, type) => {
+    return api.post(`/api/reports/${reportId}/comments/${commentId}/reactions`, { type });
+  },
+
+  // Get replies for a comment (alias for backward compatibility)
+  getReplies: (reportId, commentId) => {
+    return api.get(`/api/reports/${reportId}/comments/${commentId}/replies`);
+  },
+
+  // Get replies for a comment
+  getCommentReplies: (reportId, commentId) => {
+    return api.get(`/api/reports/${reportId}/comments/${commentId}/replies`);
   },
 };

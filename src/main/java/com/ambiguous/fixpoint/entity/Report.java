@@ -59,6 +59,8 @@ public class Report {
 
     private Integer voteCount = 0;
 
+    private Boolean notifyVolunteers = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reporter_id", nullable = false)
     private User reporter;
@@ -67,9 +69,13 @@ public class Report {
     @JoinColumn(name = "assigned_to_id")
     private User assignedTo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "target_organization_id")
-    private Organization targetOrganization;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "report_target_organizations",
+        joinColumns = @JoinColumn(name = "report_id"),
+        inverseJoinColumns = @JoinColumn(name = "organization_id")
+    )
+    private Set<Organization> targetOrganizations = new HashSet<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -139,14 +145,17 @@ public class Report {
     public Integer getVoteCount() { return voteCount; }
     public void setVoteCount(Integer voteCount) { this.voteCount = voteCount; }
 
+    public Boolean getNotifyVolunteers() { return notifyVolunteers; }
+    public void setNotifyVolunteers(Boolean notifyVolunteers) { this.notifyVolunteers = notifyVolunteers; }
+
     public User getReporter() { return reporter; }
     public void setReporter(User reporter) { this.reporter = reporter; }
 
     public User getAssignedTo() { return assignedTo; }
     public void setAssignedTo(User assignedTo) { this.assignedTo = assignedTo; }
 
-    public Organization getTargetOrganization() { return targetOrganization; }
-    public void setTargetOrganization(Organization targetOrganization) { this.targetOrganization = targetOrganization; }
+    public Set<Organization> getTargetOrganizations() { return targetOrganizations; }
+    public void setTargetOrganizations(Set<Organization> targetOrganizations) { this.targetOrganizations = targetOrganizations; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
