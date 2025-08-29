@@ -87,45 +87,8 @@ export const reportService = {
     return publicApi.get("/api/public/reports/priorities");
   },
 
-  // List comments for a report
-  getComments: (reportId) => {
-    return api.get(`/api/reports/${reportId}/comments`);
-  },
-
-  // Add a comment to a report
-  addComment: (reportId, content) => {
-    return api.post(`/api/reports/${reportId}/comments`, { content });
-  },
-
-  // Add a reply to a comment
-  addReply: (reportId, commentId, content) => {
-    return api.post(`/api/reports/${reportId}/comments/${commentId}/replies`, {
-      content,
-    });
-  },
-
-  // Get replies for a comment
-  getReplies: (reportId, commentId) => {
-    return api.get(`/api/reports/${reportId}/comments/${commentId}/replies`);
-  },
-
-  // Toggle reaction on a comment
-  toggleReaction: (reportId, commentId, reactionType) => {
-    return api.post(
-      `/api/reports/${reportId}/comments/${commentId}/reactions`,
-      { type: reactionType }
-    );
-  },
-
-  // AI Image Analysis
-  analyzeImage: (image) => {
-    const formData = new FormData();
-    formData.append("image", image);
-
-    return api.post("/api/ai/analyze-image", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+  // Get organizations
+  getOrganizations: () => {
+    return publicApi.get("/api/organizations");
   },
 };

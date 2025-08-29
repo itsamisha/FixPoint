@@ -28,6 +28,8 @@ public class ReportRequest {
     @Size(max = 255)
     private String locationAddress;
 
+    private Long targetOrganizationId;
+
     // Constructors
     public ReportRequest() {}
 
@@ -52,4 +54,7 @@ public class ReportRequest {
 
     public String getLocationAddress() { return locationAddress; }
     public void setLocationAddress(String locationAddress) { this.locationAddress = locationAddress; }
+
+    public Long getTargetOrganizationId() { return targetOrganizationId; }
+    public void setTargetOrganizationId(Long targetOrganizationId) { this.targetOrganizationId = targetOrganizationId; }
 }

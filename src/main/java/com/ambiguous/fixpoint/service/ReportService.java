@@ -41,6 +41,9 @@ public class ReportService {
     @Autowired
     private CommentRepository commentRepository;
 
+    @Autowired
+    private OrganizationService organizationService;
+
     private final String uploadDir = "uploads/";
 
     public ReportSummary createReport(ReportRequest reportRequest, MultipartFile image, User reporter) {
@@ -53,6 +56,12 @@ public class ReportService {
         report.setLongitude(reportRequest.getLongitude());
         report.setLocationAddress(reportRequest.getLocationAddress());
         report.setReporter(reporter);
+
+        // Set target organization if provided
+        if (reportRequest.getTargetOrganizationId() != null) {
+            organizationService.getOrganizationById(reportRequest.getTargetOrganizationId())
+                .ifPresent(report::setTargetOrganization);
+        }
 
         // Handle image upload
         if (image != null && !image.isEmpty()) {

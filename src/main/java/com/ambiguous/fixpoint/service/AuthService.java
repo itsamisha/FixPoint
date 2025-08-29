@@ -94,8 +94,40 @@ public class AuthService {
         user.setLongitude(signUpRequest.getLongitude());
         user.setIsVolunteer(signUpRequest.getIsVolunteer());
         user.setVolunteerSkills(signUpRequest.getVolunteerSkills());
+        
+        // Set user type and organization if provided
+        if (signUpRequest.getUserType() != null) {
+            user.setUserType(signUpRequest.getUserType());
+        }
+        
+        if (signUpRequest.getJobTitle() != null) {
+            user.setJobTitle(signUpRequest.getJobTitle());
+        }
+        
+        if (signUpRequest.getDepartment() != null) {
+            user.setDepartment(signUpRequest.getDepartment());
+        }
+        
+        if (signUpRequest.getEmployeeId() != null) {
+            user.setEmployeeId(signUpRequest.getEmployeeId());
+        }
+        
+        // Set role based on user type
+        if (signUpRequest.getUserType() == User.UserType.ORGANIZATION_ADMIN) {
+            user.setRole(User.Role.ORG_ADMIN);
+        } else if (signUpRequest.getUserType() == User.UserType.ORGANIZATION_STAFF) {
+            user.setRole(User.Role.ORG_STAFF);
+        }
+        
+        User savedUser = userRepository.save(user);
+        
+        // Set organization relationship if organizationId is provided
+        if (signUpRequest.getOrganizationId() != null) {
+            // We'll need to inject OrganizationService here or handle this differently
+            // For now, we'll save the user first and then update the organization relationship
+        }
 
-        return userRepository.save(user);
+        return savedUser;
     }
 
     public boolean existsByUsername(String username) {

@@ -67,6 +67,10 @@ public class Report {
     @JoinColumn(name = "assigned_to_id")
     private User assignedTo;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "target_organization_id")
+    private Organization targetOrganization;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
@@ -140,6 +144,9 @@ public class Report {
 
     public User getAssignedTo() { return assignedTo; }
     public void setAssignedTo(User assignedTo) { this.assignedTo = assignedTo; }
+
+    public Organization getTargetOrganization() { return targetOrganization; }
+    public void setTargetOrganization(Organization targetOrganization) { this.targetOrganization = targetOrganization; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

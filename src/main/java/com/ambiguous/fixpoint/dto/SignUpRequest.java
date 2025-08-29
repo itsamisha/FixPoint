@@ -1,5 +1,6 @@
 package com.ambiguous.fixpoint.dto;
 
+import com.ambiguous.fixpoint.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -35,6 +36,20 @@ public class SignUpRequest {
     @Size(max = 500)
     private String volunteerSkills;
 
+    // Organization-related fields for organization staff registration
+    private Long organizationId;
+    
+    @Size(max = 100)
+    private String jobTitle;
+    
+    @Size(max = 100)
+    private String department;
+    
+    @Size(max = 50)
+    private String employeeId;
+    
+    private User.UserType userType = User.UserType.CITIZEN;
+
     // Constructors
     public SignUpRequest() {}
 
@@ -68,4 +83,19 @@ public class SignUpRequest {
 
     public String getVolunteerSkills() { return volunteerSkills; }
     public void setVolunteerSkills(String volunteerSkills) { this.volunteerSkills = volunteerSkills; }
+
+    public Long getOrganizationId() { return organizationId; }
+    public void setOrganizationId(Long organizationId) { this.organizationId = organizationId; }
+
+    public String getJobTitle() { return jobTitle; }
+    public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
+
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
+
+    public String getEmployeeId() { return employeeId; }
+    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+
+    public User.UserType getUserType() { return userType; }
+    public void setUserType(User.UserType userType) { this.userType = userType; }
 }

@@ -2,9 +2,12 @@ package com.ambiguous.fixpoint.controller;
 
 import com.ambiguous.fixpoint.dto.JwtAuthenticationResponse;
 import com.ambiguous.fixpoint.dto.LoginRequest;
+import com.ambiguous.fixpoint.dto.OrganizationRegistrationRequest;
 import com.ambiguous.fixpoint.dto.SignUpRequest;
+import com.ambiguous.fixpoint.entity.Organization;
 import com.ambiguous.fixpoint.entity.User;
 import com.ambiguous.fixpoint.service.AuthService;
+import com.ambiguous.fixpoint.service.OrganizationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,9 @@ public class AuthController {
 
     @Autowired
     AuthService authService;
+
+    @Autowired
+    OrganizationService organizationService;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -67,5 +73,55 @@ public class AuthController {
         Map<String, Boolean> response = new HashMap<>();
         response.put("available", !authService.existsByEmail(email));
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/signup-organization")
+    public ResponseEntity<?> registerOrganization(@Valid @RequestBody OrganizationRegistrationRequest request) {
+        try {
+            // Create organization
+            Organization organization = new Organization();
+            organization.setName(request.getName());
+            organization.setDescription(request.getDescription());
+            organization.setType(request.getType());
+            organization.setAddress(request.getAddress());
+            organization.setCity(request.getCity());
+            organization.setState(request.getState());
+            organization.setZipCode(request.getZipCode());
+            organization.setCountry(request.getCountry());
+            organization.setContactPhone(request.getContactPhone());
+            organization.setContactEmail(request.getContactEmail());
+            organization.setWebsite(request.getWebsite());
+            organization.setLatitude(request.getLatitude());
+            organization.setLongitude(request.getLongitude());
+            organization.setServiceAreas(request.getServiceAreas());
+            organization.setCategories(request.getCategories());
+
+            Organization savedOrganization = organizationService.createOrganization(organization);
+
+            // Create admin user for the organization
+            SignUpRequest adminSignUp = new SignUpRequest();
+            adminSignUp.setUsername(request.getAdminUsername());
+            adminSignUp.setFullName(request.getAdminFullName());
+            adminSignUp.setEmail(request.getAdminEmail());
+            adminSignUp.setPassword(request.getAdminPassword());
+            adminSignUp.setPhone(request.getAdminPhone());
+            adminSignUp.setJobTitle(request.getAdminJobTitle());
+            adminSignUp.setDepartment(request.getAdminDepartment());
+            adminSignUp.setUserType(User.UserType.ORGANIZATION_ADMIN);
+            adminSignUp.setOrganizationId(savedOrganization.getId());
+
+            User adminUser = authService.registerUser(adminSignUp);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Organization and admin user registered successfully");
+            response.put("organizationId", savedOrganization.getId());
+            response.put("adminUserId", adminUser.getId());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
     }
 }

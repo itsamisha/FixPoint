@@ -43,6 +43,7 @@ const ReportForm = () => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [priorities, setPriorities] = useState([]);
+  const [organizations, setOrganizations] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [mapPosition, setMapPosition] = useState([23.8103, 90.4125]); // Dhaka, Bangladesh
@@ -65,8 +66,9 @@ const ReportForm = () => {
   useEffect(() => {
     fetchCategories();
     fetchPriorities();
+    fetchOrganizations();
     getCurrentLocation();
-  }, []);
+  }, [getCurrentLocation]);
 
   const fetchCategories = async () => {
     try {
@@ -86,7 +88,16 @@ const ReportForm = () => {
     }
   };
 
-  const getCurrentLocation = () => {
+  const fetchOrganizations = async () => {
+    try {
+      const response = await reportService.getOrganizations();
+      setOrganizations(response.data);
+    } catch (error) {
+      console.error('Error fetching organizations:', error);
+    }
+  };
+
+  const getCurrentLocation = useCallback(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -102,7 +113,7 @@ const ReportForm = () => {
         }
       );
     }
-  };
+  }, [setValue]);
 
   const handleLocationSelect = useCallback(
     (lat, lng) => {
@@ -286,6 +297,32 @@ const ReportForm = () => {
                       </option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="targetOrganizationId" className="form-label">
+                  Report To (Organization) *
+                </label>
+                <select
+                  id="targetOrganizationId"
+                  className="form-select"
+                  {...register('targetOrganizationId', {
+                    required: 'Please select an organization to report to'
+                  })}
+                >
+                  <option value="">Select organization to handle this issue</option>
+                  {organizations.map(org => (
+                    <option key={org.id} value={org.id}>
+                      {org.name} - {org.type.replace(/_/g, ' ')} ({org.city})
+                    </option>
+                  ))}
+                </select>
+                {errors.targetOrganizationId && (
+                  <div className="form-error">{errors.targetOrganizationId.message}</div>
+                )}
+                <div className="form-help">
+                  Choose the appropriate organization that should handle this type of issue in your area.
                 </div>
               </div>
 

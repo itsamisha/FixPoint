@@ -49,6 +49,23 @@ public class User {
     @Column(length = 20)
     private Role role = Role.CITIZEN;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private UserType userType = UserType.CITIZEN;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
+    private Organization organization;
+
+    @Size(max = 100)
+    private String jobTitle;
+
+    @Size(max = 100)
+    private String department;
+
+    @Size(max = 50)
+    private String employeeId;
+
     private Boolean isVolunteer = false;
 
     @Size(max = 500)
@@ -113,6 +130,21 @@ public class User {
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
 
+    public UserType getUserType() { return userType; }
+    public void setUserType(UserType userType) { this.userType = userType; }
+
+    public Organization getOrganization() { return organization; }
+    public void setOrganization(Organization organization) { this.organization = organization; }
+
+    public String getJobTitle() { return jobTitle; }
+    public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
+
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
+
+    public String getEmployeeId() { return employeeId; }
+    public void setEmployeeId(String employeeId) { this.employeeId = employeeId; }
+
     public Boolean getIsVolunteer() { return isVolunteer; }
     public void setIsVolunteer(Boolean isVolunteer) { this.isVolunteer = isVolunteer; }
 
@@ -141,6 +173,14 @@ public class User {
     public void setVotes(Set<Vote> votes) { this.votes = votes; }
 
     public enum Role {
-        CITIZEN, ADMIN, NGO_STAFF
+        CITIZEN, ADMIN, NGO_STAFF, ORG_ADMIN, ORG_STAFF
+    }
+
+    public enum UserType {
+        CITIZEN,
+        ORGANIZATION_ADMIN,
+        ORGANIZATION_STAFF,
+        VOLUNTEER,
+        SYSTEM_ADMIN
     }
 }
