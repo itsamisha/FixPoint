@@ -6,12 +6,18 @@ import com.ambiguous.fixpoint.entity.Report;
 import com.ambiguous.fixpoint.entity.User;
 import com.ambiguous.fixpoint.security.UserPrincipal;
 import com.ambiguous.fixpoint.service.ReportService;
+import com.ambiguous.fixpoint.service.DuplicateDetectionService;
 import com.ambiguous.fixpoint.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,6 +39,9 @@ public class ReportController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DuplicateDetectionService duplicateDetectionService;
 
     @PostMapping
     public ResponseEntity<?> createReport(
@@ -246,6 +255,67 @@ public class ReportController {
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/check-duplicates")
+    public ResponseEntity<?> checkDuplicates(@RequestBody ReportRequest reportRequest) {
+        try {
+            // Create a temporary Report object for duplicate checking
+            Report tempReport = new Report();
+            tempReport.setCategory(reportRequest.getCategory());
+            tempReport.setDescription(reportRequest.getDescription());
+            tempReport.setLatitude(reportRequest.getLatitude());
+            tempReport.setLongitude(reportRequest.getLongitude());
+
+            // Find potential duplicates
+            List<DuplicateDetectionService.DuplicateResult> duplicates = 
+                duplicateDetectionService.findRankedDuplicates(tempReport);
+
+            System.out.println("Found " + duplicates.size() + " total duplicates");
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("hasDuplicates", !duplicates.isEmpty());
+            response.put("duplicateCount", duplicates.size());
+            
+            // Simplified duplicate info to avoid circular references
+            List<Map<String, Object>> duplicateList = new ArrayList<>();
+            for (DuplicateDetectionService.DuplicateResult duplicate : duplicates) {
+                if (duplicateList.size() >= 5) break; // Limit to 5 duplicates
+                
+                Map<String, Object> duplicateInfo = new HashMap<>();
+                Report report = duplicate.getReport();
+                
+                duplicateInfo.put("id", report.getId());
+                duplicateInfo.put("title", report.getTitle());
+                duplicateInfo.put("description", report.getDescription());
+                duplicateInfo.put("category", report.getCategory().toString());
+                duplicateInfo.put("status", report.getStatus().toString());
+                duplicateInfo.put("createdAt", report.getCreatedAt().toString());
+                duplicateInfo.put("similarity", Math.round(duplicate.getScore() * 100));
+                
+                // Safely get reporter name without circular references
+                try {
+                    String reporterName = "Unknown Reporter";
+                    if (report.getReporter() != null) {
+                        reporterName = report.getReporter().getFullName();
+                    }
+                    duplicateInfo.put("reporter", reporterName);
+                } catch (Exception e) {
+                    duplicateInfo.put("reporter", "Unknown Reporter");
+                    System.out.println("Error getting reporter: " + e.getMessage());
+                }
+                
+                duplicateList.add(duplicateInfo);
+            }
+            
+            response.put("duplicates", duplicateList);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Error checking for duplicates: " + e.getMessage());
             return ResponseEntity.badRequest().body(error);
         }
     }

@@ -61,4 +61,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     // Find reports targeted to a specific organization
     @Query("SELECT r FROM Report r JOIN r.targetOrganizations o WHERE o.id = :organizationId")
     Page<Report> findByTargetOrganizationsId(@Param("organizationId") Long organizationId, Pageable pageable);
+    
+    // For duplicate detection
+    List<Report> findByCategoryAndCreatedAtAfter(Report.Category category, LocalDateTime createdAt);
 }

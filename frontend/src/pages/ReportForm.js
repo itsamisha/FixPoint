@@ -4,8 +4,13 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
-import { MapPin, Upload, Save, Sparkles, Edit3, Users, Building2, ChevronDown } from "lucide-react";
+import { MapPin, Save, ChevronDown, Sparkles, Edit3 } from "lucide-react";
 import { reportService } from "../services/reportService";
+import DuplicateWarningModal from "../components/DuplicateWarningModal";
+import OrganizationSelector from "../components/OrganizationSelector";
+import VolunteerNotification from "../components/VolunteerNotification";
+import AIDescriptionGenerator from "../components/AIDescriptionGenerator";
+import ImageUploader from "../components/ImageUploader";
 import "./ReportForm.css";
 
 // Fix for default markers in react-leaflet
@@ -56,6 +61,10 @@ const ReportForm = () => {
   const [organizationSearch, setOrganizationSearch] = useState("");
   const [showOrganizationDropdown, setShowOrganizationDropdown] = useState(false);
   const [notifyVolunteers, setNotifyVolunteers] = useState(false);
+  const [duplicates, setDuplicates] = useState([]);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
+  const [pendingReportData, setPendingReportData] = useState(null);
 
   const {
     register,
@@ -95,7 +104,7 @@ const ReportForm = () => {
 
   const getSelectedOrganizationNames = () => {
     const selected = organizations.filter(org => selectedOrganizations.includes(org.id.toString()));
-    return selected.map(org => `${org.name} (${org.city})`).join(', ');
+    return selected.map(org => `${org.name} (${org.city})`);
   };
 
   const toggleOrganization = (orgId) => {
@@ -294,6 +303,42 @@ const ReportForm = () => {
     setShowAiDescription(false);
   };
 
+  const checkForDuplicates = async (reportData) => {
+    setIsCheckingDuplicates(true);
+    try {
+      console.log('Checking for duplicates with data:', reportData);
+      const response = await reportService.checkDuplicates(reportData);
+      console.log('Duplicate check response:', response.data);
+      
+      if (response.data.hasDuplicates) {
+        setDuplicates(response.data.duplicates);
+        setShowDuplicateWarning(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("Error checking for duplicates:", error);
+      // Don't block submission if duplicate check fails
+      return false;
+    } finally {
+      setIsCheckingDuplicates(false);
+    }
+  };
+
+  const proceedWithSubmission = async (reportData, skipDuplicateCheck = false) => {
+    setLoading(true);
+    try {
+      const report = await reportService.createReport(reportData, selectedImage);
+      toast.success("Report submitted successfully!");
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      toast.error("Failed to submit report. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onSubmit = async (data) => {
     if (!selectedLocation) {
       toast.error("Please select a location on the map");
@@ -305,25 +350,25 @@ const ReportForm = () => {
       return;
     }
 
-    setLoading(true);
-    try {
-      const reportData = {
-        ...data,
-        latitude: selectedLocation.lat,
-        longitude: selectedLocation.lng,
-        targetOrganizationIds: selectedOrganizations,
-        notifyVolunteers: notifyVolunteers,
-      };
+    const reportData = {
+      ...data,
+      latitude: selectedLocation.lat,
+      longitude: selectedLocation.lng,
+      targetOrganizationIds: selectedOrganizations,
+      notifyVolunteers: notifyVolunteers,
+    };
 
-      await reportService.createReport(reportData, selectedImage);
-      toast.success("Report submitted successfully!");
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Error creating report:", error);
-      toast.error("Failed to submit report. Please try again.");
-    } finally {
-      setLoading(false);
+    // Check for duplicates first
+    const hasDuplicates = await checkForDuplicates(reportData);
+    
+    if (hasDuplicates) {
+      // Store the report data for later submission
+      setPendingReportData(reportData);
+      return;
     }
+
+    // No duplicates found, proceed with submission
+    await proceedWithSubmission(reportData);
   };
 
   const formatEnumValue = (value) => {
@@ -415,139 +460,26 @@ const ReportForm = () => {
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">
-                  Report To (Organizations) *
-                </label>
-                <div className="form-help mb-3">
-                  Select one or more organizations that should handle this type of issue in your area.
-                </div>
-                
-                {/* Custom Searchable Multi-Select Dropdown */}
-                <div className="organization-selector">
-                  <div className="organization-input-wrapper">
-                    <input
-                      type="text"
-                      className="form-input organization-search"
-                      placeholder={selectedOrganizations.length > 0 ? `${selectedOrganizations.length} organization(s) selected` : "Search and select organizations..."}
-                      value={organizationSearch}
-                      onChange={(e) => setOrganizationSearch(e.target.value)}
-                      onFocus={() => setShowOrganizationDropdown(true)}
-                      autoComplete="off"
-                    />
-                    <button
-                      type="button"
-                      className="organization-dropdown-toggle"
-                      onClick={() => setShowOrganizationDropdown(!showOrganizationDropdown)}
-                    >
-                      <ChevronDown size={20} />
-                    </button>
-                  </div>
-                  
-                  {showOrganizationDropdown && (
-                    <div className="organization-dropdown">
-                      {Object.keys(getGroupedOrganizations()).length > 0 ? (
-                        Object.entries(getGroupedOrganizations()).map(([type, orgs]) => (
-                          <div key={type} className="organization-group">
-                            <div className="organization-group-header">
-                              {type} ({orgs.length})
-                            </div>
-                            {orgs.map(org => (
-                              <button
-                                key={org.id}
-                                type="button"
-                                className={`organization-option ${selectedOrganizations.includes(org.id.toString()) ? 'selected' : ''}`}
-                                onClick={() => toggleOrganization(org.id)}
-                              >
-                                <div className="organization-checkbox">
-                                  <input
-                                    type="checkbox"
-                                    checked={selectedOrganizations.includes(org.id.toString())}
-                                    onChange={() => {}} // Handled by button click
-                                    className="organization-checkbox-input"
-                                  />
-                                </div>
-                                <div className="organization-info">
-                                  <div className="organization-name">{org.name}</div>
-                                  <div className="organization-details">
-                                    {org.city}
-                                    {org.serviceAreas && (
-                                      <span className="service-areas"> • {org.serviceAreas}</span>
-                                    )}
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        ))
-                      ) : (
-                        <div className="organization-no-results">
-                          {organizationSearch ? 'No organizations found' : 'No organizations available'}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                
-                {selectedOrganizations.length > 0 && (
-                  <div className="selected-organizations-preview">
-                    <div className="selected-organizations-header">
-                      <Building2 size={16} />
-                      <span>Selected Organizations ({selectedOrganizations.length})</span>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedOrganizations([])}
-                        className="clear-all-selections"
-                      >
-                        Clear All
-                      </button>
-                    </div>
-                    <div className="selected-organizations-list">
-                      {organizations
-                        .filter(org => selectedOrganizations.includes(org.id.toString()))
-                        .map(org => (
-                          <div key={org.id} className="selected-org-item">
-                            <span>{org.name} ({org.city})</span>
-                            <button
-                              type="button"
-                              onClick={() => toggleOrganization(org.id)}
-                              className="remove-selection"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))
-                      }
-                    </div>
-                  </div>
-                )}
-                
-                {selectedOrganizations.length === 0 && organizations.length === 0 && (
-                  <div className="form-error mt-2">
-                    No organizations available. Please check your connection and try again.
-                  </div>
-                )}
-              </div>
+              {/* Organization Selection */}
+              <OrganizationSelector
+                organizations={organizations}
+                selectedOrganizations={selectedOrganizations}
+                setSelectedOrganizations={setSelectedOrganizations}
+                organizationSearch={organizationSearch}
+                setOrganizationSearch={setOrganizationSearch}
+                showOrganizationDropdown={showOrganizationDropdown}
+                setShowOrganizationDropdown={setShowOrganizationDropdown}
+                getFilteredOrganizations={getFilteredOrganizations}
+                getGroupedOrganizations={getGroupedOrganizations}
+                getSelectedOrganizationNames={getSelectedOrganizationNames}
+                formatEnumValue={formatEnumValue}
+              />
 
               {/* Volunteer Option */}
-              <div className="form-group">
-                <div className="volunteer-option">
-                  <input
-                    type="checkbox"
-                    className="volunteer-checkbox"
-                    id="volunteer-notification"
-                    onChange={(e) => setNotifyVolunteers(e.target.checked)}
-                  />
-                  <div className="volunteer-content">
-                    <label className="volunteer-title" htmlFor="volunteer-notification">
-                      Notify Community Volunteers
-                    </label>
-                    <p className="volunteer-description">
-                      Check this if you want to notify local volunteers who can help with this issue. Local volunteers will be notified and can offer assistance.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <VolunteerNotification 
+                notifyVolunteers={notifyVolunteers}
+                setNotifyVolunteers={setNotifyVolunteers}
+              />
 
               <div className="form-group">
                 <label htmlFor="description" className="form-label">
@@ -632,59 +564,21 @@ const ReportForm = () => {
               <h2 className="card-title">Upload Image</h2>
             </div>
             <div className="card-body">
-              <div className="form-group">
-                <label htmlFor="image" className="form-label">
-                  Issue Photo (Optional)
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
-                  <div className="text-center">
-                    <Upload size={48} className="mx-auto text-gray-400 mb-4" />
-                    <label
-                      htmlFor="image"
-                      className="btn btn-outline cursor-pointer"
-                    >
-                      Choose Image
-                    </label>
-                    <input
-                      id="image"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageChange}
-                    />
-                    <p className="text-sm text-gray-500 mt-2">
-                      PNG, JPG, GIF up to 10MB
-                    </p>
-                  </div>
-                </div>
-
-                {imagePreview && (
-                  <div className="mt-4">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-64 object-cover rounded-lg"
-                    />
-
-                    {/* AI Analysis Button */}
-                    <div className="mt-4 flex justify-center">
-                      <button
-                        type="button"
-                        onClick={analyzeImageWithAI}
-                        disabled={isAnalyzingImage}
-                        className="btn btn-primary flex items-center space-x-2"
-                      >
-                        <Sparkles size={20} />
-                        <span>
-                          {isAnalyzingImage
-                            ? "Analyzing..."
-                            : "Generate Description with AI"}
-                        </span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <ImageUploader 
+                selectedImage={selectedImage}
+                imagePreview={imagePreview}
+                handleImageSelect={handleImageChange}
+              />
+              
+              <AIDescriptionGenerator
+                selectedImage={selectedImage}
+                isAnalyzingImage={isAnalyzingImage}
+                aiGeneratedDescription={aiGeneratedDescription}
+                showAiDescription={showAiDescription}
+                analyzeImageWithAI={analyzeImageWithAI}
+                useAIDescription={useAIDescription}
+                editAIDescription={editAIDescription}
+              />
             </div>
           </div>
 
@@ -737,16 +631,37 @@ const ReportForm = () => {
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || isCheckingDuplicates}
               className="btn btn-primary"
             >
               <Save size={20} className="mr-2" />
-              {loading ? "Submitting..." : "Submit Report"}
+              {isCheckingDuplicates ? "Checking for duplicates..." : loading ? "Submitting..." : "Submit Report"}
             </button>
           </div>
         </form>
         </div>
       </div>
+
+      {/* Duplicate Warning Modal */}
+      <DuplicateWarningModal
+        show={showDuplicateWarning}
+        duplicates={duplicates}
+        onCancel={() => {
+          setShowDuplicateWarning(false);
+          setDuplicates([]);
+          setPendingReportData(null);
+        }}
+        onProceed={async () => {
+          setShowDuplicateWarning(false);
+          setDuplicates([]);
+          if (pendingReportData) {
+            await proceedWithSubmission(pendingReportData, true);
+            setPendingReportData(null);
+          }
+        }}
+        loading={loading}
+        formatEnumValue={formatEnumValue}
+      />
     </div>
   );
 };

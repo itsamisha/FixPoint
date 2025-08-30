@@ -50,6 +50,11 @@ export const reportService = {
     });
   },
 
+  // Check for duplicate reports
+  checkDuplicates: (reportData) => {
+    return api.post("/api/reports/check-duplicates", reportData);
+  },
+
   // Get user's reports
   getUserReports: (params = {}) => {
     return api.get("/api/reports/my-reports", { params });
