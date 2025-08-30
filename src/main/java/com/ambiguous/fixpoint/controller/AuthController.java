@@ -104,6 +104,7 @@ public class AuthController {
             adminSignUp.setFullName(request.getAdminFullName());
             adminSignUp.setEmail(request.getAdminEmail());
             adminSignUp.setPassword(request.getAdminPassword());
+            adminSignUp.setConfirmPassword(request.getConfirmPassword());
             adminSignUp.setPhone(request.getAdminPhone());
             adminSignUp.setJobTitle(request.getAdminJobTitle());
             adminSignUp.setDepartment(request.getAdminDepartment());

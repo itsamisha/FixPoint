@@ -76,6 +76,7 @@ const Register = () => {
           adminFullName: data.fullName,
           adminEmail: data.email,
           adminPassword: data.password,
+          confirmPassword: data.confirmPassword,
           adminPhone: data.phone,
           adminJobTitle: data.jobTitle,
           adminDepartment: data.department

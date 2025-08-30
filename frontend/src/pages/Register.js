@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
-import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
-import './Register.css'; // Import the CSS file
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { useAuth } from "../contexts/AuthContext";
+import api from "../services/api";
+import "./Register.css"; // Import the CSS file
 
 const Register = () => {
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [registrationType, setRegistrationType] = useState('citizen');
+  const [registrationType, setRegistrationType] = useState("citizen");
   const [organizations, setOrganizations] = useState([]);
   const [organizationTypes, setOrganizationTypes] = useState([]);
 
@@ -18,48 +18,51 @@ const Register = () => {
     register,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors },
   } = useForm();
 
-  const password = watch('password');
+  const password = watch("password");
 
   useEffect(() => {
-    if (registrationType === 'organization_staff') {
+    if (registrationType === "organization_staff") {
       fetchOrganizations();
     }
-    if (registrationType === 'organization') {
+    if (registrationType === "organization") {
       fetchOrganizationTypes();
     }
   }, [registrationType]);
 
   const fetchOrganizations = async () => {
     try {
-      const response = await api.get('/api/organizations');
+      const response = await api.get("/api/organizations");
       // Ensure we always set an array
       if (response.data && Array.isArray(response.data)) {
         setOrganizations(response.data);
       } else {
-        console.warn('Organizations response is not an array:', response.data);
+        console.warn("Organizations response is not an array:", response.data);
         setOrganizations([]);
       }
     } catch (error) {
-      console.error('Error fetching organizations:', error);
+      console.error("Error fetching organizations:", error);
       setOrganizations([]); // Set empty array on error
     }
   };
 
   const fetchOrganizationTypes = async () => {
     try {
-      const response = await api.get('/api/organizations/types');
+      const response = await api.get("/api/organizations/types");
       // Ensure we always set an array
       if (response.data && Array.isArray(response.data)) {
         setOrganizationTypes(response.data);
       } else {
-        console.warn('Organization types response is not an array:', response.data);
+        console.warn(
+          "Organization types response is not an array:",
+          response.data
+        );
         setOrganizationTypes([]);
       }
     } catch (error) {
-      console.error('Error fetching organization types:', error);
+      console.error("Error fetching organization types:", error);
       setOrganizationTypes([]); // Set empty array on error
     }
   };
@@ -69,9 +72,9 @@ const Register = () => {
     try {
       let result;
 
-      if (registrationType === 'organization') {
+      if (registrationType === "organization") {
         // Register organization with admin user
-        result = await api.post('/api/auth/signup-organization', {
+        result = await api.post("/api/auth/signup-organization", {
           name: data.organizationName,
           description: data.organizationDescription,
           type: data.organizationType,
@@ -79,7 +82,7 @@ const Register = () => {
           city: data.organizationCity,
           state: data.organizationState,
           zipCode: data.organizationZipCode,
-          country: data.organizationCountry || 'Bangladesh',
+          country: data.organizationCountry || "Bangladesh",
           contactPhone: data.organizationPhone,
           contactEmail: data.organizationEmail,
           website: data.organizationWebsite,
@@ -89,37 +92,41 @@ const Register = () => {
           adminFullName: data.fullName,
           adminEmail: data.email,
           adminPassword: data.password,
+          confirmPassword: data.confirmPassword,
           adminPhone: data.phone,
           adminJobTitle: data.jobTitle,
-          adminDepartment: data.department
+          adminDepartment: data.department,
         });
 
         if (result.status === 200) {
-          toast.success('Organization registered successfully! Please log in.');
-          navigate('/login');
+          toast.success("Organization registered successfully! Please log in.");
+          navigate("/login");
         }
       } else {
         // Regular user registration
         const userData = {
           ...data,
           userType:
-            registrationType === 'citizen'
-              ? 'CITIZEN'
-              : registrationType === 'organization_staff'
-              ? 'ORGANIZATION_STAFF'
-              : 'VOLUNTEER'
+            registrationType === "citizen"
+              ? "CITIZEN"
+              : registrationType === "organization_staff"
+              ? "ORGANIZATION_STAFF"
+              : "VOLUNTEER",
         };
 
         result = await registerUser(userData);
         if (result.success) {
-          toast.success('Registration successful! Please log in.');
-          navigate('/login');
+          toast.success("Registration successful! Please log in.");
+          navigate("/login");
         } else {
           toast.error(result.message);
         }
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+      toast.error(
+        error.response?.data?.message ||
+          "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -132,40 +139,44 @@ const Register = () => {
         <div className="register-header">
           <h2>Create Your Account</h2>
           <p>
-            Or{' '}
-            <Link to="/login">
-              sign in to your existing account
-            </Link>
+            Or <Link to="/login">sign in to your existing account</Link>
           </p>
         </div>
 
         {/* Registration Type */}
-<div className="register-section">
-  <label className="block text-gray-700 font-medium mb-2">Registration Type</label>
-  <div className="radio-group">
-    {['citizen', 'organization_staff', 'organization'].map((type) => (
-      <label key={type} className={`radio-label ${registrationType === type ? 'selected' : ''}`}>
-        <input
-          type="radio"
-          value={type}
-          checked={registrationType === type}
-          onChange={(e) => setRegistrationType(e.target.value)}
-        />
-        <span></span>
-        {type === 'citizen'
-          ? 'Citizen'
-          : type === 'organization_staff'
-          ? 'Organization Staff Member'
-          : 'Register New Organization'}
-      </label>
-    ))}
-  </div>
-</div>
+        <div className="register-section">
+          <label className="block text-gray-700 font-medium mb-2">
+            Registration Type
+          </label>
+          <div className="radio-group">
+            {["citizen", "organization_staff", "organization"].map((type) => (
+              <label
+                key={type}
+                className={`radio-label ${
+                  registrationType === type ? "selected" : ""
+                }`}
+              >
+                <input
+                  type="radio"
+                  value={type}
+                  checked={registrationType === type}
+                  onChange={(e) => setRegistrationType(e.target.value)}
+                />
+                <span></span>
+                {type === "citizen"
+                  ? "Citizen"
+                  : type === "organization_staff"
+                  ? "Organization Staff Member"
+                  : "Register New Organization"}
+              </label>
+            ))}
+          </div>
+        </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Organization Information */}
-          {registrationType === 'organization' && (
+          {registrationType === "organization" && (
             <div className="register-section">
               <h3>Organization Information</h3>
               <div className="grid-2">
@@ -174,33 +185,56 @@ const Register = () => {
                   <input
                     type="text"
                     className="form-input"
-                    {...register('organizationName', { required: 'Organization name is required' })}
+                    {...register("organizationName", {
+                      required: "Organization name is required",
+                    })}
                   />
-                  {errors.organizationName && <p className="form-error">{errors.organizationName.message}</p>}
+                  {errors.organizationName && (
+                    <p className="form-error">
+                      {errors.organizationName.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label>Organization Type *</label>
                   <select
                     className="form-input"
-                    {...register('organizationType', { required: 'Organization type is required' })}
+                    {...register("organizationType", {
+                      required: "Organization type is required",
+                    })}
                   >
                     <option value="">Select Type</option>
-                    {Array.isArray(organizationTypes) && organizationTypes.length > 0 ? organizationTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}
+                    {Array.isArray(organizationTypes) &&
+                    organizationTypes.length > 0 ? (
+                      organizationTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (l) => l.toUpperCase())}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>
+                        No organization types available
                       </option>
-                    )) : (
-                      <option value="" disabled>No organization types available</option>
                     )}
                   </select>
-                  {errors.organizationType && <p className="form-error">{errors.organizationType.message}</p>}
+                  {errors.organizationType && (
+                    <p className="form-error">
+                      {errors.organizationType.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="mt-4">
                 <label>Description</label>
-                <textarea className="form-input" {...register('organizationDescription')} rows={3} />
+                <textarea
+                  className="form-input"
+                  {...register("organizationDescription")}
+                  rows={3}
+                />
               </div>
 
               <div className="grid-2 mt-4">
@@ -209,9 +243,15 @@ const Register = () => {
                   <input
                     type="tel"
                     className="form-input"
-                    {...register('organizationPhone', { required: 'Organization phone is required' })}
+                    {...register("organizationPhone", {
+                      required: "Organization phone is required",
+                    })}
                   />
-                  {errors.organizationPhone && <p className="form-error">{errors.organizationPhone.message}</p>}
+                  {errors.organizationPhone && (
+                    <p className="form-error">
+                      {errors.organizationPhone.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -219,9 +259,15 @@ const Register = () => {
                   <input
                     type="email"
                     className="form-input"
-                    {...register('organizationEmail', { required: 'Organization email is required' })}
+                    {...register("organizationEmail", {
+                      required: "Organization email is required",
+                    })}
                   />
-                  {errors.organizationEmail && <p className="form-error">{errors.organizationEmail.message}</p>}
+                  {errors.organizationEmail && (
+                    <p className="form-error">
+                      {errors.organizationEmail.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -231,7 +277,7 @@ const Register = () => {
                   type="url"
                   className="form-input"
                   placeholder="https://example.com"
-                  {...register('organizationWebsite')}
+                  {...register("organizationWebsite")}
                 />
               </div>
 
@@ -240,9 +286,15 @@ const Register = () => {
                 <input
                   type="text"
                   className="form-input"
-                  {...register('organizationAddress', { required: 'Organization address is required' })}
+                  {...register("organizationAddress", {
+                    required: "Organization address is required",
+                  })}
                 />
-                {errors.organizationAddress && <p className="form-error">{errors.organizationAddress.message}</p>}
+                {errors.organizationAddress && (
+                  <p className="form-error">
+                    {errors.organizationAddress.message}
+                  </p>
+                )}
               </div>
 
               <div className="grid-2 mt-4">
@@ -251,9 +303,15 @@ const Register = () => {
                   <input
                     type="text"
                     className="form-input"
-                    {...register('organizationCity', { required: 'City is required' })}
+                    {...register("organizationCity", {
+                      required: "City is required",
+                    })}
                   />
-                  {errors.organizationCity && <p className="form-error">{errors.organizationCity.message}</p>}
+                  {errors.organizationCity && (
+                    <p className="form-error">
+                      {errors.organizationCity.message}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -261,9 +319,15 @@ const Register = () => {
                   <input
                     type="text"
                     className="form-input"
-                    {...register('organizationState', { required: 'State/Division is required' })}
+                    {...register("organizationState", {
+                      required: "State/Division is required",
+                    })}
                   />
-                  {errors.organizationState && <p className="form-error">{errors.organizationState.message}</p>}
+                  {errors.organizationState && (
+                    <p className="form-error">
+                      {errors.organizationState.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -273,7 +337,7 @@ const Register = () => {
                   <input
                     type="text"
                     className="form-input"
-                    {...register('organizationZipCode')}
+                    {...register("organizationZipCode")}
                   />
                 </div>
 
@@ -283,7 +347,7 @@ const Register = () => {
                     type="text"
                     className="form-input"
                     defaultValue="Bangladesh"
-                    {...register('organizationCountry')}
+                    {...register("organizationCountry")}
                   />
                 </div>
               </div>
@@ -295,7 +359,7 @@ const Register = () => {
                     className="form-input"
                     rows={2}
                     placeholder="e.g., Dhaka, Chittagong, Sylhet"
-                    {...register('serviceAreas')}
+                    {...register("serviceAreas")}
                   />
                 </div>
 
@@ -305,7 +369,7 @@ const Register = () => {
                     className="form-input"
                     rows={2}
                     placeholder="e.g., Infrastructure, Healthcare, Environment"
-                    {...register('categories')}
+                    {...register("categories")}
                   />
                 </div>
               </div>
@@ -314,7 +378,11 @@ const Register = () => {
 
           {/* Personal Information */}
           <div className="register-section">
-            <h3>{registrationType === 'organization' ? 'Admin User Information' : 'Personal Information'}</h3>
+            <h3>
+              {registrationType === "organization"
+                ? "Admin User Information"
+                : "Personal Information"}
+            </h3>
 
             <div className="grid-2">
               <div>
@@ -322,9 +390,13 @@ const Register = () => {
                 <input
                   type="text"
                   className="form-input"
-                  {...register('fullName', { required: 'Full name is required' })}
+                  {...register("fullName", {
+                    required: "Full name is required",
+                  })}
                 />
-                {errors.fullName && <p className="form-error">{errors.fullName.message}</p>}
+                {errors.fullName && (
+                  <p className="form-error">{errors.fullName.message}</p>
+                )}
               </div>
 
               <div>
@@ -332,12 +404,17 @@ const Register = () => {
                 <input
                   type="text"
                   className="form-input"
-                  {...register('username', {
-                    required: 'Username is required',
-                    minLength: { value: 3, message: 'Username must be at least 3 characters' }
+                  {...register("username", {
+                    required: "Username is required",
+                    minLength: {
+                      value: 3,
+                      message: "Username must be at least 3 characters",
+                    },
                   })}
                 />
-                {errors.username && <p className="form-error">{errors.username.message}</p>}
+                {errors.username && (
+                  <p className="form-error">{errors.username.message}</p>
+                )}
               </div>
             </div>
 
@@ -347,15 +424,17 @@ const Register = () => {
                 <input
                   type="email"
                   className="form-input"
-                  {...register('email', {
-                    required: 'Email is required',
+                  {...register("email", {
+                    required: "Email is required",
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address'
-                    }
+                      message: "Invalid email address",
+                    },
                   })}
                 />
-                {errors.email && <p className="form-error">{errors.email.message}</p>}
+                {errors.email && (
+                  <p className="form-error">{errors.email.message}</p>
+                )}
               </div>
 
               <div>
@@ -363,12 +442,17 @@ const Register = () => {
                 <input
                   type="password"
                   className="form-input"
-                  {...register('password', {
-                    required: 'Password is required',
-                    minLength: { value: 6, message: 'Password must be at least 6 characters' }
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters",
+                    },
                   })}
                 />
-                {errors.password && <p className="form-error">{errors.password.message}</p>}
+                {errors.password && (
+                  <p className="form-error">{errors.password.message}</p>
+                )}
               </div>
             </div>
 
@@ -378,27 +462,38 @@ const Register = () => {
                 <input
                   type="password"
                   className="form-input"
-                  {...register('confirmPassword', {
-                    required: 'Please confirm your password',
-                    validate: (value) => value === password || 'Passwords do not match'
+                  {...register("confirmPassword", {
+                    required: "Please confirm your password",
+                    validate: (value) =>
+                      value === password || "Passwords do not match",
                   })}
                 />
-                {errors.confirmPassword && <p className="form-error">{errors.confirmPassword.message}</p>}
+                {errors.confirmPassword && (
+                  <p className="form-error">{errors.confirmPassword.message}</p>
+                )}
               </div>
 
               <div>
                 <label>Phone Number</label>
-                <input type="tel" className="form-input" {...register('phone')} />
+                <input
+                  type="tel"
+                  className="form-input"
+                  {...register("phone")}
+                />
               </div>
             </div>
 
             <div className="mt-4">
               <label>Address</label>
-              <input type="text" className="form-input" {...register('address')} />
+              <input
+                type="text"
+                className="form-input"
+                {...register("address")}
+              />
             </div>
 
             {/* Organization Admin Specific Fields */}
-            {registrationType === 'organization' && (
+            {registrationType === "organization" && (
               <div className="grid-2 mt-4">
                 <div>
                   <label>Job Title</label>
@@ -406,7 +501,7 @@ const Register = () => {
                     type="text"
                     className="form-input"
                     placeholder="e.g., Director, Manager, Administrator"
-                    {...register('jobTitle')}
+                    {...register("jobTitle")}
                   />
                 </div>
 
@@ -416,34 +511,46 @@ const Register = () => {
                     type="text"
                     className="form-input"
                     placeholder="e.g., Administration, Operations"
-                    {...register('department')}
+                    {...register("department")}
                   />
                 </div>
               </div>
             )}
 
             {/* Organization Staff Specific Fields */}
-            {registrationType === 'organization_staff' && (
+            {registrationType === "organization_staff" && (
               <div className="organization-staff-section">
-                <h3 style={{ marginBottom: '15px', color: '#1e293b' }}>Organization Information</h3>
+                <h3 style={{ marginBottom: "15px", color: "#1e293b" }}>
+                  Organization Information
+                </h3>
                 <div>
                   <label>Select Organization *</label>
                   <select
                     className="form-input"
-                    {...register('organizationId', {
-                      required: 'Please select an organization'
+                    {...register("organizationId", {
+                      required: "Please select an organization",
                     })}
                   >
                     <option value="">Choose your organization</option>
-                    {Array.isArray(organizations) && organizations.length > 0 ? organizations.map((org) => (
-                      <option key={org.id} value={org.id}>
-                        {org.name} - {org.type?.replace(/_/g, ' ')} ({org.city})
+                    {Array.isArray(organizations) &&
+                    organizations.length > 0 ? (
+                      organizations.map((org) => (
+                        <option key={org.id} value={org.id}>
+                          {org.name} - {org.type?.replace(/_/g, " ")} (
+                          {org.city})
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>
+                        No organizations available
                       </option>
-                    )) : (
-                      <option value="" disabled>No organizations available</option>
                     )}
                   </select>
-                  {errors.organizationId && <p className="form-error">{errors.organizationId.message}</p>}
+                  {errors.organizationId && (
+                    <p className="form-error">
+                      {errors.organizationId.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid-2 mt-4">
@@ -453,7 +560,7 @@ const Register = () => {
                       type="text"
                       className="form-input"
                       placeholder="e.g., Engineer, Manager, Officer"
-                      {...register('jobTitle')}
+                      {...register("jobTitle")}
                     />
                   </div>
 
@@ -463,7 +570,7 @@ const Register = () => {
                       type="text"
                       className="form-input"
                       placeholder="e.g., Engineering, Administration"
-                      {...register('department')}
+                      {...register("department")}
                     />
                   </div>
                 </div>
@@ -474,31 +581,28 @@ const Register = () => {
                     type="text"
                     className="form-input"
                     placeholder="Your organization employee ID"
-                    {...register('employeeId')}
+                    {...register("employeeId")}
                   />
                 </div>
               </div>
             )}
 
             {/* Volunteer Section (only for citizens) */}
-            {registrationType === 'citizen' && (
+            {registrationType === "citizen" && (
               <div className="volunteer-section">
                 <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    {...register('isVolunteer')}
-                  />
-                  <span></span>
-                  I want to volunteer to help resolve community issues
+                  <input type="checkbox" {...register("isVolunteer")} />
+                  <span></span>I want to volunteer to help resolve community
+                  issues
                 </label>
-                
+
                 <div className="mt-3">
                   <label>Skills & Expertise (if volunteering)</label>
                   <textarea
                     className="form-input"
                     rows="3"
                     placeholder="e.g., Plumbing, Electrical work, Community organizing..."
-                    {...register('volunteerSkills')}
+                    {...register("volunteerSkills")}
                   />
                 </div>
               </div>
@@ -509,10 +613,10 @@ const Register = () => {
           <div>
             <button type="submit" disabled={loading} className="btn-submit">
               {loading
-                ? 'Creating account...'
-                : registrationType === 'organization'
-                ? 'Register Organization'
-                : 'Create Account'}
+                ? "Creating account..."
+                : registrationType === "organization"
+                ? "Register Organization"
+                : "Create Account"}
             </button>
           </div>
         </form>

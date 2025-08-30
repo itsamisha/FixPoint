@@ -68,6 +68,10 @@ public class OrganizationRegistrationRequest {
     @Size(max = 120)
     private String adminPassword;
 
+    @NotBlank
+    @Size(max = 120)
+    private String confirmPassword;
+
     @Size(max = 100)
     private String adminJobTitle;
 
@@ -137,6 +141,9 @@ public class OrganizationRegistrationRequest {
 
     public String getAdminPassword() { return adminPassword; }
     public void setAdminPassword(String adminPassword) { this.adminPassword = adminPassword; }
+
+    public String getConfirmPassword() { return confirmPassword; }
+    public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
 
     public String getAdminJobTitle() { return adminJobTitle; }
     public void setAdminJobTitle(String adminJobTitle) { this.adminJobTitle = adminJobTitle; }

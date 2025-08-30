@@ -1,51 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
-import { useAuth } from '../contexts/AuthContext';
-import api from '../services/api';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { useAuth } from "../contexts/AuthContext";
+import api from "../services/api";
 
 const Register = () => {
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [registrationType, setRegistrationType] = useState('citizen');
+  const [registrationType, setRegistrationType] = useState("citizen");
   const [organizations, setOrganizations] = useState([]);
   const [organizationTypes, setOrganizationTypes] = useState([]);
-  
+
   const {
     register,
     handleSubmit,
     watch,
-    formState: { errors }
+    formState: { errors },
   } = useForm();
 
-  const password = watch('password');
+  const password = watch("password");
 
   useEffect(() => {
-    if (registrationType === 'organization_staff') {
+    if (registrationType === "organization_staff") {
       fetchOrganizations();
     }
-    if (registrationType === 'organization') {
+    if (registrationType === "organization") {
       fetchOrganizationTypes();
     }
   }, [registrationType]);
 
   const fetchOrganizations = async () => {
     try {
-      const response = await api.get('/api/organizations');
+      const response = await api.get("/api/organizations");
       setOrganizations(response.data);
     } catch (error) {
-      console.error('Error fetching organizations:', error);
+      console.error("Error fetching organizations:", error);
     }
   };
 
   const fetchOrganizationTypes = async () => {
     try {
-      const response = await api.get('/api/organizations/types');
+      const response = await api.get("/api/organizations/types");
       setOrganizationTypes(response.data);
     } catch (error) {
-      console.error('Error fetching organization types:', error);
+      console.error("Error fetching organization types:", error);
     }
   };
 
@@ -53,10 +53,10 @@ const Register = () => {
     setLoading(true);
     try {
       let result;
-      
-      if (registrationType === 'organization') {
+
+      if (registrationType === "organization") {
         // Register organization with admin user
-        result = await api.post('/api/auth/signup-organization', {
+        result = await api.post("/api/auth/signup-organization", {
           // Organization details
           name: data.organizationName,
           description: data.organizationDescription,
@@ -65,7 +65,7 @@ const Register = () => {
           city: data.organizationCity,
           state: data.organizationState,
           zipCode: data.organizationZipCode,
-          country: data.organizationCountry || 'Bangladesh',
+          country: data.organizationCountry || "Bangladesh",
           contactPhone: data.organizationPhone,
           contactEmail: data.organizationEmail,
           website: data.organizationWebsite,
@@ -76,33 +76,41 @@ const Register = () => {
           adminFullName: data.fullName,
           adminEmail: data.email,
           adminPassword: data.password,
+          confirmPassword: data.confirmPassword,
           adminPhone: data.phone,
           adminJobTitle: data.jobTitle,
-          adminDepartment: data.department
+          adminDepartment: data.department,
         });
-        
+
         if (result.status === 200) {
-          toast.success('Organization registered successfully! Please log in.');
-          navigate('/login');
+          toast.success("Organization registered successfully! Please log in.");
+          navigate("/login");
         }
       } else {
         // Regular user registration
         const userData = {
           ...data,
-          userType: registrationType === 'citizen' ? 'CITIZEN' : 
-                   registrationType === 'organization_staff' ? 'ORGANIZATION_STAFF' : 'VOLUNTEER'
+          userType:
+            registrationType === "citizen"
+              ? "CITIZEN"
+              : registrationType === "organization_staff"
+              ? "ORGANIZATION_STAFF"
+              : "VOLUNTEER",
         };
-        
+
         result = await registerUser(userData);
         if (result.success) {
-          toast.success('Registration successful! Please log in.');
-          navigate('/login');
+          toast.success("Registration successful! Please log in.");
+          navigate("/login");
         } else {
           toast.error(result.message);
         }
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+      toast.error(
+        error.response?.data?.message ||
+          "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -116,7 +124,7 @@ const Register = () => {
             Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
+            Or{" "}
             <Link
               to="/login"
               className="font-medium text-blue-600 hover:text-blue-500"
@@ -125,7 +133,7 @@ const Register = () => {
             </Link>
           </p>
         </div>
-        
+
         <div className="card">
           <div className="card-body">
             {/* Registration Type Selection */}
@@ -136,7 +144,7 @@ const Register = () => {
                   <input
                     type="radio"
                     value="citizen"
-                    checked={registrationType === 'citizen'}
+                    checked={registrationType === "citizen"}
                     onChange={(e) => setRegistrationType(e.target.value)}
                     className="mr-2"
                   />
@@ -146,7 +154,7 @@ const Register = () => {
                   <input
                     type="radio"
                     value="organization_staff"
-                    checked={registrationType === 'organization_staff'}
+                    checked={registrationType === "organization_staff"}
                     onChange={(e) => setRegistrationType(e.target.value)}
                     className="mr-2"
                   />
@@ -156,7 +164,7 @@ const Register = () => {
                   <input
                     type="radio"
                     value="organization"
-                    checked={registrationType === 'organization'}
+                    checked={registrationType === "organization"}
                     onChange={(e) => setRegistrationType(e.target.value)}
                     className="mr-2"
                   />
@@ -167,10 +175,12 @@ const Register = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Organization Information (only for organization registration) */}
-              {registrationType === 'organization' && (
+              {registrationType === "organization" && (
                 <div className="border-b pb-4 mb-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Organization Information</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Organization Information
+                  </h3>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="form-group">
                       <label htmlFor="organizationName" className="form-label">
@@ -180,12 +190,17 @@ const Register = () => {
                         id="organizationName"
                         type="text"
                         className="form-input"
-                        {...register('organizationName', {
-                          required: registrationType === 'organization' ? 'Organization name is required' : false
+                        {...register("organizationName", {
+                          required:
+                            registrationType === "organization"
+                              ? "Organization name is required"
+                              : false,
                         })}
                       />
                       {errors.organizationName && (
-                        <div className="form-error">{errors.organizationName.message}</div>
+                        <div className="form-error">
+                          {errors.organizationName.message}
+                        </div>
                       )}
                     </div>
 
@@ -196,32 +211,43 @@ const Register = () => {
                       <select
                         id="organizationType"
                         className="form-input"
-                        {...register('organizationType', {
-                          required: registrationType === 'organization' ? 'Organization type is required' : false
+                        {...register("organizationType", {
+                          required:
+                            registrationType === "organization"
+                              ? "Organization type is required"
+                              : false,
                         })}
                       >
                         <option value="">Select Type</option>
                         {organizationTypes.map((type) => (
                           <option key={type} value={type}>
-                            {type.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())}
+                            {type
+                              .replace(/_/g, " ")
+                              .toLowerCase()
+                              .replace(/\b\w/g, (l) => l.toUpperCase())}
                           </option>
                         ))}
                       </select>
                       {errors.organizationType && (
-                        <div className="form-error">{errors.organizationType.message}</div>
+                        <div className="form-error">
+                          {errors.organizationType.message}
+                        </div>
                       )}
                     </div>
                   </div>
 
                   <div className="form-group">
-                    <label htmlFor="organizationDescription" className="form-label">
+                    <label
+                      htmlFor="organizationDescription"
+                      className="form-label"
+                    >
                       Description
                     </label>
                     <textarea
                       id="organizationDescription"
                       rows="3"
                       className="form-input"
-                      {...register('organizationDescription')}
+                      {...register("organizationDescription")}
                     />
                   </div>
 
@@ -234,16 +260,21 @@ const Register = () => {
                         id="organizationEmail"
                         type="email"
                         className="form-input"
-                        {...register('organizationEmail', {
-                          required: registrationType === 'organization' ? 'Contact email is required' : false,
+                        {...register("organizationEmail", {
+                          required:
+                            registrationType === "organization"
+                              ? "Contact email is required"
+                              : false,
                           pattern: {
                             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                            message: 'Invalid email address'
-                          }
+                            message: "Invalid email address",
+                          },
                         })}
                       />
                       {errors.organizationEmail && (
-                        <div className="form-error">{errors.organizationEmail.message}</div>
+                        <div className="form-error">
+                          {errors.organizationEmail.message}
+                        </div>
                       )}
                     </div>
 
@@ -255,7 +286,7 @@ const Register = () => {
                         id="organizationPhone"
                         type="tel"
                         className="form-input"
-                        {...register('organizationPhone')}
+                        {...register("organizationPhone")}
                       />
                     </div>
                   </div>
@@ -268,7 +299,7 @@ const Register = () => {
                       id="organizationAddress"
                       type="text"
                       className="form-input"
-                      {...register('organizationAddress')}
+                      {...register("organizationAddress")}
                     />
                   </div>
 
@@ -281,7 +312,7 @@ const Register = () => {
                         id="organizationCity"
                         type="text"
                         className="form-input"
-                        {...register('organizationCity')}
+                        {...register("organizationCity")}
                       />
                     </div>
 
@@ -293,19 +324,22 @@ const Register = () => {
                         id="organizationState"
                         type="text"
                         className="form-input"
-                        {...register('organizationState')}
+                        {...register("organizationState")}
                       />
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="organizationZipCode" className="form-label">
+                      <label
+                        htmlFor="organizationZipCode"
+                        className="form-label"
+                      >
                         Zip Code
                       </label>
                       <input
                         id="organizationZipCode"
                         type="text"
                         className="form-input"
-                        {...register('organizationZipCode')}
+                        {...register("organizationZipCode")}
                       />
                     </div>
                   </div>
@@ -318,7 +352,7 @@ const Register = () => {
                       id="organizationWebsite"
                       type="url"
                       className="form-input"
-                      {...register('organizationWebsite')}
+                      {...register("organizationWebsite")}
                     />
                   </div>
 
@@ -332,7 +366,7 @@ const Register = () => {
                         type="text"
                         className="form-input"
                         placeholder="e.g., Dhaka, Chittagong, Sylhet"
-                        {...register('serviceAreas')}
+                        {...register("serviceAreas")}
                       />
                     </div>
 
@@ -345,7 +379,7 @@ const Register = () => {
                         type="text"
                         className="form-input"
                         placeholder="e.g., Roads, Water, Sanitation"
-                        {...register('categories')}
+                        {...register("categories")}
                       />
                     </div>
                   </div>
@@ -355,7 +389,9 @@ const Register = () => {
               {/* Personal Information */}
               <div className="border-b pb-4 mb-4">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  {registrationType === 'organization' ? 'Admin User Information' : 'Personal Information'}
+                  {registrationType === "organization"
+                    ? "Admin User Information"
+                    : "Personal Information"}
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -367,12 +403,14 @@ const Register = () => {
                       id="fullName"
                       type="text"
                       className="form-input"
-                      {...register('fullName', {
-                        required: 'Full name is required'
+                      {...register("fullName", {
+                        required: "Full name is required",
                       })}
                     />
                     {errors.fullName && (
-                      <div className="form-error">{errors.fullName.message}</div>
+                      <div className="form-error">
+                        {errors.fullName.message}
+                      </div>
                     )}
                   </div>
 
@@ -384,16 +422,18 @@ const Register = () => {
                       id="username"
                       type="text"
                       className="form-input"
-                      {...register('username', {
-                        required: 'Username is required',
+                      {...register("username", {
+                        required: "Username is required",
                         minLength: {
                           value: 3,
-                          message: 'Username must be at least 3 characters'
-                        }
+                          message: "Username must be at least 3 characters",
+                        },
                       })}
                     />
                     {errors.username && (
-                      <div className="form-error">{errors.username.message}</div>
+                      <div className="form-error">
+                        {errors.username.message}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -406,12 +446,12 @@ const Register = () => {
                     id="email"
                     type="email"
                     className="form-input"
-                    {...register('email', {
-                      required: 'Email is required',
+                    {...register("email", {
+                      required: "Email is required",
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: 'Invalid email address'
-                      }
+                        message: "Invalid email address",
+                      },
                     })}
                   />
                   {errors.email && (
@@ -428,16 +468,18 @@ const Register = () => {
                       id="password"
                       type="password"
                       className="form-input"
-                      {...register('password', {
-                        required: 'Password is required',
+                      {...register("password", {
+                        required: "Password is required",
                         minLength: {
                           value: 6,
-                          message: 'Password must be at least 6 characters'
-                        }
+                          message: "Password must be at least 6 characters",
+                        },
                       })}
                     />
                     {errors.password && (
-                      <div className="form-error">{errors.password.message}</div>
+                      <div className="form-error">
+                        {errors.password.message}
+                      </div>
                     )}
                   </div>
 
@@ -449,14 +491,16 @@ const Register = () => {
                       id="confirmPassword"
                       type="password"
                       className="form-input"
-                      {...register('confirmPassword', {
-                        required: 'Please confirm your password',
-                        validate: value =>
-                          value === password || 'Passwords do not match'
+                      {...register("confirmPassword", {
+                        required: "Please confirm your password",
+                        validate: (value) =>
+                          value === password || "Passwords do not match",
                       })}
                     />
                     {errors.confirmPassword && (
-                      <div className="form-error">{errors.confirmPassword.message}</div>
+                      <div className="form-error">
+                        {errors.confirmPassword.message}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -470,7 +514,7 @@ const Register = () => {
                       id="phone"
                       type="tel"
                       className="form-input"
-                      {...register('phone')}
+                      {...register("phone")}
                     />
                   </div>
 
@@ -482,13 +526,14 @@ const Register = () => {
                       id="address"
                       type="text"
                       className="form-input"
-                      {...register('address')}
+                      {...register("address")}
                     />
                   </div>
                 </div>
 
                 {/* Organization-specific fields */}
-                {(registrationType === 'organization' || registrationType === 'organization_staff') && (
+                {(registrationType === "organization" ||
+                  registrationType === "organization_staff") && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="form-group">
                       <label htmlFor="jobTitle" className="form-label">
@@ -498,7 +543,7 @@ const Register = () => {
                         id="jobTitle"
                         type="text"
                         className="form-input"
-                        {...register('jobTitle')}
+                        {...register("jobTitle")}
                       />
                     </div>
 
@@ -510,14 +555,14 @@ const Register = () => {
                         id="department"
                         type="text"
                         className="form-input"
-                        {...register('department')}
+                        {...register("department")}
                       />
                     </div>
                   </div>
                 )}
 
                 {/* Organization selection for staff */}
-                {registrationType === 'organization_staff' && (
+                {registrationType === "organization_staff" && (
                   <div className="form-group">
                     <label htmlFor="organizationId" className="form-label">
                       Select Organization *
@@ -525,8 +570,11 @@ const Register = () => {
                     <select
                       id="organizationId"
                       className="form-input"
-                      {...register('organizationId', {
-                        required: registrationType === 'organization_staff' ? 'Please select an organization' : false
+                      {...register("organizationId", {
+                        required:
+                          registrationType === "organization_staff"
+                            ? "Please select an organization"
+                            : false,
                       })}
                     >
                       <option value="">Select Organization</option>
@@ -537,23 +585,27 @@ const Register = () => {
                       ))}
                     </select>
                     {errors.organizationId && (
-                      <div className="form-error">{errors.organizationId.message}</div>
+                      <div className="form-error">
+                        {errors.organizationId.message}
+                      </div>
                     )}
                   </div>
                 )}
               </div>
 
               {/* Volunteer Section (only for citizens) */}
-              {registrationType === 'citizen' && (
+              {registrationType === "citizen" && (
                 <div className="border-b pb-4 mb-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Volunteer Information (Optional)</h3>
-                  
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Volunteer Information (Optional)
+                  </h3>
+
                   <div className="form-group">
                     <label className="flex items-center">
                       <input
                         type="checkbox"
                         className="mr-2"
-                        {...register('isVolunteer')}
+                        {...register("isVolunteer")}
                       />
                       <span className="form-label mb-0">
                         I want to volunteer to help resolve issues
@@ -570,7 +622,7 @@ const Register = () => {
                       rows="3"
                       className="form-input"
                       placeholder="e.g., Plumbing, Electrical work, Community organizing..."
-                      {...register('volunteerSkills')}
+                      {...register("volunteerSkills")}
                     />
                   </div>
                 </div>
@@ -582,8 +634,11 @@ const Register = () => {
                   disabled={loading}
                   className="w-full btn btn-primary"
                 >
-                  {loading ? 'Creating account...' : 
-                   registrationType === 'organization' ? 'Register Organization' : 'Create account'}
+                  {loading
+                    ? "Creating account..."
+                    : registrationType === "organization"
+                    ? "Register Organization"
+                    : "Create account"}
                 </button>
               </div>
             </form>

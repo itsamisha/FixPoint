@@ -69,6 +69,11 @@ public class AuthService {
             throw new RuntimeException("Email Address already in use!");
         }
 
+        // Validate password confirmation
+        if (!signUpRequest.getPassword().equals(signUpRequest.getConfirmPassword())) {
+            throw new RuntimeException("Password and confirm password do not match!");
+        }
+
         // Creating user's account
         User user = new User(signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
