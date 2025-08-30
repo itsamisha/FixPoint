@@ -70,6 +70,7 @@ const ReportForm = () => {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -261,26 +262,54 @@ const ReportForm = () => {
       return;
     }
 
+    // Get current category for enhanced analysis
+    const currentCategory = getValues("category");
+    if (!currentCategory) {
+      toast.warning("Please select a category first for better AI analysis");
+      return;
+    }
+
     setIsAnalyzingImage(true);
     try {
-      const response = await reportService.analyzeImage(selectedImage);
-      const { description, success, error } = response.data;
+      // Try enhanced AI analysis first
+      const response = await reportService.analyzeImageEnhanced(selectedImage, currentCategory);
+      const { success, description, suggestedPriority, enhancedFeatures, error } = response.data;
 
       if (success) {
         setAiGeneratedDescription(description);
-        setValue("description", description); // Directly set in the form
-        setShowAiDescription(false); // Don't show the preview box
-        toast.success(
-          "AI analysis completed! Description has been added to the form. You can edit it now."
-        );
+        setValue("description", description);
+        
+        // Set suggested priority if available
+        if (suggestedPriority && suggestedPriority !== "MEDIUM") {
+          setValue("priority", suggestedPriority);
+        }
+        
+        setShowAiDescription(false);
+        
+        if (enhancedFeatures?.categorySpecific) {
+          toast.success(
+            `Enhanced AI analysis completed! Category-specific description generated with priority suggestion: ${suggestedPriority}`
+          );
+        } else if (enhancedFeatures?.fallbackUsed) {
+          toast.warning(
+            "Enhanced AI unavailable, used basic analysis. Please review the description."
+          );
+        } else {
+          toast.success("AI analysis completed! Description has been added to the form.");
+        }
       } else {
-        setAiGeneratedDescription(description);
-        setValue("description", description); // Still set it in the form even if not perfect
-        setShowAiDescription(false); // Don't show the preview box
-        toast.warning(
-          error ||
-            "AI analysis completed with limitations. Please review and edit the description."
-        );
+        // Fallback to basic AI service
+        const fallbackResponse = await reportService.analyzeImage(selectedImage);
+        const { description: fallbackDesc, success: fallbackSuccess } = fallbackResponse.data;
+        
+        if (fallbackSuccess) {
+          setAiGeneratedDescription(fallbackDesc);
+          setValue("description", fallbackDesc);
+          setShowAiDescription(false);
+          toast.warning("Enhanced AI failed, used basic analysis. Please review the description.");
+        } else {
+          throw new Error(error || "AI analysis failed");
+        }
       }
     } catch (error) {
       console.error("Error analyzing image:", error);

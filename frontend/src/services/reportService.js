@@ -136,6 +136,24 @@ export const reportService = {
     });
   },
 
+  // Enhanced AI analysis with category-specific prompts
+  analyzeImageEnhanced: (imageFile, category) => {
+    const formData = new FormData();
+    formData.append("image", imageFile);
+    formData.append("category", category);
+    
+    return api.post("/api/ai/analyze-image-enhanced", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
+
+  // Get AI capabilities
+  getAICapabilities: () => {
+    return api.get("/api/ai/capabilities");
+  },
+
   // Comments functionality
   // Get comments for a report
   getComments: (reportId) => {

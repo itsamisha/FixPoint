@@ -33,3 +33,16 @@ build/
 .vscode/
 node_modules
 node_modules/
+
+### Environment Variables & Secrets ###
+.env
+.env.local
+.env.development
+.env.production
+*.properties.local
+secrets/
+*.key
+*.pem
+
+### API Keys and Sensitive Files ###
+application-secrets.properties
