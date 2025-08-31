@@ -27,7 +27,7 @@ export const reportService = {
     // Append report data
     Object.keys(reportData).forEach((key) => {
       if (reportData[key] !== null && reportData[key] !== undefined) {
-        if (key === 'targetOrganizationIds' && Array.isArray(reportData[key])) {
+        if (key === "targetOrganizationIds" && Array.isArray(reportData[key])) {
           // Handle array of organization IDs
           reportData[key].forEach((id, index) => {
             formData.append(`targetOrganizationIds[${index}]`, id);
@@ -72,7 +72,9 @@ export const reportService = {
 
   // Assign a report to a staff member (admin only)
   assignReport: (reportId, staffMemberId) => {
-    return api.put(`/api/reports/${reportId}/assign-staff`, { assignedToId: staffMemberId });
+    return api.put(`/api/reports/${reportId}/assign-staff`, {
+      assignedToId: staffMemberId,
+    });
   },
 
   // Update report status
@@ -121,7 +123,7 @@ export const reportService = {
   analyzeImage: (imageFile) => {
     const formData = new FormData();
     formData.append("image", imageFile);
-    
+
     return api.post("/api/ai/analyze-image", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -134,7 +136,7 @@ export const reportService = {
     const formData = new FormData();
     formData.append("image", imageFile);
     formData.append("category", category);
-    
+
     return api.post("/api/ai/analyze-image-enhanced", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -160,12 +162,17 @@ export const reportService = {
 
   // Add a reply to a comment
   addReply: (reportId, commentId, content) => {
-    return api.post(`/api/reports/${reportId}/comments/${commentId}/replies`, { content });
+    return api.post(`/api/reports/${reportId}/comments/${commentId}/replies`, {
+      content,
+    });
   },
 
   // Toggle reaction on a comment
   toggleReaction: (reportId, commentId, type) => {
-    return api.post(`/api/reports/${reportId}/comments/${commentId}/reactions`, { type });
+    return api.post(
+      `/api/reports/${reportId}/comments/${commentId}/reactions`,
+      { type }
+    );
   },
 
   // Get replies for a comment (alias for backward compatibility)
@@ -179,7 +186,17 @@ export const reportService = {
   },
 
   // Progress tracking methods
-  updateReportProgress: (reportId, progressData) => {
+  updateReportProgress: (
+    reportId,
+    progressPercentage,
+    progressNotes,
+    workStage
+  ) => {
+    const progressData = {
+      progressPercentage: progressPercentage,
+      progressNotes: progressNotes,
+      workStage: workStage,
+    };
     return api.put(`/api/reports/${reportId}/progress`, progressData);
   },
 

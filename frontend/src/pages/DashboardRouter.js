@@ -1,9 +1,10 @@
-import React from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import CitizenDashboard from './CitizenDashboard';
-import OrganizationDashboard from './OrganizationDashboard';
-import EmployeeDashboard from './EmployeeDashboard';
-import Dashboard from './Dashboard'; // Fallback dashboard
+import React from "react";
+import { useAuth } from "../contexts/AuthContext";
+import CitizenDashboard from "./CitizenDashboard";
+import OrganizationDashboard from "./OrganizationDashboard";
+import EmployeeDashboard from "./EmployeeDashboard";
+import StaffDashboard from "./StaffDashboard";
+import Dashboard from "./Dashboard"; // Fallback dashboard
 
 const DashboardRouter = () => {
   const { user } = useAuth();
@@ -21,20 +22,20 @@ const DashboardRouter = () => {
 
   // Route to appropriate dashboard based on user type
   switch (user.userType) {
-    case 'CITIZEN':
+    case "CITIZEN":
       return <CitizenDashboard />;
-    
-    case 'ORGANIZATION_ADMIN':
+
+    case "ORGANIZATION_ADMIN":
       return <OrganizationDashboard />;
-    
-    case 'ORGANIZATION_STAFF':
-      return <EmployeeDashboard />;
-    
-    case 'VOLUNTEER':
+
+    case "ORGANIZATION_STAFF":
+      return <StaffDashboard />;
+
+    case "VOLUNTEER":
       // For now, volunteers get the citizen dashboard
       // You can create a separate VolunteerDashboard later
       return <CitizenDashboard />;
-    
+
     default:
       // Fallback to general dashboard
       return <Dashboard />;

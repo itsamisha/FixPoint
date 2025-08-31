@@ -802,16 +802,131 @@ public class DataInitializer implements CommandLineRunner {
                 staffUser.setEmailVerified(true);
                 staffUser.setJobTitle(jobTitles[i % jobTitles.length]);
                 staffUser.setDepartment(departments[i % departments.length]);
-                staffUser.setEmployeeId("EMP" + String.format("%03d", i + 100));
+                staffUser.setEmployeeId("EMP" + String.format("%03d", i + 1));
                 staffUser.setOrganization(testOrg);
-                staffUser.setPhone("+1-555-" + String.format("%04d", 2000 + i));
                 
                 userRepository.save(staffUser);
-                System.out.println("Created staff member: " + staffNames[i] + " (" + username + ")");
-                
             } catch (Exception e) {
                 System.err.println("Error creating staff member " + staffNames[i] + ": " + e.getMessage());
             }
+        }
+        
+        // Create a specific dummy staff user for testing
+        createDummyStaffUser(testOrg);
+    }
+    
+    private void createDummyStaffUser(Organization testOrg) {
+        try {
+            // Check if dummy staff already exists
+            if (userRepository.findByUsername("dummy.staff").isPresent()) {
+                return;
+            }
+            
+            User dummyStaff = new User();
+            dummyStaff.setUsername("dummy.staff");
+            dummyStaff.setEmail("dummy.staff@testcity.gov");
+            dummyStaff.setPassword(passwordEncoder.encode("dummy123"));
+            dummyStaff.setFullName("Dummy Staff User");
+            dummyStaff.setRole(User.Role.ORG_STAFF);
+            dummyStaff.setUserType(User.UserType.ORGANIZATION_STAFF);
+            dummyStaff.setIsActive(true);
+            dummyStaff.setEmailVerified(true);
+            dummyStaff.setJobTitle("Field Engineer");
+            dummyStaff.setDepartment("Infrastructure");
+            dummyStaff.setEmployeeId("EMP999");
+            dummyStaff.setOrganization(testOrg);
+            
+            User savedDummyStaff = userRepository.save(dummyStaff);
+            
+            // Create some test reports and assign them to the dummy staff
+            createDummyAssignedTasks(savedDummyStaff, testOrg);
+            
+            System.out.println("Dummy staff user created:");
+            System.out.println("Username: dummy.staff");
+            System.out.println("Password: dummy123");
+            System.out.println("Email: dummy.staff@testcity.gov");
+            System.out.println("Organization: " + testOrg.getName());
+            
+        } catch (Exception e) {
+            System.err.println("Error creating dummy staff user: " + e.getMessage());
+        }
+    }
+    
+    private void createDummyAssignedTasks(User dummyStaff, Organization testOrg) {
+        try {
+            // Create test reports with different statuses and assign them to dummy staff
+            Object[][] taskData = {
+                // Title, Description, Category, Status, Priority, Lat, Lng, Address, Progress, WorkStage
+                {"Pothole on Main Street", "Large pothole causing traffic issues", Report.Category.ROADS_INFRASTRUCTURE, Report.Status.SUBMITTED, Report.Priority.HIGH, 23.7937, 90.4066, "Main Street, Dhaka", 0, Report.WorkStage.NOT_STARTED},
+                {"Broken Street Light", "Street light not working for 3 days", Report.Category.STREET_LIGHTING, Report.Status.IN_PROGRESS, Report.Priority.MEDIUM, 23.7947, 90.4076, "Park Avenue, Dhaka", 45, Report.WorkStage.IN_PROGRESS},
+                {"Garbage Collection Issue", "Garbage not being collected regularly", Report.Category.SANITATION_WASTE, Report.Status.IN_PROGRESS, Report.Priority.HIGH, 23.7957, 90.4086, "Residential Area, Dhaka", 75, Report.WorkStage.QUALITY_CHECK},
+                {"Water Pipeline Leak", "Water leaking from underground pipeline", Report.Category.WATER_DRAINAGE, Report.Status.RESOLVED, Report.Priority.URGENT, 23.7967, 90.4096, "Commercial District, Dhaka", 100, Report.WorkStage.COMPLETED},
+                {"Traffic Signal Malfunction", "Traffic signal stuck on red", Report.Category.TRAFFIC_PARKING, Report.Status.SUBMITTED, Report.Priority.HIGH, 23.7977, 90.4106, "Intersection Road, Dhaka", 0, Report.WorkStage.NOT_STARTED},
+                {"Stray Dog Issue", "Multiple stray dogs causing safety concerns", Report.Category.STRAY_ANIMALS, Report.Status.IN_PROGRESS, Report.Priority.MEDIUM, 23.7987, 90.4116, "School Area, Dhaka", 30, Report.WorkStage.ASSESSMENT},
+                {"Illegal Parking", "Cars parked illegally blocking access", Report.Category.TRAFFIC_PARKING, Report.Status.SUBMITTED, Report.Priority.LOW, 23.7997, 90.4126, "Shopping Center, Dhaka", 0, Report.WorkStage.NOT_STARTED},
+                {"Drainage Blockage", "Storm drain blocked causing flooding", Report.Category.WATER_DRAINAGE, Report.Status.RESOLVED, Report.Priority.HIGH, 23.8007, 90.4136, "Industrial Area, Dhaka", 100, Report.WorkStage.COMPLETED}
+            };
+            
+            // Get a citizen user for reporting
+            User citizenUser = userRepository.findByUsername("test").orElse(null);
+            if (citizenUser == null) {
+                System.err.println("Citizen user not found for creating dummy tasks");
+                return;
+            }
+            
+            int createdCount = 0;
+            for (Object[] data : taskData) {
+                Report report = new Report();
+                report.setTitle((String) data[0]);
+                report.setDescription((String) data[1]);
+                report.setCategory((Report.Category) data[2]);
+                report.setStatus((Report.Status) data[3]);
+                report.setPriority((Report.Priority) data[4]);
+                report.setLatitude((Double) data[5]);
+                report.setLongitude((Double) data[6]);
+                report.setLocationAddress((String) data[7]);
+                report.setReporter(citizenUser);
+                report.setAssignedTo(dummyStaff); // Assign to dummy staff
+                report.setProgressPercentage((Integer) data[8]);
+                report.setWorkStage((Report.WorkStage) data[9]);
+                report.setVoteCount((int) (Math.random() * 15) + 1);
+                
+                // Set target organization
+                report.getTargetOrganizations().add(testOrg);
+                
+                // Set progress notes based on work stage
+                switch ((Report.WorkStage) data[9]) {
+                    case NOT_STARTED:
+                        report.setProgressNotes("Task assigned, awaiting initiation");
+                        break;
+                    case ASSESSMENT:
+                        report.setProgressNotes("Currently assessing the situation and planning approach");
+                        break;
+                    case IN_PROGRESS:
+                        report.setProgressNotes("Work is actively being carried out");
+                        break;
+                    case QUALITY_CHECK:
+                        report.setProgressNotes("Final quality check and verification in progress");
+                        break;
+                    case COMPLETED:
+                        report.setProgressNotes("Task completed successfully. All work verified and approved.");
+                        report.setResolvedAt(LocalDateTime.now().minusDays((int) (Math.random() * 7)));
+                        report.setResolutionNotes("Issue has been successfully resolved. Thank you for reporting.");
+                        break;
+                }
+                
+                // Set creation time
+                report.setCreatedAt(LocalDateTime.now().minusDays((int) (Math.random() * 30)));
+                
+                reportRepository.save(report);
+                createdCount++;
+            }
+            
+            System.out.println("Created " + createdCount + " dummy tasks assigned to dummy staff user");
+            
+        } catch (Exception e) {
+            System.err.println("Error creating dummy assigned tasks: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
