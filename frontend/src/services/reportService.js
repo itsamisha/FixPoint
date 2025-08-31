@@ -90,17 +90,10 @@ export const reportService = {
     return api.post(`/api/reports/${reportId}/vote`);
   },
 
-  // Update report status (admin only)
-  updateReportStatus: (reportId, status, resolutionNotes) => {
+  // Update report status (admin only) - with parameters
+  updateReportStatusWithParams: (reportId, status, resolutionNotes) => {
     return api.put(`/api/reports/${reportId}/status`, null, {
       params: { status, resolutionNotes },
-    });
-  },
-
-  // Assign report (admin only)
-  assignReport: (reportId, assigneeId) => {
-    return api.put(`/api/reports/${reportId}/assign`, null, {
-      params: { assigneeId },
     });
   },
 
@@ -192,11 +185,6 @@ export const reportService = {
 
   // Get reports assigned to current user
   getMyAssignedReports: (params = {}) => {
-    return api.get("/api/reports/assigned/me", { params });
-  },
-
-  // Get assigned reports (alias for backward compatibility)
-  getAssignedReports: (params = {}) => {
     return api.get("/api/reports/assigned/me", { params });
   },
 };

@@ -11,7 +11,10 @@ L.Icon.Default.mergeOptions({
 });
 
 const ReportMap = ({ reports, center, zoom = 13, height = '400px', onMarkerClick }) => {
-  const defaultCenter = center || [23.8103, 90.4125]; // Dhaka, Bangladesh
+  // Ensure center coordinates are valid, fallback to Dhaka, Bangladesh
+  const validCenter = center && center[0] !== undefined && center[1] !== undefined 
+    ? center 
+    : [23.8103, 90.4125]; // Dhaka, Bangladesh
 
   const getMarkerColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -40,7 +43,7 @@ const ReportMap = ({ reports, center, zoom = 13, height = '400px', onMarkerClick
   return (
     <div style={{ height, width: '100%' }}>
       <MapContainer 
-        center={defaultCenter} 
+        center={validCenter} 
         zoom={zoom} 
         style={{ height: '100%', width: '100%' }}
       >
@@ -49,10 +52,18 @@ const ReportMap = ({ reports, center, zoom = 13, height = '400px', onMarkerClick
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {reports && reports.map((report) => (
+        {reports && reports.map((report) => {
+          // Check if coordinates are valid numbers
+          const lat = parseFloat(report.latitude);
+          const lng = parseFloat(report.longitude);
+          const hasValidCoords = !isNaN(lat) && !isNaN(lng) && 
+                                lat >= -90 && lat <= 90 && 
+                                lng >= -180 && lng <= 180;
+          
+          return hasValidCoords ? (
           <Marker
             key={report.id}
-            position={[report.latitude, report.longitude]}
+            position={[lat, lng]}
             icon={createCustomIcon(report.status)}
             eventHandlers={{
               click: () => {
@@ -65,21 +76,25 @@ const ReportMap = ({ reports, center, zoom = 13, height = '400px', onMarkerClick
             <Popup>
               <div style={{ minWidth: '200px' }}>
                 <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: 'bold' }}>
-                  {report.title}
+                  {report.title || 'Untitled Report'}
                 </h4>
                 <p style={{ margin: '0 0 8px 0', fontSize: '12px', color: '#666' }}>
                   {formatCategory(report.category)}
                 </p>
                 <p style={{ margin: '0 0 8px 0', fontSize: '12px' }}>
-                  {report.description.substring(0, 100)}
-                  {report.description.length > 100 ? '...' : ''}
+                  {report.description ? (
+                    <>
+                      {report.description.substring(0, 100)}
+                      {report.description.length > 100 ? '...' : ''}
+                    </>
+                  ) : 'No description available'}
                 </p>
                 <div style={{ fontSize: '11px', color: '#888' }}>
                   Status: <span style={{ 
                     color: getMarkerColor(report.status), 
                     fontWeight: 'bold' 
                   }}>
-                    {report.status?.replace(/_/g, ' ')}
+                    {report.status?.replace(/_/g, ' ') || 'Unknown'}
                   </span>
                 </div>
                 <div style={{ fontSize: '11px', color: '#888', marginTop: '4px' }}>
@@ -88,7 +103,8 @@ const ReportMap = ({ reports, center, zoom = 13, height = '400px', onMarkerClick
               </div>
             </Popup>
           </Marker>
-        ))}
+          ) : null;
+        })}
       </MapContainer>
     </div>
   );

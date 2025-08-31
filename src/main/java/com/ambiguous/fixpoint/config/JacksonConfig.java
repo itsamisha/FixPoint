@@ -22,6 +22,9 @@ public class JacksonConfig {
         // Disable writing dates as timestamps (use ISO-8601 strings instead)
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         
+        // Don't fail on empty beans (helps with Hibernate proxies)
+        mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        
         // Configure stream write constraints to handle deeper nesting
         StreamWriteConstraints constraints = StreamWriteConstraints.builder()
                 .maxNestingDepth(2000)

@@ -337,19 +337,30 @@ const ReportDetails = () => {
           </div>
 
           {/* Location Map */}
-          <div className="card">
-            <div className="card-header">
-              <h3 className="card-title">Location</h3>
+          {report.latitude && report.longitude ? (
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">Location</h3>
+              </div>
+              <div className="card-body p-0">
+                <ReportMap
+                  reports={[report]}
+                  center={[report.latitude, report.longitude]}
+                  zoom={16}
+                  height="250px"
+                />
+              </div>
             </div>
-            <div className="card-body p-0">
-              <ReportMap
-                reports={[report]}
-                center={[report.latitude, report.longitude]}
-                zoom={16}
-                height="250px"
-              />
+          ) : (
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">Location</h3>
+              </div>
+              <div className="card-body">
+                <p className="text-gray-500">No location data available for this report.</p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

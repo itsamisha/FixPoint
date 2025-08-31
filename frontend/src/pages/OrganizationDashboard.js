@@ -9,20 +9,32 @@ import {
   UserPlus,
   Settings,
   BarChart3,
-  UserCog
+  UserCog,
+  Phone,
+  Mail,
+  UserCheck
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import ReportCard from '../components/ReportCard';
+import AssignmentModal from '../components/AssignmentModal';
 import { reportService } from '../services/reportService';
+import { staffService } from '../services/staffService';
 import { useAuth } from '../contexts/AuthContext';
+import './OrganizationDashboard.css';
 
 const OrganizationDashboard = () => {
   const { user } = useAuth();
   const [reports, setReports] = useState([]);
   const [assignedReports, setAssignedReports] = useState([]);
   const [organizationReports, setOrganizationReports] = useState([]);
+  const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [staffLoading, setStaffLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [assignmentModal, setAssignmentModal] = useState({
+    isOpen: false,
+    report: null
+  });
   const [stats, setStats] = useState({
     totalReports: 0,
     pendingReports: 0,
@@ -37,6 +49,12 @@ const OrganizationDashboard = () => {
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'staff' && isAdmin) {
+      fetchStaff();
+    }
+  }, [activeTab, isAdmin]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -100,6 +118,21 @@ const OrganizationDashboard = () => {
     }
   };
 
+  const fetchStaff = async () => {
+    if (!isAdmin) return;
+    
+    setStaffLoading(true);
+    try {
+      const response = await staffService.getOrganizationStaff();
+      setStaff(response.data);
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+      toast.error('Failed to load staff data');
+    } finally {
+      setStaffLoading(false);
+    }
+  };
+
   const handleAssignReport = async (reportId, staffMemberId) => {
     try {
       await reportService.assignReport(reportId, staffMemberId);
@@ -109,6 +142,20 @@ const OrganizationDashboard = () => {
       console.error('Error assigning report:', error);
       toast.error('Failed to assign report');
     }
+  };
+
+  const openAssignmentModal = (report) => {
+    setAssignmentModal({
+      isOpen: true,
+      report: report
+    });
+  };
+
+  const closeAssignmentModal = () => {
+    setAssignmentModal({
+      isOpen: false,
+      report: null
+    });
   };
 
   const handleUpdateReportStatus = async (reportId, status) => {
@@ -142,15 +189,11 @@ const OrganizationDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto py-8 px-4">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-gray-200 h-32 rounded-lg"></div>
-              ))}
-            </div>
+      <div className="dashboard-container">
+        <div className="dashboard-content">
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p className="loading-text">Loading dashboard...</p>
           </div>
         </div>
       </div>
@@ -158,126 +201,121 @@ const OrganizationDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-8 px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {isAdmin ? 'Organization Admin Dashboard' : 'Staff Dashboard'}
-          </h1>
-          <p className="text-gray-600 mt-2">
-            {user?.organization?.name} • {user?.jobTitle}
-          </p>
+    <div className="dashboard-container">
+      {/* Header */}
+      <div className="dashboard-header">
+        <div className="dashboard-content">
+          <h1>{isAdmin ? 'Organization Admin Dashboard' : 'Staff Dashboard'}</h1>
+          <p>{user?.organization?.name} • {user?.jobTitle}</p>
         </div>
+      </div>
 
+      <div className="dashboard-content">
         {/* Quick Actions */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-4">
             {isAdmin && (
               <>
-                <Link
-                  to="/organization/staff"
-                  className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <UserPlus className="w-5 h-5 mr-2" />
+                <Link to="/organization/staff" className="btn btn-primary">
+                  <UserPlus className="btn-icon" />
                   Manage Staff
                 </Link>
-                <Link
-                  to="/organization/reports"
-                  className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <FileText className="w-5 h-5 mr-2" />
+                <Link to="/organization/reports" className="btn btn-success">
+                  <FileText className="btn-icon" />
                   All Reports
                 </Link>
-                <Link
-                  to="/organization/settings"
-                  className="inline-flex items-center px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  <Settings className="w-5 h-5 mr-2" />
-                  Organization Settings
+                <Link to="/organization/settings" className="btn btn-secondary">
+                  <Settings className="btn-icon" />
+                  Settings
                 </Link>
               </>
             )}
-            <Link
-              to="/reports/assigned"
-              className="inline-flex items-center px-6 py-3 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 transition-colors"
-            >
-              <UserCog className="w-5 h-5 mr-2" />
+            <Link to="/reports/assigned" className="btn btn-outline">
+              <UserCog className="btn-icon" />
               My Assigned Reports
             </Link>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+        <div className="stats-grid">
           {isAdmin && (
-            <StatCard
-              icon={FileText}
-              title="Total Reports"
-              value={stats.totalReports}
-              color="#3B82F6"
-              description="All organization reports"
-            />
+            <div className="stat-card" style={{ borderLeftColor: '#3B82F6' }}>
+              <div className="stat-card-content">
+                <div className="stat-card-info">
+                  <h3>Total Reports</h3>
+                  <div className="stat-card-value" style={{ color: '#3B82F6' }}>{stats.totalReports}</div>
+                  <p className="stat-card-description">All organization reports</p>
+                </div>
+                <FileText className="stat-card-icon" style={{ color: '#3B82F6' }} />
+              </div>
+            </div>
           )}
-          <StatCard
-            icon={Clock}
-            title="Pending"
-            value={stats.pendingReports}
-            color="#F59E0B"
-            description="Awaiting action"
-          />
-          <StatCard
-            icon={UserCog}
-            title="Assigned to Me"
-            value={stats.assignedToMe}
-            color="#8B5CF6"
-            description="Your active reports"
-          />
-          <StatCard
-            icon={Users}
-            title="In Progress"
-            value={stats.inProgressReports}
-            color="#06B6D4"
-            description="Being worked on"
-          />
-          <StatCard
-            icon={CheckCircle}
-            title="Resolved"
-            value={stats.resolvedReports}
-            color="#10B981"
-            description="Successfully completed"
-          />
+          <div className="stat-card" style={{ borderLeftColor: '#F59E0B' }}>
+            <div className="stat-card-content">
+              <div className="stat-card-info">
+                <h3>Pending</h3>
+                <div className="stat-card-value" style={{ color: '#F59E0B' }}>{stats.pendingReports}</div>
+                <p className="stat-card-description">Awaiting action</p>
+              </div>
+              <Clock className="stat-card-icon" style={{ color: '#F59E0B' }} />
+            </div>
+          </div>
+          <div className="stat-card" style={{ borderLeftColor: '#8B5CF6' }}>
+            <div className="stat-card-content">
+              <div className="stat-card-info">
+                <h3>Assigned to Me</h3>
+                <div className="stat-card-value" style={{ color: '#8B5CF6' }}>{stats.assignedToMe}</div>
+                <p className="stat-card-description">Your active reports</p>
+              </div>
+              <UserCog className="stat-card-icon" style={{ color: '#8B5CF6' }} />
+            </div>
+          </div>
+          <div className="stat-card" style={{ borderLeftColor: '#06B6D4' }}>
+            <div className="stat-card-content">
+              <div className="stat-card-info">
+                <h3>In Progress</h3>
+                <div className="stat-card-value" style={{ color: '#06B6D4' }}>{stats.inProgressReports}</div>
+                <p className="stat-card-description">Being worked on</p>
+              </div>
+              <Users className="stat-card-icon" style={{ color: '#06B6D4' }} />
+            </div>
+          </div>
+          <div className="stat-card" style={{ borderLeftColor: '#10B981' }}>
+            <div className="stat-card-content">
+              <div className="stat-card-info">
+                <h3>Resolved</h3>
+                <div className="stat-card-value" style={{ color: '#10B981' }}>{stats.resolvedReports}</div>
+                <p className="stat-card-description">Successfully completed</p>
+              </div>
+              <CheckCircle className="stat-card-icon" style={{ color: '#10B981' }} />
+            </div>
+          </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="mb-6">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              {[
-                { id: 'overview', label: 'Overview', icon: BarChart3 },
-                { id: 'assigned', label: 'My Assigned Reports', icon: UserCog },
-                ...(isAdmin ? [{ id: 'all-reports', label: 'All Organization Reports', icon: FileText }] : []),
-                ...(isAdmin ? [{ id: 'staff', label: 'Staff Management', icon: Users }] : [])
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </nav>
+        <div className="tab-navigation">
+          <div className="tab-list">
+            {[
+              { id: 'overview', label: 'Overview', icon: BarChart3 },
+              { id: 'assigned', label: 'My Assigned Reports', icon: UserCog },
+              ...(isAdmin ? [{ id: 'all-reports', label: 'All Organization Reports', icon: FileText }] : []),
+              ...(isAdmin ? [{ id: 'staff', label: 'Staff Management', icon: Users }] : [])
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
+              >
+                <tab.icon className="tab-icon" />
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="tab-content">
           {activeTab === 'overview' && (
             <div className="p-6">
               <h2 className="text-xl font-semibold mb-4">Dashboard Overview</h2>
@@ -391,41 +429,25 @@ const OrganizationDashboard = () => {
 
           {activeTab === 'assigned' && (
             <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">My Assigned Reports</h2>
+              <div className="content-header">
+                <h2 className="content-title">My Assigned Reports</h2>
               </div>
               
               {assignedReports.length > 0 ? (
-                <div className="grid gap-6">
+                <div className="reports-grid">
                   {assignedReports.map(report => (
-                    <div key={report.id} className="border rounded-lg p-4">
-                      <ReportCard report={report} />
-                      <div className="mt-4 flex space-x-2">
-                        {report.status !== 'RESOLVED' && (
-                          <>
-                            <button
-                              onClick={() => handleUpdateReportStatus(report.id, 'IN_PROGRESS')}
-                              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                            >
-                              Start Work
-                            </button>
-                            <button
-                              onClick={() => handleUpdateReportStatus(report.id, 'RESOLVED')}
-                              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                            >
-                              Mark as Resolved
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                    <ReportCard
+                      key={report.id}
+                      report={report}
+                      showAssignButton={false}
+                    />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <UserCog className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No assigned reports</h3>
-                  <p className="text-gray-500">Reports assigned to you will appear here.</p>
+                <div className="empty-state">
+                  <UserCog className="empty-state-icon" />
+                  <h3 className="empty-state-title">No assigned reports</h3>
+                  <p className="empty-state-description">Reports assigned to you will appear here.</p>
                 </div>
               )}
             </div>
@@ -433,38 +455,25 @@ const OrganizationDashboard = () => {
 
           {isAdmin && activeTab === 'all-reports' && (
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">All Organization Reports</h2>
+              <div className="content-header">
+                <h2 className="content-title">All Organization Reports</h2>
+              </div>
               {organizationReports.length > 0 ? (
-                <div className="grid gap-6">
+                <div className="reports-grid">
                   {organizationReports.map(report => (
-                    <div key={report.id} className="border rounded-lg p-4">
-                      <ReportCard report={report} />
-                      {/* Add assignment controls for admin */}
-                      <div className="mt-4 p-3 bg-gray-50 rounded">
-                        <div className="flex justify-between items-center">
-                          <div className="text-sm">
-                            <span className="font-medium">Assigned to:</span> {report.assignedTo?.fullName || 'Unassigned'}
-                          </div>
-                          <div className="flex space-x-2">
-                            <select 
-                              className="text-sm border rounded px-2 py-1"
-                              defaultValue=""
-                              onChange={(e) => e.target.value && handleAssignReport(report.id, e.target.value)}
-                            >
-                              <option value="">Assign to staff member...</option>
-                              {/* You'll need to fetch staff members */}
-                            </select>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <ReportCard
+                      key={report.id}
+                      report={report}
+                      showAssignButton={true}
+                      onAssign={(report) => openAssignmentModal(report)}
+                    />
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No reports</h3>
-                  <p className="text-gray-500">Reports submitted to your organization will appear here.</p>
+                <div className="empty-state">
+                  <FileText className="empty-state-icon" />
+                  <h3 className="empty-state-title">No reports</h3>
+                  <p className="empty-state-description">Reports submitted to your organization will appear here.</p>
                 </div>
               )}
             </div>
@@ -472,31 +481,94 @@ const OrganizationDashboard = () => {
 
           {isAdmin && activeTab === 'staff' && (
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Staff Management</h2>
-              <div className="text-center py-12">
-                <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Staff Management</h3>
-                <p className="text-gray-500 mb-6">Manage your organization's staff members and their assignments.</p>
-                <div className="flex justify-center space-x-4">
-                  <Link
-                    to="/organization/staff/invite"
-                    className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    <UserPlus className="w-5 h-5 mr-2" />
-                    Invite Staff Member
-                  </Link>
-                  <Link
-                    to="/organization/staff/list"
-                    className="inline-flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                  >
-                    <Users className="w-5 h-5 mr-2" />
-                    View All Staff
+              <div className="content-header">
+                <h2 className="content-title">Staff Management</h2>
+                <Link to="/organization/staff/invite" className="btn btn-primary">
+                  <UserPlus className="btn-icon" />
+                  Invite Staff Member
+                </Link>
+              </div>
+
+              {staffLoading ? (
+                <div className="loading-container">
+                  <div className="loading-spinner"></div>
+                  <p className="loading-text">Loading staff...</p>
+                </div>
+              ) : staff.length === 0 ? (
+                <div className="empty-state">
+                  <Users className="empty-state-icon" />
+                  <h3 className="empty-state-title">No Staff Members</h3>
+                  <p className="empty-state-description">Your organization doesn't have any staff members yet.</p>
+                  <Link to="/organization/staff/invite" className="btn btn-primary">
+                    <UserPlus className="btn-icon" />
+                    Invite Your First Staff Member
                   </Link>
                 </div>
-              </div>
+              ) : (
+                <div className="staff-list">
+                  <div className="content-header">
+                    <h3 className="content-title">Staff Members ({staff.length})</h3>
+                  </div>
+                  {staff.map((member) => (
+                    <div key={member.id} className="staff-item">
+                      <div className="staff-content">
+                        <div className="staff-info">
+                          <div className="staff-avatar">
+                            {member.fullName 
+                              ? member.fullName.split(' ').map(n => n[0]).join('').toUpperCase()
+                              : member.username[0].toUpperCase()}
+                          </div>
+                          <div className="staff-details">
+                            <div className="flex items-center gap-2">
+                              <h4>{member.fullName || member.username}</h4>
+                              {!member.isActive && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  Inactive
+                                </span>
+                              )}
+                            </div>
+                            <div className="staff-meta">
+                              {member.jobTitle && <span>{member.jobTitle}</span>}
+                              {member.department && <span>{member.department}</span>}
+                              {member.employeeId && <span>ID: {member.employeeId}</span>}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          {member.email && (
+                            <div className="staff-contact">
+                              <Mail className="w-4 h-4" />
+                              <span>{member.email}</span>
+                            </div>
+                          )}
+                          {member.phone && (
+                            <div className="staff-contact mt-1">
+                              <Phone className="w-4 h-4" />
+                              <span>{member.phone}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="staff-actions">
+                          <button className="btn btn-outline btn-sm" title="View Details">
+                            <UserCog className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
+
+        {/* Assignment Modal */}
+        <AssignmentModal
+          isOpen={assignmentModal.isOpen}
+          onClose={closeAssignmentModal}
+          report={assignmentModal.report}
+          onAssign={handleAssignReport}
+        />
       </div>
     </div>
   );

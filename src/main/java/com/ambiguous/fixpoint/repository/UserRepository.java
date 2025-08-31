@@ -32,4 +32,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     @Query("SELECT u FROM User u WHERE u.isActive = true ORDER BY u.createdAt DESC")
     List<User> findAllActiveUsers();
+    
+    List<User> findByUserType(User.UserType userType);
+    
+    List<User> findByOrganizationAndUserType(com.ambiguous.fixpoint.entity.Organization organization, User.UserType userType);
+    
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.organization WHERE u.id = :id")
+    Optional<User> findByIdWithOrganization(@Param("id") Long id);
+    
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.organization WHERE u.username = :username")
+    Optional<User> findByUsernameWithOrganization(@Param("username") String username);
 }

@@ -1,8 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, MessageSquare, ThumbsUp, MapPin, Calendar, User } from 'lucide-react';
+import { Eye, MessageSquare, ThumbsUp, MapPin, Calendar, User, UserPlus } from 'lucide-react';
 
-const ReportCard = ({ report, onVote, showVoteButton = false }) => {
+const ReportCard = ({ 
+  report, 
+  onVote, 
+  showVoteButton = false, 
+  showAssignButton = false, 
+  onAssign 
+}) => {
   const getStatusClass = (status) => {
     switch (status?.toLowerCase()) {
       case 'submitted': return 'status-submitted';
@@ -40,6 +46,18 @@ const ReportCard = ({ report, onVote, showVoteButton = false }) => {
     e.stopPropagation();
     if (onVote) {
       onVote(report.id);
+    }
+  };
+
+  const handleAssign = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('ReportCard handleAssign called with report:', report);
+    if (onAssign) {
+      console.log('Calling onAssign function');
+      onAssign(report);
+    } else {
+      console.log('onAssign function is not provided');
     }
   };
 
@@ -85,6 +103,12 @@ const ReportCard = ({ report, onVote, showVoteButton = false }) => {
             <User size={16} />
             <span>{report.reporter?.fullName || report.reporter?.username}</span>
           </div>
+          {report.assignedTo && (
+            <div className="flex items-center gap-1 text-blue-600">
+              <UserPlus size={16} />
+              <span>Assigned to: {report.assignedTo.fullName || report.assignedTo.username}</span>
+            </div>
+          )}
         </div>
 
         {report.locationAddress && (
@@ -114,6 +138,16 @@ const ReportCard = ({ report, onVote, showVoteButton = false }) => {
               >
                 <ThumbsUp size={16} />
                 {report.hasUserVoted ? 'Voted' : 'Vote'}
+              </button>
+            )}
+            {showAssignButton && (
+              <button 
+                onClick={handleAssign}
+                className="btn btn-success"
+                title="Assign to Staff"
+              >
+                <UserPlus size={16} />
+                {report.assignedTo ? 'Reassign' : 'Assign'}
               </button>
             )}
             <Link 

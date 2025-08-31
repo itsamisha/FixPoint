@@ -2,12 +2,16 @@ package com.ambiguous.fixpoint.config;
 
 import com.ambiguous.fixpoint.entity.Organization;
 import com.ambiguous.fixpoint.entity.User;
+import com.ambiguous.fixpoint.entity.Report;
 import com.ambiguous.fixpoint.repository.UserRepository;
+import com.ambiguous.fixpoint.repository.ReportRepository;
 import com.ambiguous.fixpoint.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -21,17 +25,23 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private OrganizationService organizationService;
 
+    @Autowired
+    private ReportRepository reportRepository;
+
     @Override
     public void run(String... args) throws Exception {
         if (userRepository.count() == 0) {
             System.out.println("Database is empty. Initializing sample data...");
             initializeTestUser();
             initializeOrganizations();
+            initializeDummyReportsAndStaff();
             System.out.println("Sample data initialization completed.");
         } else {
             System.out.println("Database already contains data (" + userRepository.count() + " users).");
             // Always ensure NGOs are present
             initializeNGOsIfMissing();
+            // Always add dummy reports and staff for demonstration (force initialization)
+            initializeDummyReportsAndStaff();
         }
     }
 
@@ -719,6 +729,187 @@ public class DataInitializer implements CommandLineRunner {
 
         } catch (Exception e) {
             System.err.println("Error during NGO initialization: " + e.getMessage());
+        }
+    }
+
+    private void initializeDummyReportsAndStaff() {
+        System.out.println("Initializing dummy reports and additional staff...");
+        
+        try {
+            // Get test organization (should exist from initializeTestUser)
+            Organization testOrg = organizationService.getAllActiveOrganizations()
+                .stream()
+                .filter(org -> org.getName().contains("Test City Corporation"))
+                .findFirst()
+                .orElse(null);
+            
+            if (testOrg == null) {
+                System.out.println("Test organization not found, skipping dummy data initialization");
+                return;
+            }
+
+            // Add more staff members to the test organization
+            createAdditionalStaff(testOrg);
+            
+            // Create dummy reports
+            createDummyReports(testOrg);
+            
+            System.out.println("Dummy reports and staff initialization completed!");
+            
+        } catch (Exception e) {
+            System.err.println("Error initializing dummy data: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void createAdditionalStaff(Organization testOrg) {
+        // Create additional staff members
+        String[] staffNames = {
+            "John Smith", "Sarah Johnson", "Mike Davis", "Lisa Wilson", 
+            "Robert Brown", "Emily Garcia", "David Martinez", "Jennifer Lee"
+        };
+        
+        String[] departments = {
+            "Roads & Infrastructure", "Water Management", "Waste Management", 
+            "Public Safety", "Urban Planning", "Environmental Services"
+        };
+        
+        String[] jobTitles = {
+            "Senior Engineer", "Field Supervisor", "Project Manager", 
+            "Technical Specialist", "Maintenance Coordinator", "Quality Inspector"
+        };
+
+        for (int i = 0; i < staffNames.length; i++) {
+            try {
+                String firstName = staffNames[i].split(" ")[0].toLowerCase();
+                String lastName = staffNames[i].split(" ")[1].toLowerCase();
+                String username = firstName + "." + lastName;
+                String email = username + "@testcity.gov";
+                
+                // Check if user already exists
+                if (userRepository.findByUsername(username).isPresent()) {
+                    continue;
+                }
+                
+                User staffUser = new User();
+                staffUser.setUsername(username);
+                staffUser.setEmail(email);
+                staffUser.setPassword(passwordEncoder.encode("staff123"));
+                staffUser.setFullName(staffNames[i]);
+                staffUser.setRole(User.Role.ORG_STAFF);
+                staffUser.setUserType(User.UserType.ORGANIZATION_STAFF);
+                staffUser.setIsActive(true);
+                staffUser.setEmailVerified(true);
+                staffUser.setJobTitle(jobTitles[i % jobTitles.length]);
+                staffUser.setDepartment(departments[i % departments.length]);
+                staffUser.setEmployeeId("EMP" + String.format("%03d", i + 100));
+                staffUser.setOrganization(testOrg);
+                staffUser.setPhone("+1-555-" + String.format("%04d", 2000 + i));
+                
+                userRepository.save(staffUser);
+                System.out.println("Created staff member: " + staffNames[i] + " (" + username + ")");
+                
+            } catch (Exception e) {
+                System.err.println("Error creating staff member " + staffNames[i] + ": " + e.getMessage());
+            }
+        }
+    }
+
+    private void createDummyReports(Organization testOrg) {
+        // Get some staff members to assign reports to
+        List<User> staffMembers = userRepository.findByOrganizationAndUserType(
+            testOrg, User.UserType.ORGANIZATION_STAFF);
+        
+        // Get a citizen user to create reports
+        User citizenUser = userRepository.findByUserType(User.UserType.CITIZEN)
+            .stream().findFirst().orElse(null);
+        
+        if (citizenUser == null) {
+            System.out.println("No citizen user found, skipping report creation");
+            return;
+        }
+
+        // Define dummy report data
+        Object[][] reportData = {
+            {"Pothole on Main Street", "Large pothole causing traffic issues near the city center", 
+             Report.Category.ROADS_INFRASTRUCTURE, Report.Status.SUBMITTED, Report.Priority.HIGH,
+             23.7450, 90.4095, "Main Street, Dhaka"},
+            {"Street Light Not Working", "Street light has been out for 2 weeks on Oak Avenue",
+             Report.Category.STREET_LIGHTING, Report.Status.IN_PROGRESS, Report.Priority.MEDIUM,
+             23.7461, 90.4106, "Oak Avenue, Dhaka"},
+             {"Garbage Overflow", "Garbage bins overflowing in residential area",
+             Report.Category.SANITATION_WASTE, Report.Status.SUBMITTED, Report.Priority.HIGH,
+             23.7472, 90.4117, "Green Park, Dhaka"},
+             {"Water Drainage Issue", "Poor drainage causing waterlogging after rain",
+             Report.Category.WATER_DRAINAGE, Report.Status.IN_PROGRESS, Report.Priority.URGENT,
+             23.7483, 90.4128, "Riverside Road, Dhaka"},
+             {"Illegal Parking", "Cars blocking emergency access",
+             Report.Category.TRAFFIC_PARKING, Report.Status.RESOLVED, Report.Priority.MEDIUM,
+             23.7494, 90.4139, "Hospital Road, Dhaka"},
+             {"Noise Pollution", "Construction noise exceeding permitted hours",
+             Report.Category.NOISE_POLLUTION, Report.Status.SUBMITTED, Report.Priority.LOW,
+             23.7505, 90.4150, "Residential Block B, Dhaka"},
+             {"Broken Road Sign", "Traffic sign damaged and unclear",
+             Report.Category.ROADS_INFRASTRUCTURE, Report.Status.IN_PROGRESS, Report.Priority.MEDIUM,
+             23.7516, 90.4161, "Junction Road, Dhaka"},
+             {"Stray Dog Issue", "Pack of stray dogs causing safety concerns",
+             Report.Category.STRAY_ANIMALS, Report.Status.SUBMITTED, Report.Priority.HIGH,
+             23.7527, 90.4172, "School Area, Dhaka"},
+             {"Air Quality Concern", "Heavy pollution from nearby factory",
+             Report.Category.ENVIRONMENTAL, Report.Status.SUBMITTED, Report.Priority.URGENT,
+             23.7538, 90.4183, "Industrial Zone, Dhaka"},
+             {"Security Issue", "Inadequate lighting in public park",
+             Report.Category.PUBLIC_SAFETY, Report.Status.RESOLVED, Report.Priority.HIGH,
+             23.7549, 90.4194, "City Park, Dhaka"}
+        };
+
+        for (int i = 0; i < reportData.length; i++) {
+            try {
+                Report report = new Report();
+                report.setTitle((String) reportData[i][0]);
+                report.setDescription((String) reportData[i][1]);
+                report.setCategory((Report.Category) reportData[i][2]);
+                report.setStatus((Report.Status) reportData[i][3]);
+                report.setPriority((Report.Priority) reportData[i][4]);
+                report.setLatitude((Double) reportData[i][5]);
+                report.setLongitude((Double) reportData[i][6]);
+                report.setLocationAddress((String) reportData[i][7]);
+                report.setReporter(citizenUser);
+                report.setVoteCount((int) (Math.random() * 20) + 1);
+                
+                // Set target organization
+                report.getTargetOrganizations().add(testOrg);
+                
+                // Assign some reports to staff members
+                if (!staffMembers.isEmpty() && Math.random() > 0.3) { // 70% chance to assign
+                    User randomStaff = staffMembers.get((int) (Math.random() * staffMembers.size()));
+                    report.setAssignedTo(randomStaff);
+                }
+                
+                // Set progress for reports in progress
+                if (report.getStatus() == Report.Status.IN_PROGRESS) {
+                    report.setProgressPercentage((int) (Math.random() * 70) + 10); // 10-80%
+                    report.setWorkStage(Report.WorkStage.IN_PROGRESS);
+                    report.setProgressNotes("Work is currently in progress. Updates will be provided regularly.");
+                }
+                
+                // Set resolution for resolved reports
+                if (report.getStatus() == Report.Status.RESOLVED) {
+                    report.setProgressPercentage(100);
+                    report.setWorkStage(Report.WorkStage.COMPLETED);
+                    report.setResolvedAt(LocalDateTime.now().minusDays((int) (Math.random() * 30)));
+                    report.setResolutionNotes("Issue has been successfully resolved. Thank you for reporting.");
+                }
+                
+                // Set creation time (vary between recent and older)
+                report.setCreatedAt(LocalDateTime.now().minusDays((int) (Math.random() * 60)));
+                
+                reportRepository.save(report);
+                System.out.println("Created report: " + report.getTitle());
+                
+            } catch (Exception e) {
+                System.err.println("Error creating report " + i + ": " + e.getMessage());
+            }
         }
     }
 }
