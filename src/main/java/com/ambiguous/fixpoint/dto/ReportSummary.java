@@ -25,6 +25,12 @@ public class ReportSummary {
     private LocalDateTime updatedAt;
     private Integer commentCount;
     private Boolean hasUserVoted;
+    
+    // Progress tracking fields
+    private Integer progressPercentage;
+    private String progressNotes;
+    private LocalDateTime progressUpdatedAt;
+    private Report.WorkStage workStage;
 
     // Constructors
     public ReportSummary() {}
@@ -89,4 +95,17 @@ public class ReportSummary {
 
     public Boolean getHasUserVoted() { return hasUserVoted; }
     public void setHasUserVoted(Boolean hasUserVoted) { this.hasUserVoted = hasUserVoted; }
+
+    // Progress tracking getters and setters
+    public Integer getProgressPercentage() { return progressPercentage; }
+    public void setProgressPercentage(Integer progressPercentage) { this.progressPercentage = progressPercentage; }
+
+    public String getProgressNotes() { return progressNotes; }
+    public void setProgressNotes(String progressNotes) { this.progressNotes = progressNotes; }
+
+    public LocalDateTime getProgressUpdatedAt() { return progressUpdatedAt; }
+    public void setProgressUpdatedAt(LocalDateTime progressUpdatedAt) { this.progressUpdatedAt = progressUpdatedAt; }
+
+    public Report.WorkStage getWorkStage() { return workStage; }
+    public void setWorkStage(Report.WorkStage workStage) { this.workStage = workStage; }
 }

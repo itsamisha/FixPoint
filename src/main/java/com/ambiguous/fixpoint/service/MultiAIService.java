@@ -94,7 +94,7 @@ public class MultiAIService {
         // Generation config for better responses
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("temperature", 0.3);
-        generationConfig.put("maxOutputTokens", 400);
+        generationConfig.put("maxOutputTokens", 1500);
         requestBody.put("generationConfig", generationConfig);
         
         HttpHeaders headers = new HttpHeaders();
@@ -129,7 +129,7 @@ public class MultiAIService {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("model", "gpt-4o");
         requestBody.put("messages", List.of(message));
-        requestBody.put("max_tokens", 400);
+        requestBody.put("max_tokens", 1500);
         requestBody.put("temperature", 0.3);
         
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);

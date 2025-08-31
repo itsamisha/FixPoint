@@ -319,4 +319,58 @@ public class ReportController {
             return ResponseEntity.badRequest().body(error);
         }
     }
+
+    /**
+     * Update progress for a report (for assigned employees)
+     */
+    @PutMapping("/{id}/progress")
+    public ResponseEntity<?> updateReportProgress(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> progressData,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        try {
+            Optional<User> userOpt = userRepository.findById(currentUser.getId());
+            if (!userOpt.isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "User not found"));
+            }
+
+            User user = userOpt.get();
+            
+            Integer progressPercentage = (Integer) progressData.get("progressPercentage");
+            String progressNotes = (String) progressData.get("progressNotes");
+            String workStage = (String) progressData.get("workStage");
+
+            ReportSummary updatedReport = reportService.updateProgress(id, progressPercentage, progressNotes, workStage, user);
+            
+            return ResponseEntity.ok(Map.of(
+                "message", "Progress updated successfully",
+                "report", updatedReport
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Error updating progress: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Get reports assigned to the current user
+     */
+    @GetMapping("/assigned/me")
+    public ResponseEntity<?> getMyAssignedReports(
+            @AuthenticationPrincipal UserPrincipal currentUser,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        try {
+            Sort sort = sortDir.equalsIgnoreCase("desc") ? 
+                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+            Pageable pageable = PageRequest.of(page, size, sort);
+            
+            Page<ReportSummary> reports = reportService.getAssignedReports(currentUser.getId(), pageable);
+            
+            return ResponseEntity.ok(reports);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Error fetching assigned reports: " + e.getMessage()));
+        }
+    }
 }

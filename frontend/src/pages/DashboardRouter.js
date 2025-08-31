@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import CitizenDashboard from './CitizenDashboard';
 import OrganizationDashboard from './OrganizationDashboard';
+import EmployeeDashboard from './EmployeeDashboard';
 import Dashboard from './Dashboard'; // Fallback dashboard
 
 const DashboardRouter = () => {
@@ -24,8 +25,10 @@ const DashboardRouter = () => {
       return <CitizenDashboard />;
     
     case 'ORGANIZATION_ADMIN':
-    case 'ORGANIZATION_STAFF':
       return <OrganizationDashboard />;
+    
+    case 'ORGANIZATION_STAFF':
+      return <EmployeeDashboard />;
     
     case 'VOLUNTEER':
       // For now, volunteers get the citizen dashboard

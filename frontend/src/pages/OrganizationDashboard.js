@@ -45,8 +45,10 @@ const OrganizationDashboard = () => {
       const promises = [];
       
       if (isAdmin) {
-        // Admin can see all organization reports
-        promises.push(reportService.getOrganizationReports(user.organizationId));
+        // Admin can see all organization reports, but only if they have an organizationId
+        if (user.organizationId) {
+          promises.push(reportService.getOrganizationReports(user.organizationId));
+        }
       }
       
       if (isStaff || isAdmin) {
@@ -56,9 +58,12 @@ const OrganizationDashboard = () => {
       
       const results = await Promise.all(promises);
       
-      if (isAdmin) {
-        const orgReports = results[0].data.content || results[0].data;
+      let resultIndex = 0;
+      
+      if (isAdmin && user.organizationId) {
+        const orgReports = results[resultIndex].data.content || results[resultIndex].data;
         setOrganizationReports(orgReports);
+        resultIndex++;
         
         // Calculate stats for admin
         const statsData = {
@@ -70,8 +75,8 @@ const OrganizationDashboard = () => {
         };
         setStats(statsData);
         
-        if (results[1]) {
-          setAssignedReports(results[1].data.content || results[1].data);
+        if (results[resultIndex]) {
+          setAssignedReports(results[resultIndex].data.content || results[resultIndex].data);
         }
       } else if (isStaff) {
         const assignedReports = results[0].data.content || results[0].data;

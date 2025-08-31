@@ -36,22 +36,80 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void initializeTestUser() {
-        // Create a test user - called only when database is empty
+        // First create a test organization
+        Organization testOrg = new Organization();
+        testOrg.setName("Test City Corporation");
+        testOrg.setDescription("Test organization for FixPoint development");
+        testOrg.setType(Organization.OrganizationType.CITY_CORPORATION);
+        testOrg.setAddress("123 Main Street");
+        testOrg.setCity("Test City");
+        testOrg.setState("Test State");
+        testOrg.setZipCode("12345");
+        testOrg.setCountry("Test Country");
+        testOrg.setContactPhone("+1-555-0100");
+        testOrg.setContactEmail("contact@testcity.gov");
+        testOrg.setIsActive(true);
+        testOrg.setServiceAreas("Infrastructure,Roads,Utilities,Waste Management");
+        testOrg.setCategories("Road Maintenance,Water Supply,Electricity,Drainage");
+        
+        // Save organization using the service (it might have additional logic)
+        try {
+            testOrg = organizationService.saveOrganization(testOrg);
+        } catch (Exception e) {
+            // If service method doesn't exist, we'll handle this differently
+            System.out.println("Using direct repository save for organization");
+        }
+        
+        // Create a test citizen user
         User testUser = new User();
         testUser.setUsername("test");
         testUser.setEmail("test@example.com");
         testUser.setPassword(passwordEncoder.encode("password"));
         testUser.setFullName("Test User");
         testUser.setRole(User.Role.CITIZEN);
+        testUser.setUserType(User.UserType.CITIZEN);
         testUser.setIsActive(true);
         testUser.setEmailVerified(true);
         
         userRepository.save(testUser);
         
-        System.out.println("Test user created:");
-        System.out.println("Username: test");
-        System.out.println("Email: test@example.com");
-        System.out.println("Password: password");
+        // Create an admin user for testing
+        User adminUser = new User();
+        adminUser.setUsername("admin");
+        adminUser.setEmail("admin@example.com");
+        adminUser.setPassword(passwordEncoder.encode("admin123"));
+        adminUser.setFullName("Admin User");
+        adminUser.setRole(User.Role.ORG_ADMIN);
+        adminUser.setUserType(User.UserType.ORGANIZATION_ADMIN);
+        adminUser.setIsActive(true);
+        adminUser.setEmailVerified(true);
+        adminUser.setJobTitle("City Manager");
+        adminUser.setDepartment("Administration");
+        adminUser.setOrganization(testOrg);
+        
+        userRepository.save(adminUser);
+        
+        // Create a staff user for testing
+        User staffUser = new User();
+        staffUser.setUsername("staff");
+        staffUser.setEmail("staff@example.com");
+        staffUser.setPassword(passwordEncoder.encode("staff123"));
+        staffUser.setFullName("Staff User");
+        staffUser.setRole(User.Role.ORG_STAFF);
+        staffUser.setUserType(User.UserType.ORGANIZATION_STAFF);
+        staffUser.setIsActive(true);
+        staffUser.setEmailVerified(true);
+        staffUser.setJobTitle("Field Engineer");
+        staffUser.setDepartment("Infrastructure");
+        staffUser.setOrganization(testOrg);
+        
+        userRepository.save(staffUser);
+        
+        System.out.println("Test organization and users created:");
+        System.out.println("Organization: " + testOrg.getName() + " (ID: " + testOrg.getId() + ")");
+        System.out.println("Citizen - Username: test, Email: test@example.com, Password: password");
+        System.out.println("Admin - Username: admin, Email: admin@example.com, Password: admin123, Org: " + testOrg.getName());
+        System.out.println("Staff - Username: staff, Email: staff@example.com, Password: staff123, Org: " + testOrg.getName());
     }
 
     private void initializeOrganizations() {

@@ -184,4 +184,19 @@ export const reportService = {
   getCommentReplies: (reportId, commentId) => {
     return api.get(`/api/reports/${reportId}/comments/${commentId}/replies`);
   },
+
+  // Progress tracking methods
+  updateReportProgress: (reportId, progressData) => {
+    return api.put(`/api/reports/${reportId}/progress`, progressData);
+  },
+
+  // Get reports assigned to current user
+  getMyAssignedReports: (params = {}) => {
+    return api.get("/api/reports/assigned/me", { params });
+  },
+
+  // Get assigned reports (alias for backward compatibility)
+  getAssignedReports: (params = {}) => {
+    return api.get("/api/reports/assigned/me", { params });
+  },
 };

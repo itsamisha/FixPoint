@@ -204,6 +204,12 @@ public class ReportService {
         summary.setVoteCount(report.getVoteCount());
         summary.setCreatedAt(report.getCreatedAt());
         summary.setUpdatedAt(report.getUpdatedAt());
+        
+        // Set progress tracking fields
+        summary.setProgressPercentage(report.getProgressPercentage());
+        summary.setProgressNotes(report.getProgressNotes());
+        summary.setProgressUpdatedAt(report.getProgressUpdatedAt());
+        summary.setWorkStage(report.getWorkStage());
 
         // Set reporter info
         summary.setReporter(convertToUserSummary(report.getReporter()));
@@ -249,5 +255,65 @@ public class ReportService {
 
     private ReportSummary convertToReportSummary(Report report) {
         return convertToReportSummary(report, null);
+    }
+
+    /**
+     * Update progress for a report
+     */
+    public ReportSummary updateProgress(Long reportId, Integer progressPercentage, String progressNotes, String workStage, User user) {
+        Optional<Report> reportOpt = reportRepository.findById(reportId);
+        if (!reportOpt.isPresent()) {
+            throw new RuntimeException("Report not found");
+        }
+
+        Report report = reportOpt.get();
+        
+        // Check if user is assigned to this report or is admin
+        if (report.getAssignedTo() == null || 
+            (!report.getAssignedTo().getId().equals(user.getId()) && 
+             !user.getRole().equals(User.Role.ADMIN) && 
+             !user.getRole().equals(User.Role.ORG_ADMIN))) {
+            throw new RuntimeException("You are not authorized to update this report's progress");
+        }
+
+        if (progressPercentage != null) {
+            report.setProgressPercentage(Math.max(0, Math.min(100, progressPercentage)));
+        }
+        
+        if (progressNotes != null) {
+            report.setProgressNotes(progressNotes);
+        }
+        
+        if (workStage != null) {
+            try {
+                report.setWorkStage(Report.WorkStage.valueOf(workStage.toUpperCase()));
+                
+                // Auto-update status based on work stage
+                if (workStage.equals("NOT_STARTED") || workStage.equals("ASSESSMENT") || workStage.equals("PLANNING")) {
+                    if (report.getStatus() == Report.Status.SUBMITTED) {
+                        report.setStatus(Report.Status.IN_PROGRESS);
+                    }
+                } else if (workStage.equals("COMPLETED")) {
+                    report.setProgressPercentage(100);
+                    report.setStatus(Report.Status.RESOLVED);
+                    report.setResolvedAt(LocalDateTime.now());
+                } else if (workStage.equals("IN_PROGRESS") || workStage.equals("QUALITY_CHECK")) {
+                    report.setStatus(Report.Status.IN_PROGRESS);
+                }
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid work stage: " + workStage);
+            }
+        }
+
+        report = reportRepository.save(report);
+        return convertToReportSummary(report);
+    }
+
+    /**
+     * Get reports assigned to a specific user
+     */
+    public Page<ReportSummary> getAssignedReports(Long userId, Pageable pageable) {
+        Page<Report> reports = reportRepository.findByAssignedToId(userId, pageable);
+        return reports.map(this::convertToReportSummary);
     }
 }

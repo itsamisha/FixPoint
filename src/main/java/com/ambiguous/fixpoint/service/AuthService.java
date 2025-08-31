@@ -141,6 +141,8 @@ public class AuthService {
         userSummary.setLatitude(user.getLatitude());
         userSummary.setLongitude(user.getLongitude());
         userSummary.setRole(user.getRole());
+        userSummary.setUserType(user.getUserType());
+        userSummary.setOrganizationId(user.getOrganization() != null ? user.getOrganization().getId() : null);
         userSummary.setIsVolunteer(user.getIsVolunteer());
         userSummary.setVolunteerSkills(user.getVolunteerSkills());
         userSummary.setEmailVerified(user.getEmailVerified());

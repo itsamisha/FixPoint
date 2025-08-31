@@ -14,6 +14,8 @@ public class UserSummary {
     private Double latitude;
     private Double longitude;
     private User.Role role;
+    private User.UserType userType;
+    private Long organizationId;
     private Boolean isVolunteer;
     private String volunteerSkills;
     private Boolean emailVerified;
@@ -58,6 +60,12 @@ public class UserSummary {
 
     public User.Role getRole() { return role; }
     public void setRole(User.Role role) { this.role = role; }
+
+    public User.UserType getUserType() { return userType; }
+    public void setUserType(User.UserType userType) { this.userType = userType; }
+
+    public Long getOrganizationId() { return organizationId; }
+    public void setOrganizationId(Long organizationId) { this.organizationId = organizationId; }
 
     public Boolean getIsVolunteer() { return isVolunteer; }
     public void setIsVolunteer(Boolean isVolunteer) { this.isVolunteer = isVolunteer; }

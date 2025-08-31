@@ -59,6 +59,19 @@ public class Report {
 
     private LocalDateTime resolvedAt;
 
+    // Progress tracking fields
+    @Column(columnDefinition = "INTEGER DEFAULT 0")
+    private Integer progressPercentage = 0;
+
+    @Size(max = 1000)
+    private String progressNotes;
+
+    private LocalDateTime progressUpdatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50)
+    private WorkStage workStage = WorkStage.NOT_STARTED;
+
     private Integer voteCount = 0;
 
     private Boolean notifyVolunteers = false;
@@ -200,5 +213,39 @@ public class Report {
         MEDIUM,
         HIGH,
         URGENT
+    }
+
+    public enum WorkStage {
+        NOT_STARTED,
+        ASSESSMENT,
+        PLANNING,
+        IN_PROGRESS,
+        QUALITY_CHECK,
+        COMPLETED,
+        ON_HOLD
+    }
+
+    // Getters and setters for progress tracking
+    public Integer getProgressPercentage() { return progressPercentage; }
+    public void setProgressPercentage(Integer progressPercentage) { 
+        this.progressPercentage = progressPercentage;
+        this.progressUpdatedAt = LocalDateTime.now();
+    }
+
+    public String getProgressNotes() { return progressNotes; }
+    public void setProgressNotes(String progressNotes) { 
+        this.progressNotes = progressNotes;
+        this.progressUpdatedAt = LocalDateTime.now();
+    }
+
+    public LocalDateTime getProgressUpdatedAt() { return progressUpdatedAt; }
+    public void setProgressUpdatedAt(LocalDateTime progressUpdatedAt) { 
+        this.progressUpdatedAt = progressUpdatedAt; 
+    }
+
+    public WorkStage getWorkStage() { return workStage; }
+    public void setWorkStage(WorkStage workStage) { 
+        this.workStage = workStage;
+        this.progressUpdatedAt = LocalDateTime.now();
     }
 }
