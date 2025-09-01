@@ -206,4 +206,12 @@ export const reportService = {
   getMyAssignedReports: (params = {}) => {
     return api.get("/api/reports/assigned/me", { params });
   },
+
+  // Translate text to Bangla using AI
+  translateText: (text, targetLanguage = "bangla") => {
+    return api.post("/api/ai/translate", {
+      text: text,
+      targetLanguage: targetLanguage
+    });
+  },
 };

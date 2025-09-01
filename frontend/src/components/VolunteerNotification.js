@@ -4,13 +4,15 @@ const VolunteerNotification = ({ notifyVolunteers, setNotifyVolunteers }) => {
   return (
     <div className="form-group">
       <div className="volunteer-option">
-        <input
-          type="checkbox"
-          className="volunteer-checkbox"
-          id="volunteer-notification"
-          onChange={(e) => setNotifyVolunteers(e.target.checked)}
-          checked={notifyVolunteers}
-        />
+        <div className="volunteer-checkbox-wrapper">
+          <input
+            type="checkbox"
+            className="volunteer-checkbox"
+            id="volunteer-notification"
+            onChange={(e) => setNotifyVolunteers(e.target.checked)}
+            checked={notifyVolunteers}
+          />
+        </div>
         <div className="volunteer-content">
           <label className="volunteer-title" htmlFor="volunteer-notification">
             Notify Community Volunteers

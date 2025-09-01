@@ -1,0 +1,239 @@
+/* Enhanced Location Picker Styles */
+.enhanced-location-picker {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Search Section */
+.location-search-section {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.location-search-input {
+  flex: 1;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.location-search-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: #6b7280;
+  z-index: 10;
+}
+
+.current-location-btn {
+  padding: 0.75rem;
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.current-location-btn:hover {
+  background: #7c3aed;
+  transform: translateY(-1px);
+}
+
+/* Search Results */
+.search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 40px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.search-result-item:hover {
+  background: #f9fafb;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.result-icon {
+  color: #8b5cf6;
+  flex-shrink: 0;
+}
+
+.result-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.result-name {
+  font-weight: 500;
+  color: #1f2937;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+.result-type {
+  font-size: 0.875rem;
+  color: #6b7280;
+  text-transform: capitalize;
+}
+
+.search-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.search-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #8b5cf6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Manual Address Section */
+.manual-address-section {
+  margin-bottom: 1.5rem;
+}
+
+.address-label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.manual-address-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  box-sizing: border-box;
+}
+
+.manual-address-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.address-help {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+/* Map Section */
+.map-container {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-instructions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Selected Location Display */
+.selected-location-display {
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.location-coordinates {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #0c4a6e;
+  margin-bottom: 0.5rem;
+}
+
+.resolved-address {
+  font-size: 0.875rem;
+  color: #0c4a6e;
+  line-height: 1.4;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-input-container {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .location-search-input {
+    padding-left: 2.5rem;
+  }
+
+  .current-location-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .search-results {
+    right: 0;
+  }
+}

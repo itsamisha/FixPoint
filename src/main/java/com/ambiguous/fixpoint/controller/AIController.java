@@ -155,6 +155,43 @@ public class AIController {
     }
 
     /**
+     * Translate text to Bangla using AI
+     */
+    @PostMapping("/translate")
+    public ResponseEntity<?> translateText(@RequestBody Map<String, String> request) {
+        try {
+            String text = request.get("text");
+            String targetLanguage = request.get("targetLanguage");
+            
+            if (text == null || text.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "error", "Text to translate is required"
+                ));
+            }
+            
+            // For now, we'll use a simple translation service
+            // In production, you might want to use Google Translate API or similar
+            String translatedText = multiAIService.translateTextToBangla(text);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "translatedText", translatedText,
+                "originalText", text,
+                "targetLanguage", targetLanguage != null ? targetLanguage : "bangla"
+            ));
+            
+        } catch (Exception e) {
+            System.err.println("Translation error: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                "success", false,
+                "error", "Translation failed: " + e.getMessage()
+            ));
+        }
+    }
+
+    /**
      * Get AI analysis capabilities info
      */
     @GetMapping("/capabilities")

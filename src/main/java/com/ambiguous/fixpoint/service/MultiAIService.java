@@ -349,6 +349,126 @@ public class MultiAIService {
     }
 
     /**
+     * Translate text to Bangla using AI
+     */
+    public String translateTextToBangla(String text) {
+        try {
+            // Try with configured AI provider
+            if ("gemini".equalsIgnoreCase(aiProvider) && isGeminiConfigured()) {
+                return translateWithGemini(text);
+            } else if ("openai".equalsIgnoreCase(aiProvider) && isOpenAIConfigured()) {
+                return translateWithOpenAI(text);
+            }
+            
+            // Fallback to available provider
+            if (isGeminiConfigured()) {
+                return translateWithGemini(text);
+            } else if (isOpenAIConfigured()) {
+                return translateWithOpenAI(text);
+            }
+            
+            // If no AI providers available, return a simple fallback translation
+            return generateFallbackTranslation(text);
+            
+        } catch (Exception e) {
+            System.err.println("Translation failed with all providers: " + e.getMessage());
+            return generateFallbackTranslation(text);
+        }
+    }
+
+    /**
+     * Translate text using Google Gemini
+     */
+    private String translateWithGemini(String text) throws Exception {
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+        
+        String prompt = "Translate the following English text to Bangla (Bengali). Provide only the translation without any additional text:\n\n" + text;
+        
+        Map<String, Object> requestBody = new HashMap<>();
+        List<Map<String, Object>> contents = new ArrayList<>();
+        Map<String, Object> content = new HashMap<>();
+        List<Map<String, Object>> parts = new ArrayList<>();
+        Map<String, Object> textPart = new HashMap<>();
+        textPart.put("text", prompt);
+        parts.add(textPart);
+        content.put("parts", parts);
+        contents.add(content);
+        requestBody.put("contents", contents);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+        Map<String, Object> responseBody = response.getBody();
+        
+        if (responseBody != null && responseBody.containsKey("candidates")) {
+            List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
+            if (!candidates.isEmpty()) {
+                Map<String, Object> candidate = candidates.get(0);
+                Map<String, Object> content1 = (Map<String, Object>) candidate.get("content");
+                List<Map<String, Object>> parts1 = (List<Map<String, Object>>) content1.get("parts");
+                return (String) parts1.get(0).get("text");
+            }
+        }
+        
+        throw new RuntimeException("No translation received from Gemini");
+    }
+
+    /**
+     * Translate text using OpenAI
+     */
+    private String translateWithOpenAI(String text) throws Exception {
+        String url = "https://api.openai.com/v1/chat/completions";
+        
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("max_tokens", 1000);
+        requestBody.put("temperature", 0.3);
+        
+        List<Map<String, String>> messages = new ArrayList<>();
+        Map<String, String> systemMessage = new HashMap<>();
+        systemMessage.put("role", "system");
+        systemMessage.put("content", "You are a professional translator. Translate the given English text to Bangla (Bengali). Provide only the translation without any additional text or explanations.");
+        messages.add(systemMessage);
+        
+        Map<String, String> userMessage = new HashMap<>();
+        userMessage.put("role", "user");
+        userMessage.put("content", text);
+        messages.add(userMessage);
+        
+        requestBody.put("messages", messages);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("Authorization", "Bearer " + openaiApiKey);
+        
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+        Map<String, Object> responseBody = response.getBody();
+        
+        if (responseBody != null && responseBody.containsKey("choices")) {
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
+            if (!choices.isEmpty()) {
+                Map<String, Object> choice = choices.get(0);
+                Map<String, String> message = (Map<String, String>) choice.get("message");
+                return message.get("content").trim();
+            }
+        }
+        
+        throw new RuntimeException("No translation received from OpenAI");
+    }
+
+    /**
+     * Generate a simple fallback translation when AI services are unavailable
+     */
+    private String generateFallbackTranslation(String text) {
+        // This is a very basic fallback - in production you might want to use 
+        // a local translation service or provide a more sophisticated fallback
+        return "[বাংলা অনুবাদ প্রয়োজন] " + text + " [Translation service temporarily unavailable - please translate manually]";
+    }
+
+    /**
      * Get current AI provider status
      */
     public Map<String, Object> getProviderStatus() {

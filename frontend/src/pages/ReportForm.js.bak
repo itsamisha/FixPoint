@@ -2,16 +2,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { MapPin, Save, ChevronDown, Sparkles, Edit3, Languages } from "lucide-react";
+import { Save, ChevronDown, Sparkles, Edit3 } from "lucide-react";
 import { reportService } from "../services/reportService";
 import DuplicateWarningModal from "../components/DuplicateWarningModal";
 import OrganizationSelector from "../components/OrganizationSelector";
 import VolunteerNotification from "../components/VolunteerNotification";
 import AIDescriptionGenerator from "../components/AIDescriptionGenerator";
-import EnhancedLocationPicker from "../components/EnhancedLocationPicker";
 import ImageUploader from "../components/ImageUploader";
-import "./ReportForm.css";
-import "../components/EnhancedLocationPicker.css";
+import LocationSelector from "../components/LocationSelector";
+import "../components/LocationSelector.css";
 
 const ReportForm = () => {
   const navigate = useNavigate();
@@ -21,10 +20,8 @@ const ReportForm = () => {
   const [organizations, setOrganizations] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [mapPosition, setMapPosition] = useState([23.8103, 90.4125]); // Dhaka, Bangladesh
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [locationAddress, setLocationAddress] = useState("");
-  const [locationContext, setLocationContext] = useState({});
+  const [locationAddress, setLocationAddress] = useState('');
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [aiGeneratedDescription, setAiGeneratedDescription] = useState("");
   const [showAiDescription, setShowAiDescription] = useState(false);
@@ -36,8 +33,6 @@ const ReportForm = () => {
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
   const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
   const [pendingReportData, setPendingReportData] = useState(null);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [originalDescription, setOriginalDescription] = useState("");
 
   const {
     register,
@@ -48,7 +43,6 @@ const ReportForm = () => {
   } = useForm({
     defaultValues: {
       priority: "MEDIUM",
-      locationAddress: "",
     },
   });
 
@@ -91,109 +85,11 @@ const ReportForm = () => {
     }
   };
 
-  const handleLocationSelect = useCallback(
-    (lat, lng) => {
-      setSelectedLocation({ lat, lng });
-      setValue("latitude", lat);
-      setValue("longitude", lng);
-    },
-    [setValue]
-  );
-
-  const handleAddressChange = useCallback((address, addressComponents) => {
-    setLocationAddress(address);
-    setLocationContext(addressComponents);
-    setValue("locationAddress", address);
-  }, [setValue]);
-
-  const handleLocationAddressChange = useCallback((address) => {
-    setLocationAddress(address);
-    setValue("locationAddress", address);
-  }, [setValue]);
-
-  // Enhanced AI analysis with context - directly populate description field
-  const analyzeImageWithAI = async (contextData = {}) => {
-    if (!selectedImage) {
-      toast.error("Please select an image first");
-      return;
-    }
-
-    setIsAnalyzingImage(true);
-    try {
-      const currentCategory = getValues("category") || contextData.category || "OTHER";
-      
-      const response = await reportService.analyzeImageEnhanced(selectedImage, currentCategory);
-      if (response.data && response.data.description) {
-        // Directly populate the description field
-        setValue("description", response.data.description);
-        setAiGeneratedDescription(response.data.description);
-        setShowAiDescription(false); // Don't show preview, just apply directly
-        toast.success("AI description applied directly to the form!");
-      } else {
-        toast.error("No description received from AI service");
-      }
-    } catch (error) {
-      console.error("Error analyzing image:", error);
-      toast.error("Failed to analyze image with AI");
-    } finally {
-      setIsAnalyzingImage(false);
-    }
-  };
-
-  // AI Translation function
-  const translateDescriptionToBangla = async () => {
-    const currentDescription = getValues("description");
-    if (!currentDescription || currentDescription.trim() === "") {
-      toast.error("Please enter a description to translate");
-      return;
-    }
-
-    setIsTranslating(true);
-    try {
-      // Store original description if not already stored
-      if (!originalDescription) {
-        setOriginalDescription(currentDescription);
-      }
-
-      const response = await reportService.translateText(currentDescription, "bangla");
-      if (response.data && response.data.translatedText) {
-        setValue("description", response.data.translatedText);
-        toast.success("Description translated to Bangla!");
-      } else {
-        toast.error("Translation failed. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error translating text:", error);
-      toast.error("Failed to translate description");
-    } finally {
-      setIsTranslating(false);
-    }
-  };
-
-  const getCurrentLocation = useCallback(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setMapPosition([latitude, longitude]);
-          setSelectedLocation({ lat: latitude, lng: longitude });
-          setValue("latitude", latitude);
-          setValue("longitude", longitude);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          toast.info("Please select your location on the map");
-        }
-      );
-    }
-  }, [setValue]);
-
   useEffect(() => {
     fetchCategories();
     fetchPriorities();
     fetchOrganizations();
-    getCurrentLocation();
-  }, [getCurrentLocation]);
+  }, []);
 
   // Handle clicking outside dropdown
   useEffect(() => {
@@ -278,6 +174,23 @@ const ReportForm = () => {
     }
   };
 
+  const handleLocationSelect = useCallback(
+    (lat, lng) => {
+      setSelectedLocation({ lat, lng });
+      setValue("latitude", lat);
+      setValue("longitude", lng);
+    },
+    [setValue]
+  );
+
+  const handleAddressChange = useCallback(
+    (address) => {
+      setLocationAddress(address);
+      setValue("locationAddress", address);
+    },
+    [setValue]
+  );
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -300,14 +213,91 @@ const ReportForm = () => {
     }
   };
 
-  const useAIDescription = (description = aiGeneratedDescription) => {
-    setValue("description", description);
+  const analyzeImageWithAI = async () => {
+    if (!selectedImage) {
+      toast.error("Please upload an image first");
+      return;
+    }
+
+    // Get current category for enhanced analysis
+    const currentCategory = getValues("category");
+    if (!currentCategory) {
+      toast.warning("Please select a category first for better AI analysis");
+      return;
+    }
+
+    setIsAnalyzingImage(true);
+    try {
+      // Include location data in AI analysis
+      const locationContext = {
+        address: locationAddress,
+        coordinates: selectedLocation,
+        hasLocation: Boolean(locationAddress || selectedLocation)
+      };
+
+      // Try enhanced AI analysis first with location context
+      const locationInfo = locationAddress ? ` Location: ${locationAddress}` : '';
+      
+      const response = await reportService.analyzeImageEnhanced(
+        selectedImage, 
+        currentCategory + locationInfo
+      );
+      const { success, description, suggestedPriority, enhancedFeatures, error } = response.data;
+
+      if (success) {
+        setAiGeneratedDescription(description);
+        setValue("description", description);
+        
+        // Set suggested priority if available
+        if (suggestedPriority && suggestedPriority !== "MEDIUM") {
+          setValue("priority", suggestedPriority);
+        }
+        
+        setShowAiDescription(false);
+        
+        if (enhancedFeatures?.categorySpecific) {
+          toast.success(
+            `Enhanced AI analysis completed! ${locationContext.hasLocation ? 'Location-aware ' : ''}Category-specific description generated with priority suggestion: ${suggestedPriority}`
+          );
+        } else if (enhancedFeatures?.fallbackUsed) {
+          toast.warning(
+            "Enhanced AI unavailable, used basic analysis. Please review the description."
+          );
+        } else {
+          toast.success("AI analysis completed! Description has been added to the form.");
+        }
+      } else {
+        // Fallback to basic AI service with location context
+        const fallbackResponse = await reportService.analyzeImage(selectedImage);
+        const { description: fallbackDesc, success: fallbackSuccess } = fallbackResponse.data;
+        
+        if (fallbackSuccess) {
+          setAiGeneratedDescription(fallbackDesc);
+          setValue("description", fallbackDesc);
+          setShowAiDescription(false);
+          toast.warning("Enhanced AI failed, used basic analysis. Please review the description.");
+        } else {
+          throw new Error(error || "AI analysis failed");
+        }
+      }
+    } catch (error) {
+      console.error("Error analyzing image:", error);
+      toast.error(
+        "Failed to analyze image. Please try again or write description manually."
+      );
+    } finally {
+      setIsAnalyzingImage(false);
+    }
+  };
+
+  const useAIDescription = () => {
+    setValue("description", aiGeneratedDescription);
     setShowAiDescription(false);
     toast.success("AI description applied! You can continue editing.");
   };
 
-  const editAIDescription = (description = aiGeneratedDescription) => {
-    setValue("description", description);
+  const editAIDescription = () => {
+    setValue("description", aiGeneratedDescription);
     setShowAiDescription(false);
   };
 
@@ -488,79 +478,11 @@ const ReportForm = () => {
                 notifyVolunteers={notifyVolunteers}
                 setNotifyVolunteers={setNotifyVolunteers}
               />
-            </div>
-          </div>
 
-          {/* Image Upload and AI Analysis */}
-          <div className="card">
-            <div className="card-header">
-              <h2 className="card-title">Upload Image</h2>
-              <p className="text-sm text-gray-600">
-                Upload an image of the issue and let AI help generate a description
-              </p>
-            </div>
-            <div className="card-body">
-              <ImageUploader 
-                selectedImage={selectedImage}
-                imagePreview={imagePreview}
-                handleImageSelect={handleImageChange}
-              />
-              
-              <AIDescriptionGenerator
-                selectedImage={selectedImage}
-                isAnalyzingImage={isAnalyzingImage}
-                aiGeneratedDescription={aiGeneratedDescription}
-                showAiDescription={showAiDescription}
-                analyzeImageWithAI={analyzeImageWithAI}
-                useAIDescription={useAIDescription}
-                editAIDescription={editAIDescription}
-              />
-            </div>
-          </div>
-
-          {/* Description */}
-          <div className="card">
-            <div className="card-header">
-              <h2 className="card-title">Detailed Description</h2>
-              <p className="text-sm text-gray-600">
-                Provide detailed information about the issue (AI can help generate this from your image)
-              </p>
-            </div>
-            <div className="card-body">
               <div className="form-group">
-                <div className="flex items-center justify-between mb-2">
-                  <label htmlFor="description" className="form-label">
-                    Description *
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={translateDescriptionToBangla}
-                      disabled={isTranslating}
-                      className="btn btn-secondary btn-sm flex items-center gap-2"
-                    >
-                      <Languages size={16} />
-                      {isTranslating ? "Translating..." : "Translate to বাংলা"}
-                    </button>
-                    {originalDescription && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setValue("description", originalDescription);
-                          setOriginalDescription("");
-                          toast.success("Restored original description");
-                        }}
-                        className="btn btn-outline btn-sm"
-                      >
-                        Undo Translation
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <p className="text-sm text-gray-600 mb-3">
-                  Use the translate button to convert your description to Bangla (বাংলা) for better local communication.
-                </p>
+                <label htmlFor="description" className="form-label">
+                  Description *
+                </label>
 
                 {/* AI Generated Description Preview */}
                 {showAiDescription && (
@@ -618,29 +540,68 @@ const ReportForm = () => {
                   <div className="form-error">{errors.description.message}</div>
                 )}
               </div>
+
+              {/* Image Upload */}
+              <div className="form-group">
+                <label className="form-label">Upload Image</label>
+                <ImageUploader 
+                  selectedImage={selectedImage}
+                  imagePreview={imagePreview}
+                  handleImageSelect={handleImageChange}
+                />
+                
+                <AIDescriptionGenerator
+                  selectedImage={selectedImage}
+                  isAnalyzingImage={isAnalyzingImage}
+                  aiGeneratedDescription={aiGeneratedDescription}
+                  showAiDescription={showAiDescription}
+                  analyzeImageWithAI={analyzeImageWithAI}
+                  useAIDescription={useAIDescription}
+                  editAIDescription={editAIDescription}
+                />
+              </div>
+
+              {/* Location Selection */}
+              <div className="form-group">
+                <label className="form-label">Location Details</label>
+                <p className="text-sm text-gray-600 mb-4">
+                  Search for a location, use your current location, or click on the map to pinpoint the exact location
+                </p>
+                <LocationSelector
+                  onLocationSelect={handleLocationSelect}
+                  selectedLocation={selectedLocation}
+                  onAddressChange={handleAddressChange}
+                  locationAddress={locationAddress}
+                />
+
+                <input type="hidden" {...register("latitude")} />
+                <input type="hidden" {...register("longitude")} />
+                <input type="hidden" {...register("locationAddress")} />
+              </div>
             </div>
           </div>
 
-          {/* Location Selection */}
+          {/* Image Upload */
           <div className="card">
             <div className="card-header">
-              <h2 className="card-title">Select Location</h2>
-              <p className="text-sm text-gray-600">
-                Search for a location, use your current location, or click on the map to pinpoint the exact location
-              </p>
+              <h2 className="card-title">Upload Image</h2>
             </div>
             <div className="card-body">
-              <EnhancedLocationPicker
-                onLocationSelect={handleLocationSelect}
-                initialPosition={mapPosition}
-                onAddressChange={handleAddressChange}
-                selectedLocation={selectedLocation}
-                locationAddress={locationAddress}
-                onLocationAddressChange={handleLocationAddressChange}
+              <ImageUploader 
+                selectedImage={selectedImage}
+                imagePreview={imagePreview}
+                handleImageSelect={handleImageChange}
               />
               
-              <input type="hidden" {...register("latitude")} />
-              <input type="hidden" {...register("longitude")} />
+              <AIDescriptionGenerator
+                selectedImage={selectedImage}
+                isAnalyzingImage={isAnalyzingImage}
+                aiGeneratedDescription={aiGeneratedDescription}
+                showAiDescription={showAiDescription}
+                analyzeImageWithAI={analyzeImageWithAI}
+                useAIDescription={useAIDescription}
+                editAIDescription={editAIDescription}
+              />
             </div>
           </div>
 
