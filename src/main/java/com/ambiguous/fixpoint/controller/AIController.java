@@ -213,4 +213,41 @@ public class AIController {
         
         return ResponseEntity.ok(capabilities);
     }
+
+    @PostMapping("/categorize-issue")
+    public ResponseEntity<Map<String, Object>> categorizeIssue(
+            @RequestParam("description") String description,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "location", required = false) String location) {
+        
+        try {
+            System.out.println("Categorizing issue with description: " + description);
+            
+            Map<String, Object> categorization = multiAIService.categorizeIssue(description, image, location);
+            
+            return ResponseEntity.ok(categorization);
+            
+        } catch (Exception e) {
+            System.err.println("Error in issue categorization: " + e.getMessage());
+            e.printStackTrace();
+            
+            Map<String, Object> fallbackResponse = new HashMap<>();
+            fallbackResponse.put("category", Map.of(
+                "id", "other",
+                "name", "Other",
+                "description", "Issues that don't fit other categories",
+                "icon", "📋",
+                "color", "#6B7280"
+            ));
+            fallbackResponse.put("priority", Map.of(
+                "value", "medium",
+                "color", "#F59E0B"
+            ));
+            fallbackResponse.put("confidence", 0.3);
+            fallbackResponse.put("suggestedTags", new String[]{});
+            fallbackResponse.put("reasoning", "Basic categorization due to AI service error");
+            
+            return ResponseEntity.ok(fallbackResponse);
+        }
+    }
 }

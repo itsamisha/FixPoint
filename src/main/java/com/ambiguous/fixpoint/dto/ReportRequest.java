@@ -12,7 +12,6 @@ public class ReportRequest {
     private String title;
 
     @NotBlank
-    @Size(max = 2000)
     private String description;
 
     @NotNull

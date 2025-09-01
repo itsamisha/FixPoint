@@ -6,9 +6,15 @@ const EnhancedAIDescriptionGenerator = ({
   isAnalyzingImage,
   aiGeneratedDescription,
   showAiDescription,
-  analyzeImageWithAI,
+  onAnalyze,
   useAIDescription: applyAIDescription, // Rename to avoid ESLint hook rules
   editAIDescription,
+  onTranslateToBangla,
+  onTranslateToEnglish,
+  onRestoreOriginal,
+  isTranslating,
+  currentDescription,
+  originalDescription,
   formData, // New prop to get form data
   locationAddress,
   selectedLocation
@@ -31,7 +37,7 @@ const EnhancedAIDescriptionGenerator = ({
       coordinates: selectedLocation ? `${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}` : ''
     };
     
-    analyzeImageWithAI(contextData);
+    onAnalyze(contextData);
   };
 
   // Format the AI description with better organization
@@ -89,6 +95,46 @@ const EnhancedAIDescriptionGenerator = ({
         </div>
       </div>
 
+      {/* Translation Tools for Any Description */}
+      {(onTranslateToBangla || onTranslateToEnglish || onRestoreOriginal) && currentDescription && (
+        <div className="translation-tools">
+          <div className="translation-tools-header">
+            <span>🌐 Description Translation</span>
+          </div>
+          <div className="translation-buttons">
+            {onTranslateToBangla && (
+              <button
+                type="button"
+                onClick={onTranslateToBangla}
+                disabled={isTranslating}
+                className="btn btn-translation btn-sm"
+              >
+                {isTranslating ? "Translating..." : "বাংলায় অনুবাদ করুন"}
+              </button>
+            )}
+            {onTranslateToEnglish && (
+              <button
+                type="button"
+                onClick={onTranslateToEnglish}
+                disabled={isTranslating}
+                className="btn btn-translation btn-sm"
+              >
+                {isTranslating ? "Translating..." : "Translate to English"}
+              </button>
+            )}
+            {onRestoreOriginal && originalDescription && (
+              <button
+                type="button"
+                onClick={onRestoreOriginal}
+                className="btn btn-restore btn-sm"
+              >
+                🔄 Restore Original
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Enhanced AI Generated Description Preview */}
       {showAiDescription && aiGeneratedDescription && (
         <div className="ai-description-preview enhanced">
@@ -126,6 +172,46 @@ const EnhancedAIDescriptionGenerator = ({
           <div className="ai-description-content enhanced">
             {formatAIDescription(aiGeneratedDescription)}
           </div>
+          
+          {/* Translation Section */}
+          {(onTranslateToBangla || onTranslateToEnglish || onRestoreOriginal) && (
+            <div className="translation-section">
+              <div className="translation-header">
+                <span>🌐 Language Options</span>
+              </div>
+              <div className="translation-buttons">
+                {onTranslateToBangla && (
+                  <button
+                    type="button"
+                    onClick={onTranslateToBangla}
+                    disabled={isTranslating}
+                    className="btn btn-translation btn-sm"
+                  >
+                    {isTranslating ? "Translating..." : "বাংলায় অনুবাদ করুন"}
+                  </button>
+                )}
+                {onTranslateToEnglish && (
+                  <button
+                    type="button"
+                    onClick={onTranslateToEnglish}
+                    disabled={isTranslating}
+                    className="btn btn-translation btn-sm"
+                  >
+                    {isTranslating ? "Translating..." : "Translate to English"}
+                  </button>
+                )}
+                {onRestoreOriginal && originalDescription && (
+                  <button
+                    type="button"
+                    onClick={onRestoreOriginal}
+                    className="btn btn-restore btn-sm"
+                  >
+                    Restore Original
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
           
           {/* Enhanced Actions */}
           <div className="ai-description-actions enhanced">

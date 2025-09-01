@@ -24,7 +24,7 @@ public class Report {
     private String title;
 
     @NotBlank
-    @Size(max = 2000)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Enumerated(EnumType.STRING)

@@ -6,7 +6,7 @@ const AIDescriptionGenerator = ({
   isAnalyzingImage,
   aiGeneratedDescription,
   showAiDescription,
-  analyzeImageWithAI,
+  onAnalyze,
   useAIDescription,
   editAIDescription
 }) => {
@@ -18,7 +18,7 @@ const AIDescriptionGenerator = ({
       <div className="ai-generate-section">
         <button
           type="button"
-          onClick={analyzeImageWithAI}
+          onClick={onAnalyze}
           disabled={isAnalyzingImage}
           className="btn btn-ai"
         >

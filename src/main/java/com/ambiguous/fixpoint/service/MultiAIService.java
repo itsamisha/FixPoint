@@ -484,4 +484,379 @@ public class MultiAIService {
         status.put("fallbackAvailable", true);
         return status;
     }
+
+    /**
+     * Categorize issue using AI analysis
+     */
+    public Map<String, Object> categorizeIssue(String description, MultipartFile image, String location) {
+        try {
+            // Try primary AI provider for categorization
+            if ("gemini".equalsIgnoreCase(aiProvider) && isGeminiConfigured()) {
+                return categorizeWithGemini(description, image, location);
+            } else if ("openai".equalsIgnoreCase(aiProvider) && isOpenAIConfigured()) {
+                return categorizeWithOpenAI(description, image, location);
+            }
+            
+            // Fallback to available provider
+            if (isGeminiConfigured()) {
+                System.out.println("Primary provider unavailable for categorization, falling back to Gemini");
+                return categorizeWithGemini(description, image, location);
+            } else if (isOpenAIConfigured()) {
+                System.out.println("Primary provider unavailable for categorization, falling back to OpenAI");
+                return categorizeWithOpenAI(description, image, location);
+            }
+            
+            // If no AI providers available, use keyword-based fallback
+            return generateFallbackCategorization(description);
+            
+        } catch (Exception e) {
+            System.err.println("Error in AI categorization: " + e.getMessage());
+            return generateFallbackCategorization(description);
+        }
+    }
+
+    private Map<String, Object> categorizeWithGemini(String description, MultipartFile image, String location) {
+        try {
+            String prompt = buildCategorizationPrompt(description, location);
+            
+            Map<String, Object> requestBody = new HashMap<>();
+            Map<String, Object> contents = new HashMap<>();
+            Map<String, Object> parts = new HashMap<>();
+            parts.put("text", prompt);
+            contents.put("parts", Arrays.asList(parts));
+            requestBody.put("contents", Arrays.asList(contents));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + geminiApiKey;
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+            
+            if (response.getBody() != null) {
+                return parseCategorizationResponse(response.getBody());
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Gemini categorization error: " + e.getMessage());
+        }
+        
+        return generateFallbackCategorization(description);
+    }
+
+    private Map<String, Object> categorizeWithOpenAI(String description, MultipartFile image, String location) {
+        try {
+            String prompt = buildCategorizationPrompt(description, location);
+            
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("model", "gpt-3.5-turbo");
+            requestBody.put("max_tokens", 500);
+            requestBody.put("temperature", 0.3);
+            
+            Map<String, Object> message = new HashMap<>();
+            message.put("role", "user");
+            message.put("content", prompt);
+            requestBody.put("messages", Arrays.asList(message));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+            headers.set("Authorization", "Bearer " + openaiApiKey);
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                "https://api.openai.com/v1/chat/completions", 
+                request, 
+                Map.class
+            );
+            
+            if (response.getBody() != null) {
+                return parseOpenAICategorizationResponse(response.getBody());
+            }
+            
+        } catch (Exception e) {
+            System.err.println("OpenAI categorization error: " + e.getMessage());
+        }
+        
+        return generateFallbackCategorization(description);
+    }
+
+    private String buildCategorizationPrompt(String description, String location) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("You are an AI assistant that categorizes community issues and reports. ");
+        prompt.append("Analyze the following issue and respond with a JSON object containing category, priority, confidence, and tags.\n\n");
+        
+        prompt.append("Available categories:\n");
+        prompt.append("- infrastructure: Roads, bridges, buildings, public facilities\n");
+        prompt.append("- utilities: Water, electricity, gas, sewage, internet\n");
+        prompt.append("- safety: Street lighting, security, emergency situations\n");
+        prompt.append("- environment: Waste management, pollution, green spaces\n");
+        prompt.append("- transport: Public transport, traffic, parking\n");
+        prompt.append("- healthcare: Health facilities, medical emergencies\n");
+        prompt.append("- education: Schools, libraries, educational facilities\n");
+        prompt.append("- social: Community centers, social programs, events\n");
+        prompt.append("- other: Issues that don't fit other categories\n\n");
+        
+        prompt.append("Priority levels: low, medium, high, urgent\n\n");
+        
+        prompt.append("Issue Description: \"").append(description).append("\"\n");
+        if (location != null && !location.trim().isEmpty()) {
+            prompt.append("Location: ").append(location).append("\n");
+        }
+        
+        prompt.append("\nRespond with ONLY a JSON object in this exact format:\n");
+        prompt.append("{\n");
+        prompt.append("  \"category\": \"category_id\",\n");
+        prompt.append("  \"priority\": \"priority_level\",\n");
+        prompt.append("  \"confidence\": 0.8,\n");
+        prompt.append("  \"tags\": [\"tag1\", \"tag2\"],\n");
+        prompt.append("  \"reasoning\": \"Brief explanation\"\n");
+        prompt.append("}");
+        
+        return prompt.toString();
+    }
+
+    private Map<String, Object> parseCategorizationResponse(Map<String, Object> response) {
+        try {
+            List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
+            if (candidates != null && !candidates.isEmpty()) {
+                Map<String, Object> candidate = candidates.get(0);
+                Map<String, Object> content = (Map<String, Object>) candidate.get("content");
+                List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+                if (parts != null && !parts.isEmpty()) {
+                    String text = (String) parts.get(0).get("text");
+                    return parseCategorizationJSON(text);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing Gemini categorization response: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private Map<String, Object> parseOpenAICategorizationResponse(Map<String, Object> response) {
+        try {
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+            if (choices != null && !choices.isEmpty()) {
+                Map<String, Object> choice = choices.get(0);
+                Map<String, Object> message = (Map<String, Object>) choice.get("message");
+                String content = (String) message.get("content");
+                return parseCategorizationJSON(content);
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing OpenAI categorization response: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private Map<String, Object> parseCategorizationJSON(String jsonText) {
+        try {
+            // Basic JSON parsing for the categorization response
+            jsonText = jsonText.trim();
+            if (jsonText.startsWith("```json")) {
+                jsonText = jsonText.substring(7);
+            }
+            if (jsonText.endsWith("```")) {
+                jsonText = jsonText.substring(0, jsonText.length() - 3);
+            }
+            jsonText = jsonText.trim();
+            
+            // Simple JSON parsing (you might want to use a proper JSON library)
+            Map<String, Object> result = new HashMap<>();
+            
+            // Extract category
+            String categoryId = extractJsonValue(jsonText, "category", "other");
+            result.put("category", createCategoryObject(categoryId));
+            
+            // Extract priority
+            String priority = extractJsonValue(jsonText, "priority", "medium");
+            result.put("priority", createPriorityObject(priority));
+            
+            // Extract confidence
+            String confidenceStr = extractJsonValue(jsonText, "confidence", "0.5");
+            double confidence = Double.parseDouble(confidenceStr);
+            result.put("confidence", confidence);
+            
+            // Extract tags
+            result.put("suggestedTags", extractJsonArray(jsonText, "tags"));
+            
+            // Extract reasoning
+            result.put("reasoning", extractJsonValue(jsonText, "reasoning", "AI-based categorization"));
+            
+            return result;
+            
+        } catch (Exception e) {
+            System.err.println("Error parsing categorization JSON: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private String extractJsonValue(String json, String key, String defaultValue) {
+        try {
+            String pattern = "\"" + key + "\"\\s*:\\s*\"([^\"]+)\"";
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+            java.util.regex.Matcher m = p.matcher(json);
+            if (m.find()) {
+                return m.group(1);
+            }
+        } catch (Exception e) {
+            System.err.println("Error extracting JSON value for key: " + key);
+        }
+        return defaultValue;
+    }
+
+    private List<String> extractJsonArray(String json, String key) {
+        try {
+            String pattern = "\"" + key + "\"\\s*:\\s*\\[([^\\]]+)\\]";
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern);
+            java.util.regex.Matcher m = p.matcher(json);
+            if (m.find()) {
+                String arrayContent = m.group(1);
+                List<String> tags = new ArrayList<>();
+                String[] items = arrayContent.split(",");
+                for (String item : items) {
+                    String tag = item.trim().replaceAll("\"", "");
+                    if (!tag.isEmpty()) {
+                        tags.add(tag);
+                    }
+                }
+                return tags;
+            }
+        } catch (Exception e) {
+            System.err.println("Error extracting JSON array for key: " + key);
+        }
+        return new ArrayList<>();
+    }
+
+    private Map<String, Object> createCategoryObject(String categoryId) {
+        Map<String, Object> category = new HashMap<>();
+        
+        switch (categoryId.toLowerCase()) {
+            case "infrastructure":
+                category.put("id", "infrastructure");
+                category.put("name", "Infrastructure");
+                category.put("description", "Roads, bridges, buildings, public facilities");
+                category.put("icon", "🏗️");
+                category.put("color", "#3B82F6");
+                break;
+            case "utilities":
+                category.put("id", "utilities");
+                category.put("name", "Utilities");
+                category.put("description", "Water, electricity, gas, sewage, internet");
+                category.put("icon", "⚡");
+                category.put("color", "#F59E0B");
+                break;
+            case "safety":
+                category.put("id", "safety");
+                category.put("name", "Safety & Security");
+                category.put("description", "Street lighting, security, emergency situations");
+                category.put("icon", "🚨");
+                category.put("color", "#EF4444");
+                break;
+            case "environment":
+                category.put("id", "environment");
+                category.put("name", "Environment");
+                category.put("description", "Waste management, pollution, green spaces");
+                category.put("icon", "🌱");
+                category.put("color", "#10B981");
+                break;
+            case "transport":
+                category.put("id", "transport");
+                category.put("name", "Transportation");
+                category.put("description", "Public transport, traffic, parking");
+                category.put("icon", "🚌");
+                category.put("color", "#8B5CF6");
+                break;
+            case "healthcare":
+                category.put("id", "healthcare");
+                category.put("name", "Healthcare");
+                category.put("description", "Health facilities, medical emergencies");
+                category.put("icon", "🏥");
+                category.put("color", "#EC4899");
+                break;
+            case "education":
+                category.put("id", "education");
+                category.put("name", "Education");
+                category.put("description", "Schools, libraries, educational facilities");
+                category.put("icon", "📚");
+                category.put("color", "#6366F1");
+                break;
+            case "social":
+                category.put("id", "social");
+                category.put("name", "Social Services");
+                category.put("description", "Community centers, social programs, events");
+                category.put("icon", "🏛️");
+                category.put("color", "#14B8A6");
+                break;
+            default:
+                category.put("id", "other");
+                category.put("name", "Other");
+                category.put("description", "Issues that don't fit other categories");
+                category.put("icon", "📋");
+                category.put("color", "#6B7280");
+        }
+        
+        return category;
+    }
+
+    private Map<String, Object> createPriorityObject(String priority) {
+        Map<String, Object> priorityObj = new HashMap<>();
+        priorityObj.put("value", priority.toLowerCase());
+        
+        switch (priority.toLowerCase()) {
+            case "urgent":
+                priorityObj.put("color", "#DC2626");
+                break;
+            case "high":
+                priorityObj.put("color", "#EF4444");
+                break;
+            case "medium":
+                priorityObj.put("color", "#F59E0B");
+                break;
+            case "low":
+            default:
+                priorityObj.put("color", "#10B981");
+        }
+        
+        return priorityObj;
+    }
+
+    private Map<String, Object> generateFallbackCategorization(String description) {
+        Map<String, Object> result = new HashMap<>();
+        
+        // Simple keyword-based categorization
+        String lowerDesc = description.toLowerCase();
+        String categoryId = "other";
+        String priority = "medium";
+        
+        if (lowerDesc.contains("road") || lowerDesc.contains("bridge") || lowerDesc.contains("building")) {
+            categoryId = "infrastructure";
+        } else if (lowerDesc.contains("water") || lowerDesc.contains("electricity") || lowerDesc.contains("power")) {
+            categoryId = "utilities";
+            priority = "high";
+        } else if (lowerDesc.contains("light") || lowerDesc.contains("security") || lowerDesc.contains("emergency")) {
+            categoryId = "safety";
+            priority = "high";
+        } else if (lowerDesc.contains("waste") || lowerDesc.contains("garbage") || lowerDesc.contains("pollution")) {
+            categoryId = "environment";
+        } else if (lowerDesc.contains("bus") || lowerDesc.contains("traffic") || lowerDesc.contains("parking")) {
+            categoryId = "transport";
+        }
+        
+        // Check for urgency keywords
+        if (lowerDesc.contains("emergency") || lowerDesc.contains("urgent") || lowerDesc.contains("danger")) {
+            priority = "urgent";
+        } else if (lowerDesc.contains("broken") || lowerDesc.contains("damaged") || lowerDesc.contains("leak")) {
+            priority = "high";
+        }
+        
+        result.put("category", createCategoryObject(categoryId));
+        result.put("priority", createPriorityObject(priority));
+        result.put("confidence", 0.4);
+        result.put("suggestedTags", new ArrayList<>());
+        result.put("reasoning", "Keyword-based categorization (AI services unavailable)");
+        
+        return result;
+    }
 }
