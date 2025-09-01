@@ -78,8 +78,10 @@ export const reportService = {
   },
 
   // Update report status
-  updateReportStatus: (reportId, status) => {
-    return api.put(`/api/reports/${reportId}/status`, { status });
+  updateReportStatus: (reportId, status, resolutionNotes) => {
+    return api.put(`/api/reports/${reportId}/status`, null, {
+      params: { status, resolutionNotes },
+    });
   },
 
   // Get reports in area

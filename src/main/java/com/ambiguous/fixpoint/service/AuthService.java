@@ -2,7 +2,9 @@ package com.ambiguous.fixpoint.service;
 
 import com.ambiguous.fixpoint.dto.*;
 import com.ambiguous.fixpoint.entity.User;
+import com.ambiguous.fixpoint.entity.Organization;
 import com.ambiguous.fixpoint.repository.UserRepository;
+import com.ambiguous.fixpoint.repository.OrganizationRepository;
 import com.ambiguous.fixpoint.security.JwtTokenProvider;
 import com.ambiguous.fixpoint.security.UserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class AuthService {
 
     @Autowired
     JwtTokenProvider tokenProvider;
+
+    @Autowired
+    OrganizationRepository organizationRepository;
 
     public JwtAuthenticationResponse authenticateUser(LoginRequest loginRequest) {
         System.out.println("DEBUG: Attempting authentication for: " + loginRequest.getUsernameOrEmail());
@@ -111,14 +116,14 @@ public class AuthService {
             user.setRole(User.Role.ORG_STAFF);
         }
         
-        User savedUser = userRepository.save(user);
-        
-        // Set organization relationship if organizationId is provided
+        // Link organization if provided (for organization staff/admin registrations)
         if (signUpRequest.getOrganizationId() != null) {
-            // We'll need to inject OrganizationService here or handle this differently
-            // For now, we'll save the user first and then update the organization relationship
+            Organization organization = organizationRepository.findById(signUpRequest.getOrganizationId())
+                    .orElseThrow(() -> new RuntimeException("Organization not found"));
+            user.setOrganization(organization);
         }
 
+        User savedUser = userRepository.save(user);
         return savedUser;
     }
 
