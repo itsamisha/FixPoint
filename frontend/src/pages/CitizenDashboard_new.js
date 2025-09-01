@@ -22,81 +22,26 @@ const CitizenDashboard = () => {
 
   useEffect(() => {
     fetchData();
-  }, [user]); // Re-fetch when user changes
+  }, []);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       
       // Fetch all reports for community view
-      const allReportsResponse = await reportService.getReports();
-      console.log('Raw API response for all reports:', allReportsResponse);
-      const allReportsData = allReportsResponse?.data;
-      console.log('Extracted all reports data:', allReportsData);
-      console.log('All reports data type:', typeof allReportsData);
-      console.log('All reports data keys:', allReportsData ? Object.keys(allReportsData) : 'null/undefined');
-      
-      // Handle different response formats for community reports
-      let reportsArray = [];
-      if (Array.isArray(allReportsData)) {
-        reportsArray = allReportsData;
-        console.log('All reports is array, using directly:', reportsArray);
-      } else if (allReportsData && typeof allReportsData === 'object' && Array.isArray(allReportsData.reports)) {
-        reportsArray = allReportsData.reports;
-        console.log('All reports is object with reports property:', reportsArray);
-      } else if (allReportsData && typeof allReportsData === 'object' && Array.isArray(allReportsData.content)) {
-        reportsArray = allReportsData.content;
-        console.log('All reports is paginated object with content property:', reportsArray);
-      } else if (allReportsData && typeof allReportsData === 'object' && Array.isArray(allReportsData.data)) {
-        reportsArray = allReportsData.data;
-        console.log('All reports is object with nested data property:', reportsArray);
-      } else {
-        console.warn('Unexpected data format for all reports:', allReportsData);
-        console.warn('Available properties:', allReportsData ? Object.keys(allReportsData) : 'none');
-        reportsArray = [];
-      }
-      
-      setReports(reportsArray);
+      const allReports = await reportService.getAllReports();
+      setReports(allReports || []);
       
       // Fetch user's reports
       if (user?.id) {
-        const myReportsResponse = await reportService.getUserReports();
-        console.log('Raw API response for user reports:', myReportsResponse);
-        const myReports = myReportsResponse?.data;
-        console.log('Extracted data:', myReports);
-        console.log('Data type:', typeof myReports);
-        console.log('Data keys:', myReports ? Object.keys(myReports) : 'null/undefined');
+        const myReports = await reportService.getMyReports();
+        setUserReports(myReports || []);
         
-        // Ensure we always have an array
-        let userReportsArray = [];
-        if (Array.isArray(myReports)) {
-          userReportsArray = myReports;
-          console.log('Data is array, using directly:', userReportsArray);
-        } else if (myReports && typeof myReports === 'object' && Array.isArray(myReports.reports)) {
-          // In case the API returns an object with a reports property
-          userReportsArray = myReports.reports;
-          console.log('Data is object with reports property:', userReportsArray);
-        } else if (myReports && typeof myReports === 'object' && Array.isArray(myReports.content)) {
-          // In case the API returns paginated data with content property
-          userReportsArray = myReports.content;
-          console.log('Data is paginated object with content property:', userReportsArray);
-        } else if (myReports && typeof myReports === 'object' && Array.isArray(myReports.data)) {
-          // In case the API returns nested data property
-          userReportsArray = myReports.data;
-          console.log('Data is object with nested data property:', userReportsArray);
-        } else {
-          console.warn('Unexpected data format for user reports:', myReports);
-          console.warn('Available properties:', myReports ? Object.keys(myReports) : 'none');
-          userReportsArray = [];
-        }
-        
-        setUserReports(userReportsArray);
-        
-        // Calculate stats - ensure we have an array before filtering
-        const totalReports = userReportsArray.length || 0;
-        const pendingReports = userReportsArray.filter(r => r && r.status === 'PENDING').length || 0;
-        const inProgressReports = userReportsArray.filter(r => r && r.status === 'IN_PROGRESS').length || 0;
-        const resolvedReports = userReportsArray.filter(r => r && r.status === 'RESOLVED').length || 0;
+        // Calculate stats
+        const totalReports = myReports?.length || 0;
+        const pendingReports = myReports?.filter(r => r.status === 'PENDING')?.length || 0;
+        const inProgressReports = myReports?.filter(r => r.status === 'IN_PROGRESS')?.length || 0;
+        const resolvedReports = myReports?.filter(r => r.status === 'RESOLVED')?.length || 0;
         
         setStats({
           totalReports,
@@ -214,16 +159,16 @@ const CitizenDashboard = () => {
               </div>
             </Link>
             
-            <Link to="/map" className="action-card">
+            <Link to="/organizations" className="action-card">
               <div className="action-card-overlay"></div>
               <div className="action-card-content">
                 <div className="action-icon" style={{background: 'linear-gradient(135deg, #3b82f6, #06b6d4)'}}>
                   <Users size={40} color="white" />
                 </div>
-                <h3 className="action-title">Explore Community</h3>
-                <p className="action-description">View reports on map and connect with local organizations</p>
+                <h3 className="action-title">Organizations</h3>
+                <p className="action-description">Connect with local groups and community leaders</p>
                 <div className="action-link">
-                  <span>Explore Map</span>
+                  <span>Browse Groups</span>
                   <div className="action-arrow">
                     <span>→</span>
                   </div>
@@ -348,7 +293,7 @@ const CitizenDashboard = () => {
                     </div>
                     <h3 className="overview-card-title">Your Recent Reports</h3>
                   </div>
-                  {Array.isArray(userReports) && userReports.slice(0, 3).length > 0 ? (
+                  {userReports.slice(0, 3).length > 0 ? (
                     <div>
                       {userReports.slice(0, 3).map(report => (
                         <div key={report.id} className="report-item">
@@ -398,7 +343,7 @@ const CitizenDashboard = () => {
                     </div>
                     <h3 className="overview-card-title">Community Activity</h3>
                   </div>
-                  {Array.isArray(reports) && reports.slice(0, 3).length > 0 ? (
+                  {reports.slice(0, 3).length > 0 ? (
                     <div>
                       {reports.slice(0, 3).map(report => (
                         <div key={report.id} className="report-item">
@@ -448,7 +393,7 @@ const CitizenDashboard = () => {
                 <p className="overview-subtitle">Track and manage all your submitted reports</p>
               </div>
               
-              {Array.isArray(userReports) && userReports.length > 0 ? (
+              {userReports.length > 0 ? (
                 <div style={{display: 'grid', gap: '24px'}}>
                   {userReports.map(report => (
                     <div key={report.id} style={{transform: 'scale(1)', transition: 'transform 0.3s ease'}}>
@@ -478,7 +423,7 @@ const CitizenDashboard = () => {
                 <h2 className="overview-title">Community Reports</h2>
                 <p className="overview-subtitle">See what's happening in your neighborhood</p>
               </div>
-              {Array.isArray(reports) && reports.length > 0 ? (
+              {reports.length > 0 ? (
                 <div style={{display: 'grid', gap: '24px'}}>
                   {reports.map(report => (
                     <div key={report.id} style={{transform: 'scale(1)', transition: 'transform 0.3s ease'}}>
