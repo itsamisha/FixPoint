@@ -382,7 +382,7 @@ public class MultiAIService {
     private String translateWithGemini(String text) throws Exception {
         String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
         
-        String prompt = "Translate the following English text to Bangla (Bengali). Provide only the translation without any additional text:\n\n" + text;
+        String prompt = "Translate the following English text to Bangla (Bengali). Provide only the translation without any additional text or explanations:\n\n" + text;
         
         Map<String, Object> requestBody = new HashMap<>();
         List<Map<String, Object>> contents = new ArrayList<>();
@@ -399,16 +399,18 @@ public class MultiAIService {
         headers.set("Content-Type", "application/json");
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
         
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
-        Map<String, Object> responseBody = response.getBody();
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        String responseBody = response.getBody();
         
-        if (responseBody != null && responseBody.containsKey("candidates")) {
-            List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
-            if (!candidates.isEmpty()) {
-                Map<String, Object> candidate = candidates.get(0);
-                Map<String, Object> content1 = (Map<String, Object>) candidate.get("content");
-                List<Map<String, Object>> parts1 = (List<Map<String, Object>>) content1.get("parts");
-                return (String) parts1.get(0).get("text");
+        // Parse the response to extract the translation
+        if (responseBody != null && responseBody.contains("\"text\"")) {
+            int startIndex = responseBody.indexOf("\"text\": \"") + 9;
+            int endIndex = responseBody.indexOf("\"", startIndex);
+            if (startIndex > 8 && endIndex > startIndex) {
+                return responseBody.substring(startIndex, endIndex)
+                    .replace("\\n", "\n")
+                    .replace("\\\"", "\"")
+                    .trim();
             }
         }
         
@@ -444,15 +446,18 @@ public class MultiAIService {
         headers.set("Authorization", "Bearer " + openaiApiKey);
         
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
-        Map<String, Object> responseBody = response.getBody();
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        String responseBody = response.getBody();
         
-        if (responseBody != null && responseBody.containsKey("choices")) {
-            List<Map<String, Object>> choices = (List<Map<String, Object>>) responseBody.get("choices");
-            if (!choices.isEmpty()) {
-                Map<String, Object> choice = choices.get(0);
-                Map<String, String> message = (Map<String, String>) choice.get("message");
-                return message.get("content").trim();
+        // Parse the response to extract the translation
+        if (responseBody != null && responseBody.contains("\"content\"")) {
+            int startIndex = responseBody.lastIndexOf("\"content\": \"") + 12;
+            int endIndex = responseBody.indexOf("\"", startIndex);
+            if (startIndex > 11 && endIndex > startIndex) {
+                return responseBody.substring(startIndex, endIndex)
+                    .replace("\\n", "\n")
+                    .replace("\\\"", "\"")
+                    .trim();
             }
         }
         
@@ -465,7 +470,7 @@ public class MultiAIService {
     private String generateFallbackTranslation(String text) {
         // This is a very basic fallback - in production you might want to use 
         // a local translation service or provide a more sophisticated fallback
-        return "[বাংলা অনুবাদ প্রয়োজন] " + text + " [Translation service temporarily unavailable - please translate manually]";
+        return "[বাংলা অনুবাদ প্রয়োজন] " + text + " [AI translation service temporarily unavailable - please translate manually]";
     }
 
     /**

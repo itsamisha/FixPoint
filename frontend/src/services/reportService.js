@@ -78,10 +78,8 @@ export const reportService = {
   },
 
   // Update report status
-  updateReportStatus: (reportId, status, resolutionNotes) => {
-    return api.put(`/api/reports/${reportId}/status`, null, {
-      params: { status, resolutionNotes },
-    });
+  updateReportStatus: (reportId, status) => {
+    return api.put(`/api/reports/${reportId}/status`, { status });
   },
 
   // Get reports in area
@@ -218,5 +216,37 @@ export const reportService = {
   // Assign report to a volunteer or staff member
   assignReport: (reportId, userId) => {
     return api.put(`/api/reports/${reportId}/assign`, { assignedToId: userId });
+  },
+
+  // Export reports to PDF
+  exportReportsToPDF: (reportIds, exportOptions = {}) => {
+    console.log('Frontend: Sending PDF export request');
+    console.log('Report IDs:', reportIds, 'Types:', reportIds.map(id => typeof id));
+    console.log('Export options:', exportOptions);
+    
+    // Ensure report IDs are numbers
+    const cleanReportIds = reportIds.map(id => Number(id));
+    console.log('Cleaned Report IDs:', cleanReportIds, 'Types:', cleanReportIds.map(id => typeof id));
+    
+    return api.post("/api/reports/export/pdf", {
+      reportIds: cleanReportIds,
+      options: exportOptions
+    }, {
+      responseType: 'blob', // Important for PDF download
+      headers: {
+        'Accept': 'application/pdf'
+      }
+    });
+  },
+
+  // Export single report to PDF
+  exportSingleReportToPDF: (reportId, exportOptions = {}) => {
+    return api.get(`/api/reports/${reportId}/export/pdf`, {
+      params: exportOptions,
+      responseType: 'blob', // Important for PDF download
+      headers: {
+        'Accept': 'application/pdf'
+      }
+    });
   },
 };

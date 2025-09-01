@@ -18,6 +18,7 @@ import {
 import { toast } from "react-toastify";
 import { reportService } from "../services/reportService";
 import { useAuth } from "../contexts/AuthContext";
+import ReportExporter from "../components/ReportExporter";
 import "./StaffDashboard.css";
 
 const StaffDashboard = () => {
@@ -30,6 +31,8 @@ const StaffDashboard = () => {
   const [progressNotes, setProgressNotes] = useState("");
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [selectedWorkStage, setSelectedWorkStage] = useState("");
+  const [selectedReports, setSelectedReports] = useState([]);
+  const [isExportMode, setIsExportMode] = useState(false);
 
   const [stats, setStats] = useState({
     totalAssigned: 0,

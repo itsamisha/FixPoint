@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -410,6 +411,119 @@ public class ReportController {
             return ResponseEntity.ok(reports);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("message", "Error fetching assigned reports: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Export selected reports to PDF
+     */
+    @PostMapping("/export/pdf")
+    public ResponseEntity<?> exportReportsToPDF(
+            @RequestBody Map<String, Object> exportRequest,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        try {
+            System.out.println("PDF Export request received: " + exportRequest);
+            
+            User user = userRepository.findById(currentUser.getId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            // Handle both Integer and Long values from JSON
+            @SuppressWarnings("unchecked")
+            List<Object> rawReportIds = (List<Object>) exportRequest.get("reportIds");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> options = (Map<String, Object>) exportRequest.get("options");
+
+            if (rawReportIds == null || rawReportIds.isEmpty()) {
+                System.out.println("No report IDs provided");
+                return ResponseEntity.badRequest().body(Map.of("message", "No reports selected for export"));
+            }
+
+            // Convert Integer/Long values to Long
+            List<Long> reportIds = rawReportIds.stream()
+                    .map(id -> {
+                        if (id instanceof Integer) {
+                            return ((Integer) id).longValue();
+                        } else if (id instanceof Long) {
+                            return (Long) id;
+                        } else {
+                            return Long.valueOf(id.toString());
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            System.out.println("Exporting reports: " + reportIds + " for user: " + user.getFullName());
+            
+            byte[] pdfBytes = reportService.exportReportsToPDF(reportIds, options, user);
+            
+            System.out.println("PDF generated successfully, size: " + pdfBytes.length + " bytes");
+            
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/pdf")
+                    .header("Content-Disposition", "attachment; filename=reports_export.pdf")
+                    .body(pdfBytes);
+                    
+        } catch (Exception e) {
+            System.err.println("Error exporting reports: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("message", "Error exporting reports: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Export single report to PDF
+     */
+    @GetMapping("/{id}/export/pdf")
+    public ResponseEntity<?> exportSingleReportToPDF(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "true") boolean includeImages,
+            @RequestParam(defaultValue = "true") boolean includeComments,
+            @RequestParam(defaultValue = "true") boolean includeProgress,
+            @RequestParam(defaultValue = "true") boolean includeMetadata,
+            @RequestParam(defaultValue = "detailed") String format,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        try {
+            User user = userRepository.findById(currentUser.getId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            Map<String, Object> options = new HashMap<>();
+            options.put("includeImages", includeImages);
+            options.put("includeComments", includeComments);
+            options.put("includeProgress", includeProgress);
+            options.put("includeMetadata", includeMetadata);
+            options.put("format", format);
+
+            byte[] pdfBytes = reportService.exportSingleReportToPDF(id, options, user);
+            
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/pdf")
+                    .header("Content-Disposition", "attachment; filename=report_" + id + ".pdf")
+                    .body(pdfBytes);
+                    
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Error exporting report: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Test PDF generation endpoint
+     */
+    @GetMapping("/test-pdf")
+    public ResponseEntity<?> testPDF(@AuthenticationPrincipal UserPrincipal currentUser) {
+        try {
+            System.out.println("Test PDF endpoint called");
+            
+            // Create a simple test PDF
+            String testContent = "Test PDF Content - User: " + currentUser.getUsername();
+            byte[] testPdf = testContent.getBytes();
+            
+            return ResponseEntity.ok()
+                    .header("Content-Type", "text/plain")
+                    .header("Content-Disposition", "attachment; filename=test.txt")
+                    .body(testPdf);
+                    
+        } catch (Exception e) {
+            System.err.println("Error in test PDF: " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", "Test failed: " + e.getMessage()));
         }
     }
 }

@@ -503,6 +503,21 @@
   padding: 1.5rem;
   border-bottom: 1px solid rgba(241, 245, 249, 0.8);
   background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.task-header-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.task-checkbox {
+  margin-top: 0.25rem;
+  transform: scale(1.2);
+  cursor: pointer;
 }
 
 .task-card-header h3 {
@@ -511,6 +526,32 @@
   color: #1e293b;
   margin-bottom: 1rem;
   line-height: 1.3;
+  margin: 0;
+}
+
+/* Header actions for export functionality */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  gap: 1rem;
+}
+
+.header-left h2 {
+  margin: 0 0 0.5rem 0;
+}
+
+.header-left p {
+  margin: 0;
+  color: #64748b;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
 }
 
 .task-meta {

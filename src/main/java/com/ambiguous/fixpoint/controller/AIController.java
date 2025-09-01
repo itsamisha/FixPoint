@@ -170,8 +170,7 @@ public class AIController {
                 ));
             }
             
-            // For now, we'll use a simple translation service
-            // In production, you might want to use Google Translate API or similar
+            // Use MultiAI service for translation
             String translatedText = multiAIService.translateTextToBangla(text);
             
             return ResponseEntity.ok(Map.of(

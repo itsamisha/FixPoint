@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -46,6 +47,9 @@ public class ReportService {
 
     @Autowired
     private OrganizationService organizationService;
+
+    @Autowired
+    private PDFExportService pdfExportService;
 
     private final String uploadDir = "uploads/";
 
@@ -315,5 +319,29 @@ public class ReportService {
     public Page<ReportSummary> getAssignedReports(Long userId, Pageable pageable) {
         Page<Report> reports = reportRepository.findByAssignedToId(userId, pageable);
         return reports.map(this::convertToReportSummary);
+    }
+
+    /**
+     * Export multiple reports to PDF
+     */
+    public byte[] exportReportsToPDF(List<Long> reportIds, Map<String, Object> options, User currentUser) {
+        try {
+            System.out.println("ReportService: Starting PDF export for " + reportIds.size() + " reports");
+            
+            // Switch to real PDF generation
+            return pdfExportService.exportReportsToPDF(reportIds, options, currentUser);
+            
+        } catch (Exception e) {
+            System.err.println("Error in exportReportsToPDF: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("PDF export failed: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Export single report to PDF
+     */
+    public byte[] exportSingleReportToPDF(Long reportId, Map<String, Object> options, User currentUser) {
+        return pdfExportService.exportSingleReportToPDF(reportId, options, currentUser);
     }
 }

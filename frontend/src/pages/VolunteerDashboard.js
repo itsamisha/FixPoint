@@ -26,6 +26,7 @@ import { toast } from "react-toastify";
 import { reportService } from "../services/reportService";
 import { volunteerService } from "../services/volunteerService";
 import { useAuth } from "../contexts/AuthContext";
+import ReportExporter from "../components/ReportExporter";
 import "./VolunteerDashboard.css";
 
 const VolunteerDashboard = () => {
@@ -40,6 +41,8 @@ const VolunteerDashboard = () => {
   const [progressNotes, setProgressNotes] = useState("");
   const [progressPercentage, setProgressPercentage] = useState(0);
   const [selectedWorkStage, setSelectedWorkStage] = useState("");
+  const [selectedReports, setSelectedReports] = useState([]);
+  const [isExportMode, setIsExportMode] = useState(false);
 
   const [stats, setStats] = useState({
     totalTasks: 0,
@@ -181,6 +184,26 @@ const VolunteerDashboard = () => {
     setProgressNotes("");
     setProgressPercentage(0);
     setSelectedWorkStage("");
+  };
+
+  const handleReportSelection = (reportId) => {
+    setSelectedReports(prev => 
+      prev.includes(reportId) 
+        ? prev.filter(id => id !== reportId)
+        : [...prev, reportId]
+    );
+  };
+
+  const handleSelectAllReports = () => {
+    if (selectedReports.length === myTasks.length) {
+      setSelectedReports([]);
+    } else {
+      setSelectedReports(myTasks.map(task => task.id));
+    }
+  };
+
+  const onExportComplete = () => {
+    setSelectedReports([]);
   };
 
   const getStatusColor = (status) => {
@@ -492,15 +515,47 @@ const VolunteerDashboard = () => {
           {activeTab === "my-tasks" && (
             <div>
               <div className="content-header">
-                <h2 className="content-title">My Tasks</h2>
-                <p>Track and manage your assigned tasks</p>
+                <div className="header-left">
+                  <h2 className="content-title">My Tasks</h2>
+                  <p>Track and manage your assigned tasks</p>
+                </div>
+                <div className="header-actions">
+                  <ReportExporter
+                    selectedReports={selectedReports}
+                    allReports={myTasks}
+                    userRole="volunteer"
+                    onExportComplete={onExportComplete}
+                    isExportMode={isExportMode}
+                    onExportModeChange={setIsExportMode}
+                  />
+                  {isExportMode && myTasks.length > 0 && (
+                    <button
+                      onClick={handleSelectAllReports}
+                      className="btn btn-secondary"
+                      style={{ marginLeft: '10px' }}
+                    >
+                      {selectedReports.length === myTasks.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="tasks-grid">
                 {myTasks.map((task) => (
                   <div key={task.id} className="task-card">
                     <div className="task-card-header">
-                      <h3>{task.title}</h3>
+                      <div className="task-header-left">
+                        {isExportMode && (
+                          <input
+                            type="checkbox"
+                            checked={selectedReports.includes(task.id)}
+                            onChange={() => handleReportSelection(task.id)}
+                            className="task-checkbox"
+                            style={{ marginRight: '10px' }}
+                          />
+                        )}
+                        <h3>{task.title}</h3>
+                      </div>
                       <div className="task-meta">
                         <span
                           className="priority-badge"
