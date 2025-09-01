@@ -4,6 +4,7 @@ import CitizenDashboard from "./CitizenDashboard";
 import OrganizationDashboard from "./OrganizationDashboard";
 import EmployeeDashboard from "./EmployeeDashboard";
 import StaffDashboard from "./StaffDashboard";
+import VolunteerDashboard from "./VolunteerDashboard";
 import Dashboard from "./Dashboard"; // Fallback dashboard
 
 const DashboardRouter = () => {
@@ -23,6 +24,10 @@ const DashboardRouter = () => {
   // Route to appropriate dashboard based on user type
   switch (user.userType) {
     case "CITIZEN":
+      // Check if user is a volunteer
+      if (user.isVolunteer) {
+        return <VolunteerDashboard />;
+      }
       return <CitizenDashboard />;
 
     case "ORGANIZATION_ADMIN":
@@ -32,9 +37,7 @@ const DashboardRouter = () => {
       return <StaffDashboard />;
 
     case "VOLUNTEER":
-      // For now, volunteers get the citizen dashboard
-      // You can create a separate VolunteerDashboard later
-      return <CitizenDashboard />;
+      return <VolunteerDashboard />;
 
     default:
       // Fallback to general dashboard

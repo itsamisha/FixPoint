@@ -18,6 +18,7 @@ import OrganizationReports from "./pages/OrganizationReports";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import AssignedReports from "./pages/AssignedReports";
 import StaffDashboard from "./pages/StaffDashboard";
+import VolunteerDashboard from "./pages/VolunteerDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -79,6 +80,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <StaffDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/volunteer/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <VolunteerDashboard />
                     </ProtectedRoute>
                   }
                 />

@@ -813,6 +813,9 @@ public class DataInitializer implements CommandLineRunner {
         
         // Create a specific dummy staff user for testing
         createDummyStaffUser(testOrg);
+        
+        // Create dummy citizen volunteers for testing leaderboard
+        createDummyCitizenVolunteers();
     }
     
     private void createDummyStaffUser(Organization testOrg) {
@@ -926,6 +929,145 @@ public class DataInitializer implements CommandLineRunner {
             
         } catch (Exception e) {
             System.err.println("Error creating dummy assigned tasks: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void createDummyCitizenVolunteers() {
+        System.out.println("Creating dummy citizen volunteers for leaderboard testing...");
+        
+        try {
+            // Create 10 citizen volunteers with usernames citizen1 to citizen10
+            for (int i = 1; i <= 10; i++) {
+                String username = "citizen" + i;
+                
+                // Check if user already exists
+                if (userRepository.findByUsername(username).isPresent()) {
+                    System.out.println("User " + username + " already exists, skipping...");
+                    continue;
+                }
+                
+                User volunteer = new User();
+                volunteer.setUsername(username);
+                volunteer.setEmail("citizen" + i + "@example.com");
+                volunteer.setPassword(passwordEncoder.encode("123456"));
+                volunteer.setFullName("Citizen Volunteer " + i);
+                volunteer.setRole(User.Role.CITIZEN);
+                volunteer.setUserType(User.UserType.CITIZEN);
+                volunteer.setIsActive(true);
+                volunteer.setEmailVerified(true);
+                volunteer.setIsVolunteer(true);
+                
+                // Add some volunteer skills
+                String[] skills = {"Community Service", "Problem Solving", "Communication", "Teamwork", "Leadership"};
+                volunteer.setVolunteerSkills(String.join(",", skills));
+                
+                User savedVolunteer = userRepository.save(volunteer);
+                
+                // Create some dummy reports and assign them to this volunteer for leaderboard testing
+                createDummyVolunteerTasks(savedVolunteer, i);
+                
+                System.out.println("Created volunteer: " + username + " (Password: 123456)");
+            }
+            
+            System.out.println("Dummy citizen volunteers created successfully!");
+            
+        } catch (Exception e) {
+            System.err.println("Error creating dummy citizen volunteers: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    private void createDummyVolunteerTasks(User volunteer, int volunteerNumber) {
+        try {
+            // Create different numbers of tasks for each volunteer to create variety in leaderboard
+            int taskCount = (volunteerNumber % 3) + 2; // 2, 3, or 4 tasks per volunteer
+            
+            // Different task categories for variety
+            Report.Category[] categories = {
+                Report.Category.ROADS_INFRASTRUCTURE,
+                Report.Category.STREET_LIGHTING,
+                Report.Category.SANITATION_WASTE,
+                Report.Category.WATER_DRAINAGE,
+                Report.Category.TRAFFIC_PARKING,
+                Report.Category.STRAY_ANIMALS
+            };
+            
+            // Different work stages for variety
+            Report.WorkStage[] workStages = {
+                Report.WorkStage.NOT_STARTED,
+                Report.WorkStage.ASSESSMENT,
+                Report.WorkStage.IN_PROGRESS,
+                Report.WorkStage.QUALITY_CHECK,
+                Report.WorkStage.COMPLETED
+            };
+            
+            // Get a citizen user for reporting (use the test user)
+            User citizenUser = userRepository.findByUsername("test").orElse(null);
+            if (citizenUser == null) {
+                System.err.println("Citizen user not found for creating volunteer tasks");
+                return;
+            }
+            
+            for (int i = 0; i < taskCount; i++) {
+                Report report = new Report();
+                report.setTitle("Volunteer Task " + volunteerNumber + "-" + (i + 1) + " - " + categories[i % categories.length].toString().replace("_", " "));
+                report.setDescription("Task created for testing volunteer leaderboard functionality. This is task " + (i + 1) + " for volunteer " + volunteerNumber);
+                report.setCategory(categories[i % categories.length]);
+                report.setStatus(Report.Status.IN_PROGRESS);
+                report.setPriority(Report.Priority.MEDIUM);
+                report.setLatitude(23.7937 + (volunteerNumber * 0.001) + (i * 0.0001));
+                report.setLongitude(90.4066 + (volunteerNumber * 0.001) + (i * 0.0001));
+                report.setLocationAddress("Test Location " + volunteerNumber + "-" + (i + 1) + ", Dhaka");
+                report.setReporter(citizenUser);
+                report.setAssignedTo(volunteer); // Assign to this volunteer
+                
+                // Randomize progress and work stage for variety
+                int progress = (int) (Math.random() * 100);
+                Report.WorkStage workStage = workStages[i % workStages.length];
+                
+                // Ensure some tasks are completed for leaderboard testing
+                if (i == taskCount - 1) { // Last task for each volunteer
+                    progress = 100;
+                    workStage = Report.WorkStage.COMPLETED;
+                    report.setStatus(Report.Status.RESOLVED);
+                    report.setResolvedAt(LocalDateTime.now().minusDays((int) (Math.random() * 7)));
+                    report.setResolutionNotes("Task completed successfully by volunteer " + volunteerNumber);
+                }
+                
+                report.setProgressPercentage(progress);
+                report.setWorkStage(workStage);
+                report.setVoteCount((int) (Math.random() * 10) + 1);
+                
+                // Set progress notes based on work stage
+                switch (workStage) {
+                    case NOT_STARTED:
+                        report.setProgressNotes("Task assigned to volunteer, awaiting initiation");
+                        break;
+                    case ASSESSMENT:
+                        report.setProgressNotes("Volunteer is assessing the situation");
+                        break;
+                    case IN_PROGRESS:
+                        report.setProgressNotes("Volunteer is actively working on this task");
+                        break;
+                    case QUALITY_CHECK:
+                        report.setProgressNotes("Volunteer is performing final quality check");
+                        break;
+                    case COMPLETED:
+                        report.setProgressNotes("Task completed successfully by volunteer");
+                        break;
+                }
+                
+                // Set creation time
+                report.setCreatedAt(LocalDateTime.now().minusDays((int) (Math.random() * 30)));
+                
+                reportRepository.save(report);
+            }
+            
+            System.out.println("Created " + taskCount + " tasks for volunteer " + volunteer.getUsername());
+            
+        } catch (Exception e) {
+            System.err.println("Error creating volunteer tasks for " + volunteer.getUsername() + ": " + e.getMessage());
             e.printStackTrace();
         }
     }

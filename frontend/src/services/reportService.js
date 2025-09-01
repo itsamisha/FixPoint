@@ -211,7 +211,12 @@ export const reportService = {
   translateText: (text, targetLanguage = "bangla") => {
     return api.post("/api/ai/translate", {
       text: text,
-      targetLanguage: targetLanguage
+      targetLanguage: targetLanguage,
     });
+  },
+
+  // Assign report to a volunteer or staff member
+  assignReport: (reportId, userId) => {
+    return api.put(`/api/reports/${reportId}/assign`, { assignedToId: userId });
   },
 };

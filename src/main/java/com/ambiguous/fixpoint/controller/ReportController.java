@@ -259,6 +259,45 @@ public class ReportController {
         }
     }
 
+    @PutMapping("/{id}/assign")
+    public ResponseEntity<?> assignReport(
+            @PathVariable Long id,
+            @RequestBody Map<String, Long> requestBody,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        User user = userRepository.findById(currentUser.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        try {
+            Long assignedToId = requestBody.get("assignedToId");
+            
+            // Check if the current user is trying to assign to themselves (volunteer self-assignment)
+            if (assignedToId.equals(currentUser.getId())) {
+                // Allow volunteers to self-assign
+                if (user.getIsVolunteer() || user.getUserType() == User.UserType.VOLUNTEER) {
+                    ReportSummary report = reportService.assignReport(id, assignedToId, user);
+                    return ResponseEntity.ok(report);
+                }
+            }
+            
+            // For other assignments, check if user is admin or staff
+            if (user.getUserType() == User.UserType.ORGANIZATION_ADMIN || 
+                user.getUserType() == User.UserType.ORGANIZATION_STAFF) {
+                ReportSummary report = reportService.assignReport(id, assignedToId, user);
+                return ResponseEntity.ok(report);
+            }
+            
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "Unauthorized to assign reports");
+            return ResponseEntity.status(403).body(error);
+            
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
     @PostMapping("/check-duplicates")
     public ResponseEntity<?> checkDuplicates(@RequestBody ReportRequest reportRequest) {
         try {
