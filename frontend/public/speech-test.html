@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speech-to-Text Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        color: white;
+      }
+      .container {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 30px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #fff;
+      }
+      .test-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      button {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin: 10px;
+        font-size: 16px;
+        transition: transform 0.2s;
+      }
+      button:hover {
+        transform: translateY(-2px);
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      .status {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .transcript {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+        min-height: 100px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .recording {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        animation: pulse 1.5s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎤 Speech-to-Text Test Page</h1>
+
+      <div class="test-section">
+        <h3>🔊 Text-to-Speech Test</h3>
+        <button onclick="speakText()">Speak Sample Text</button>
+        <button onclick="stopSpeaking()">Stop Speaking</button>
+        <div class="status" id="tts-status">Ready to speak</div>
+      </div>
+
+      <div class="test-section">
+        <h3>🎤 Speech-to-Text Test</h3>
+        <button onclick="startRecording()" id="startBtn">
+          Start Recording
+        </button>
+        <button onclick="stopRecording()" id="stopBtn" disabled>
+          Stop Recording
+        </button>
+        <div class="status" id="stt-status">Ready to record</div>
+        <div class="transcript" id="transcript">
+          Your speech will appear here...
+        </div>
+      </div>
+
+      <div class="test-section">
+        <h3>🌐 API Status</h3>
+        <button onclick="checkAPIStatus()">Check API Status</button>
+        <div class="status" id="api-status">Click to check status</div>
+      </div>
+    </div>
+
+    <script>
+      let isRecording = false;
+      let mediaRecorder = null;
+      let audioChunks = [];
+      let isSpeaking = false;
+
+      // Text-to-Speech
+      function speakText() {
+        if (isSpeaking) {
+          stopSpeaking();
+          return;
+        }
+
+        const text =
+          "Hello! This is a test of the text-to-speech functionality. The speech synthesis is working correctly.";
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        utterance.onstart = () => {
+          isSpeaking = true;
+          document.getElementById("tts-status").textContent = "🔊 Speaking...";
+          document.getElementById("tts-status").className = "status recording";
+        };
+
+        utterance.onend = () => {
+          isSpeaking = false;
+          document.getElementById("tts-status").textContent =
+            "✅ Speech completed";
+          document.getElementById("tts-status").className = "status";
+        };
+
+        window.speechSynthesis.speak(utterance);
+      }
+
+      function stopSpeaking() {
+        window.speechSynthesis.cancel();
+        isSpeaking = false;
+        document.getElementById("tts-status").textContent = "⏹️ Speech stopped";
+        document.getElementById("tts-status").className = "status";
+      }
+
+      // Speech-to-Text
+      async function startRecording() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+
+          mediaRecorder = new MediaRecorder(stream, {
+            mimeType: "audio/webm;codecs=opus",
+          });
+
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              audioChunks.push(event.data);
+            }
+          };
+
+          mediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            await processAudio(audioBlob);
+            stream.getTracks().forEach((track) => track.stop());
+          };
+
+          mediaRecorder.start();
+          isRecording = true;
+
+          document.getElementById("startBtn").disabled = true;
+          document.getElementById("stopBtn").disabled = false;
+          document.getElementById("stt-status").textContent = "🎤 Recording...";
+          document.getElementById("stt-status").className = "status recording";
+        } catch (error) {
+          console.error("Error starting recording:", error);
+          document.getElementById("stt-status").textContent =
+            "❌ Error: " + error.message;
+        }
+      }
+
+      function stopRecording() {
+        if (mediaRecorder && isRecording) {
+          mediaRecorder.stop();
+          isRecording = false;
+
+          document.getElementById("startBtn").disabled = false;
+          document.getElementById("stopBtn").disabled = true;
+          document.getElementById("stt-status").textContent =
+            "⏹️ Processing audio...";
+          document.getElementById("stt-status").className = "status";
+        }
+      }
+
+      async function processAudio(audioBlob) {
+        try {
+          // Convert to base64
+          const base64Audio = await blobToBase64(audioBlob);
+
+          // Call our backend API
+          const response = await fetch("/api/speech/convert", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              audio: base64Audio,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          if (result.success && result.transcript) {
+            document.getElementById("transcript").textContent =
+              result.transcript;
+            document.getElementById(
+              "stt-status"
+            ).textContent = `✅ Success! Source: ${result.source}`;
+          } else {
+            throw new Error(result.message || "Failed to get transcript");
+          }
+        } catch (error) {
+          console.error("Error processing audio:", error);
+          document.getElementById("transcript").textContent =
+            "Error: " + error.message;
+          document.getElementById("stt-status").textContent =
+            "❌ Error processing audio";
+        }
+      }
+
+      function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64 = reader.result.split(",")[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      // API Status Check
+      async function checkAPIStatus() {
+        try {
+          const response = await fetch("/api/speech/status");
+          const result = await response.json();
+
+          document.getElementById("api-status").innerHTML = `
+                    <strong>Service Status:</strong><br>
+                    Enabled: ${result.enabled ? "✅ Yes" : "❌ No"}<br>
+                    Project ID: ${result.projectId || "Not set"}<br>
+                    Service: ${result.service}<br>
+                    Status: ${result.status}
+                `;
+        } catch (error) {
+          document.getElementById("api-status").innerHTML = `
+                    <strong>❌ Error:</strong><br>
+                    ${error.message}<br>
+                    Make sure the backend is running!
+                `;
+        }
+      }
+    </script>
+  </body>
+</html>

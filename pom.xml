@@ -91,6 +91,13 @@
     <scope>runtime</scope>
 </dependency>
 
+<!-- Google Cloud Speech-to-Text -->
+<dependency>
+    <groupId>com.google.cloud</groupId>
+    <artifactId>google-cloud-speech</artifactId>
+    <version>4.8.0</version>
+</dependency>
+
 <!-- For file upload (optional) -->
 <dependency>
     <groupId>commons-fileupload</groupId>

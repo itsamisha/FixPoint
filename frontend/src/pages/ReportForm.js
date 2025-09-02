@@ -589,6 +589,26 @@ const ReportForm = () => {
     await proceedWithSubmission(reportData);
   };
 
+  // Speech-to-Text callback
+  const handleSpeechToTextUpdate = (recognizedText) => {
+    console.log("Speech-to-text callback received:", recognizedText);
+    const currentDescription = getValues("description") || "";
+    const newDescription =
+      currentDescription + (currentDescription ? " " : "") + recognizedText;
+    console.log("Current description:", currentDescription);
+    console.log("New description:", newDescription);
+
+    setValue("description", newDescription);
+
+    // Force a re-render by updating the form state
+    setTimeout(() => {
+      const updatedValue = getValues("description");
+      console.log("Updated description value:", updatedValue);
+    }, 100);
+
+    toast.success("Voice input added to description!");
+  };
+
   const formatEnumValue = (value) => {
     return value
       .replace(/_/g, " ")
@@ -767,6 +787,7 @@ const ReportForm = () => {
                       <TextToSpeechButton
                         text={getValues("description") || ""}
                         className="description-tts"
+                        onTextUpdate={handleSpeechToTextUpdate}
                       />
                     </div>
 
