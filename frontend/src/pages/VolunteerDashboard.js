@@ -27,6 +27,7 @@ import { reportService } from "../services/reportService";
 import { volunteerService } from "../services/volunteerService";
 import { useAuth } from "../contexts/AuthContext";
 import ReportExporter from "../components/ReportExporter";
+import VolunteerCertificate from "../components/VolunteerCertificate";
 import "./VolunteerDashboard.css";
 
 const VolunteerDashboard = () => {
@@ -187,9 +188,9 @@ const VolunteerDashboard = () => {
   };
 
   const handleReportSelection = (reportId) => {
-    setSelectedReports(prev => 
-      prev.includes(reportId) 
-        ? prev.filter(id => id !== reportId)
+    setSelectedReports((prev) =>
+      prev.includes(reportId)
+        ? prev.filter((id) => id !== reportId)
         : [...prev, reportId]
     );
   };
@@ -198,7 +199,7 @@ const VolunteerDashboard = () => {
     if (selectedReports.length === myTasks.length) {
       setSelectedReports([]);
     } else {
-      setSelectedReports(myTasks.map(task => task.id));
+      setSelectedReports(myTasks.map((task) => task.id));
     }
   };
 
@@ -532,9 +533,11 @@ const VolunteerDashboard = () => {
                     <button
                       onClick={handleSelectAllReports}
                       className="btn btn-secondary"
-                      style={{ marginLeft: '10px' }}
+                      style={{ marginLeft: "10px" }}
                     >
-                      {selectedReports.length === myTasks.length ? 'Deselect All' : 'Select All'}
+                      {selectedReports.length === myTasks.length
+                        ? "Deselect All"
+                        : "Select All"}
                     </button>
                   )}
                 </div>
@@ -551,7 +554,7 @@ const VolunteerDashboard = () => {
                             checked={selectedReports.includes(task.id)}
                             onChange={() => handleReportSelection(task.id)}
                             className="task-checkbox"
-                            style={{ marginRight: '10px' }}
+                            style={{ marginRight: "10px" }}
                           />
                         )}
                         <h3>{task.title}</h3>
@@ -634,9 +637,16 @@ const VolunteerDashboard = () => {
 
           {activeTab === "leaderboard" && (
             <div>
-              <div className="content-header">
-                <h2 className="content-title">Volunteer Leaderboard</h2>
-                <p>Top community heroes and their contributions</p>
+              <div className="content-header-with-certificate">
+                <div>
+                  <h2 className="content-title">Volunteer Leaderboard</h2>
+                  <p>Top community heroes and their contributions</p>
+                </div>
+                <div className="certificate-section">
+                  <span className="text-sm text-gray-600">
+                    Download your certificate to showcase your achievements!
+                  </span>
+                </div>
               </div>
 
               <div className="leaderboard-container">
@@ -646,6 +656,7 @@ const VolunteerDashboard = () => {
                   <div className="leaderboard-tasks">Completed Tasks</div>
                   <div className="leaderboard-success">Success Rate</div>
                   <div className="leaderboard-rating">Rating</div>
+                  <div className="leaderboard-actions">Certificate</div>
                 </div>
 
                 {volunteerLeaderboard.map((volunteer, index) => (
@@ -711,6 +722,15 @@ const VolunteerDashboard = () => {
                         ))}
                       </div>
                       <div className="rating-value">{volunteer.rating}</div>
+                    </div>
+                    <div className="leaderboard-actions">
+                      <VolunteerCertificate
+                        volunteer={volunteer}
+                        rank={index + 1}
+                        onDownload={(fileName) => {
+                          toast.success(`Certificate downloaded: ${fileName}`);
+                        }}
+                      />
                     </div>
                   </div>
                 ))}
