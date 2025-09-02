@@ -46,3 +46,5 @@ secrets/
 
 ### API Keys and Sensitive Files ###
 application-secrets.properties
+data/*.mv.db
+data/*.trace.db

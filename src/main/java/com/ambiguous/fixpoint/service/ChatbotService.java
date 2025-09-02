@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 @Service
 public class ChatbotService {
@@ -103,6 +106,31 @@ public class ChatbotService {
                 .stream()
                 .limit(limit)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Get conversation history for API response
+     */
+    public List<Map<String, Object>> getConversationHistory(String sessionId) {
+        try {
+            List<ChatbotConversation> conversations = conversationRepository.findByUsernameOrderByCreatedAtDesc(sessionId)
+                    .stream()
+                    .limit(20)
+                    .collect(Collectors.toList());
+            
+            return conversations.stream().map(conv -> {
+                Map<String, Object> convMap = new HashMap<>();
+                convMap.put("id", conv.getId());
+                convMap.put("userMessage", conv.getUserMessage());
+                convMap.put("botResponse", conv.getBotResponse());
+                convMap.put("timestamp", conv.getCreatedAt().toString());
+                convMap.put("sessionId", conv.getUsername()); // Using username field for sessionId
+                return convMap;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error getting conversation history: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     /**

@@ -8,6 +8,7 @@ import com.ambiguous.fixpoint.entity.User;
 import com.ambiguous.fixpoint.repository.UserRepository;
 import com.ambiguous.fixpoint.service.ReportService;
 import com.ambiguous.fixpoint.service.AuthService;
+import com.ambiguous.fixpoint.service.ChatbotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/public")
@@ -37,6 +39,9 @@ public class PublicController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private ChatbotService chatbotService;
 
     @GetMapping("/reports")
     public ResponseEntity<Page<ReportSummary>> getPublicReports(
@@ -171,6 +176,83 @@ public class PublicController {
             error.put("message", "Authentication failed: " + e.getMessage());
             error.put("type", e.getClass().getSimpleName());
             return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    // Chatbot endpoints
+    @PostMapping("/chatbot/chat")
+    public ResponseEntity<?> chatWithBot(@RequestBody Map<String, String> request) {
+        try {
+            String message = request.get("message");
+            String context = request.get("context");
+            String sessionId = request.get("sessionId");
+            
+            if (message == null || message.trim().isEmpty()) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "Message cannot be empty");
+                return ResponseEntity.badRequest().body(error);
+            }
+            
+            // Generate unique session ID if not provided
+            if (sessionId == null || sessionId.trim().isEmpty()) {
+                sessionId = "session_" + UUID.randomUUID().toString();
+            }
+            
+            String response = chatbotService.generateResponse(message, context, sessionId);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("response", response);
+            result.put("sessionId", sessionId);
+            result.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.err.println("Chatbot error: " + e.getMessage());
+            e.printStackTrace();
+            
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Sorry, I'm having trouble right now. Please try again.");
+            return ResponseEntity.status(500).body(error);
+        }
+    }
+
+    @GetMapping("/chatbot/history/{sessionId}")
+    public ResponseEntity<?> getChatHistory(@PathVariable String sessionId) {
+        try {
+            List<Map<String, Object>> conversations = chatbotService.getConversationHistory(sessionId);
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("conversations", conversations);
+            result.put("sessionId", sessionId);
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            System.err.println("Error fetching chat history: " + e.getMessage());
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("conversations", new java.util.ArrayList<>());
+            result.put("sessionId", sessionId);
+            
+            return ResponseEntity.ok(result);
+        }
+    }
+
+    @GetMapping("/chatbot/status")
+    public ResponseEntity<?> getChatbotStatus() {
+        try {
+            Map<String, Object> status = new HashMap<>();
+            status.put("available", true);
+            status.put("aiEnabled", true);
+            status.put("version", "1.0");
+            status.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(status);
+        } catch (Exception e) {
+            Map<String, Object> status = new HashMap<>();
+            status.put("available", false);
+            status.put("error", e.getMessage());
+            
+            return ResponseEntity.ok(status);
         }
     }
 }

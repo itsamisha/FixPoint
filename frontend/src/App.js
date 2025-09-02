@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import Navbar from "./components/Navbar";
+import Chatbot from "./components/Chatbot";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -101,6 +102,7 @@ function App() {
                 />
               </Routes>
             </main>
+            <Chatbot />
             <ToastContainer position="top-right" autoClose={3000} />
           </div>
         </Router>

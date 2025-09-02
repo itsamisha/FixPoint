@@ -859,4 +859,101 @@ public class MultiAIService {
         
         return result;
     }
+
+    /**
+     * Generate chat response using the configured AI provider
+     */
+    public String generateChatResponse(String prompt) {
+        try {
+            // Try primary AI provider
+            if ("gemini".equalsIgnoreCase(aiProvider) && isGeminiConfigured()) {
+                return generateChatWithGemini(prompt);
+            } else if ("openai".equalsIgnoreCase(aiProvider) && isOpenAIConfigured()) {
+                return generateChatWithOpenAI(prompt);
+            }
+            
+            // Fallback to available provider
+            if (isGeminiConfigured()) {
+                System.out.println("Primary provider unavailable, falling back to Gemini for chat");
+                return generateChatWithGemini(prompt);
+            } else if (isOpenAIConfigured()) {
+                System.out.println("Primary provider unavailable, falling back to OpenAI for chat");
+                return generateChatWithOpenAI(prompt);
+            }
+            
+            // If no API keys configured, return error message
+            return "🤖 I'm currently unable to connect to AI services. Please check your configuration and try again.";
+            
+        } catch (Exception e) {
+            System.err.println("Chat generation failed: " + e.getMessage());
+            return "🤖 I'm having trouble generating a response right now. Please try again in a moment.";
+        }
+    }
+
+    /**
+     * Generate chat response using Google Gemini API
+     */
+    private String generateChatWithGemini(String prompt) throws Exception {
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+        
+        Map<String, Object> requestBody = new HashMap<>();
+        
+        // Build the contents array
+        List<Map<String, Object>> contents = new ArrayList<>();
+        Map<String, Object> content = new HashMap<>();
+        
+        List<Map<String, Object>> parts = new ArrayList<>();
+        Map<String, Object> textPart = new HashMap<>();
+        textPart.put("text", prompt);
+        parts.add(textPart);
+        
+        content.put("parts", parts);
+        contents.add(content);
+        requestBody.put("contents", contents);
+        
+        // Generation config for chat responses
+        Map<String, Object> generationConfig = new HashMap<>();
+        generationConfig.put("temperature", 0.7);
+        generationConfig.put("topP", 0.8);
+        generationConfig.put("topK", 40);
+        // Remove maxOutputTokens to allow full responses
+        requestBody.put("generationConfig", generationConfig);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        
+        return parseGeminiResponse(response.getBody());
+    }
+
+    /**
+     * Generate chat response using OpenAI API
+     */
+    private String generateChatWithOpenAI(String prompt) throws Exception {
+        String url = "https://api.openai.com/v1/chat/completions";
+        
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("model", "gpt-3.5-turbo");
+        
+        List<Map<String, Object>> messages = new ArrayList<>();
+        Map<String, Object> message = new HashMap<>();
+        message.put("role", "user");
+        message.put("content", prompt);
+        messages.add(message);
+        
+        requestBody.put("messages", messages);
+        requestBody.put("temperature", 0.7);
+        // Remove max_tokens to allow full responses
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("Authorization", "Bearer " + openaiApiKey);
+        
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        
+        return parseOpenAIResponse(response.getBody());
+    }
 }
