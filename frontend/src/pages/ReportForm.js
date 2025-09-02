@@ -2,7 +2,14 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { MapPin, Save, ChevronDown, Sparkles, Edit3, Languages } from "lucide-react";
+import {
+  MapPin,
+  Save,
+  ChevronDown,
+  Sparkles,
+  Edit3,
+  Languages,
+} from "lucide-react";
 import { reportService } from "../services/reportService";
 import { ISSUE_CATEGORIES } from "../services/categorizationService";
 import DuplicateWarningModal from "../components/DuplicateWarningModal";
@@ -17,6 +24,7 @@ import ImageUploader from "../components/ImageUploader";
 import CategorySelector from "../components/CategorySelector";
 import "./ReportForm.css";
 import "../components/EnhancedLocationPicker.css";
+import TextToSpeechButton from "../components/TextToSpeechButton";
 
 const ReportForm = () => {
   const navigate = useNavigate();
@@ -35,7 +43,8 @@ const ReportForm = () => {
   const [showAiDescription, setShowAiDescription] = useState(false);
   const [selectedOrganizations, setSelectedOrganizations] = useState([]);
   const [organizationSearch, setOrganizationSearch] = useState("");
-  const [showOrganizationDropdown, setShowOrganizationDropdown] = useState(false);
+  const [showOrganizationDropdown, setShowOrganizationDropdown] =
+    useState(false);
   const [notifyVolunteers, setNotifyVolunteers] = useState(false);
   const [duplicates, setDuplicates] = useState([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
@@ -43,7 +52,9 @@ const ReportForm = () => {
   const [pendingReportData, setPendingReportData] = useState(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const [originalDescription, setOriginalDescription] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(ISSUE_CATEGORIES.OTHER || null);
+  const [selectedCategory, setSelectedCategory] = useState(
+    ISSUE_CATEGORIES.OTHER || null
+  );
   const [selectedPriority, setSelectedPriority] = useState("medium");
 
   const {
@@ -63,37 +74,42 @@ const ReportForm = () => {
   // Filter and group organizations
   const getFilteredOrganizations = () => {
     if (!organizationSearch) return organizations;
-    
-    return organizations.filter(org => 
-      org.name.toLowerCase().includes(organizationSearch.toLowerCase()) ||
-      org.type.toLowerCase().includes(organizationSearch.toLowerCase()) ||
-      org.city.toLowerCase().includes(organizationSearch.toLowerCase())
+
+    return organizations.filter(
+      (org) =>
+        org.name.toLowerCase().includes(organizationSearch.toLowerCase()) ||
+        org.type.toLowerCase().includes(organizationSearch.toLowerCase()) ||
+        org.city.toLowerCase().includes(organizationSearch.toLowerCase())
     );
   };
 
   const getGroupedOrganizations = () => {
     const filtered = getFilteredOrganizations();
     const grouped = filtered.reduce((groups, org) => {
-      const key = org.type.replace(/_/g, ' ');
+      const key = org.type.replace(/_/g, " ");
       if (!groups[key]) {
         groups[key] = [];
       }
       groups[key].push(org);
       return groups;
     }, {});
-    
+
     return grouped;
   };
 
   const getSelectedOrganizationNames = () => {
-    const selected = organizations.filter(org => selectedOrganizations.includes(org.id.toString()));
-    return selected.map(org => `${org.name} (${org.city})`);
+    const selected = organizations.filter((org) =>
+      selectedOrganizations.includes(org.id.toString())
+    );
+    return selected.map((org) => `${org.name} (${org.city})`);
   };
 
   const toggleOrganization = (orgId) => {
     const orgIdStr = orgId.toString();
     if (selectedOrganizations.includes(orgIdStr)) {
-      setSelectedOrganizations(selectedOrganizations.filter(id => id !== orgIdStr));
+      setSelectedOrganizations(
+        selectedOrganizations.filter((id) => id !== orgIdStr)
+      );
     } else {
       setSelectedOrganizations([...selectedOrganizations, orgIdStr]);
     }
@@ -108,65 +124,81 @@ const ReportForm = () => {
     [setValue]
   );
 
-  const handleAddressChange = useCallback((address, addressComponents) => {
-    setLocationAddress(address);
-    setLocationContext(addressComponents);
-    setValue("locationAddress", address);
-  }, [setValue]);
+  const handleAddressChange = useCallback(
+    (address, addressComponents) => {
+      setLocationAddress(address);
+      setLocationContext(addressComponents);
+      setValue("locationAddress", address);
+    },
+    [setValue]
+  );
 
-  const handleLocationAddressChange = useCallback((address) => {
-    setLocationAddress(address);
-    setValue("locationAddress", address);
-  }, [setValue]);
+  const handleLocationAddressChange = useCallback(
+    (address) => {
+      setLocationAddress(address);
+      setValue("locationAddress", address);
+    },
+    [setValue]
+  );
 
   // Handlers for smart categorization
-  const handleCategoryChange = useCallback((category) => {
-    setSelectedCategory(category);
-    setValue("category", category.id);
-  }, [setValue]);
+  const handleCategoryChange = useCallback(
+    (category) => {
+      setSelectedCategory(category);
+      setValue("category", category.id);
+    },
+    [setValue]
+  );
 
-  const handlePriorityChange = useCallback((priority) => {
-    setSelectedPriority(priority); // Keep lowercase for UI
-    setValue("priority", priority.toUpperCase()); // Convert to uppercase for backend
-  }, [setValue]);
+  const handlePriorityChange = useCallback(
+    (priority) => {
+      setSelectedPriority(priority); // Keep lowercase for UI
+      setValue("priority", priority.toUpperCase()); // Convert to uppercase for backend
+    },
+    [setValue]
+  );
 
   // Progress tracking functions
   const calculateProgress = () => {
     let progress = 0;
     const formData = getValues();
-    
+
     // Step 1: Title (15%)
     if (formData.title && formData.title.trim().length > 0) progress += 15;
-    
+
     // Step 2: Image (15%)
     if (selectedImage) progress += 15;
-    
+
     // Step 3: Description (20%)
-    if (formData.description && formData.description.trim().length > 10) progress += 20;
-    
+    if (formData.description && formData.description.trim().length > 10)
+      progress += 20;
+
     // Step 4: Category (15%)
     if (selectedCategory || formData.category) progress += 15;
-    
+
     // Step 5: Location (15%)
-    if (selectedLocation && formData.latitude && formData.longitude) progress += 15;
-    
+    if (selectedLocation && formData.latitude && formData.longitude)
+      progress += 15;
+
     // Step 6: Organization (10%)
     if (selectedOrganizations.length > 0) progress += 10;
-    
+
     // Step 7: Volunteer notification (10%)
     progress += 10; // Always completed as it has a default value
-    
+
     return Math.min(progress, 100);
   };
 
   const getCurrentStep = () => {
     const formData = getValues();
-    
+
     if (!formData.title || formData.title.trim().length === 0) return 1;
     if (!selectedImage) return 2;
-    if (!formData.description || formData.description.trim().length <= 10) return 3;
+    if (!formData.description || formData.description.trim().length <= 10)
+      return 3;
     if (!selectedCategory && !formData.category) return 4;
-    if (!selectedLocation || !formData.latitude || !formData.longitude) return 5;
+    if (!selectedLocation || !formData.latitude || !formData.longitude)
+      return 5;
     if (selectedOrganizations.length === 0) return 6;
     return 7;
   };
@@ -176,11 +208,11 @@ const ReportForm = () => {
     const stepNames = {
       1: "Issue Title",
       2: "Upload Image",
-      3: "Description", 
+      3: "Description",
       4: "Categorization",
       5: "Location",
       6: "Organizations",
-      7: "Final Review"
+      7: "Final Review",
     };
     return stepNames[step] || "Complete";
   };
@@ -194,51 +226,61 @@ const ReportForm = () => {
 
     setIsAnalyzingImage(true);
     try {
-      const currentCategory = getValues("category") || contextData.category || "OTHER";
-      
-      const response = await reportService.analyzeImageEnhanced(selectedImage, currentCategory);
+      const currentCategory =
+        getValues("category") || contextData.category || "OTHER";
+
+      const response = await reportService.analyzeImageEnhanced(
+        selectedImage,
+        currentCategory
+      );
       if (response.data && response.data.description) {
         // Store original description before replacing
         const currentDescription = getValues("description");
         if (currentDescription && !originalDescription) {
           setOriginalDescription(currentDescription);
         }
-        
+
         // Directly populate the description field
         setValue("description", response.data.description);
         setAiGeneratedDescription(response.data.description);
         setShowAiDescription(false); // Don't show preview, description is already in field
-        
+
         // Auto-select suggested category and priority if available
         if (response.data.suggestedCategory) {
           const categoryKey = response.data.suggestedCategory.toUpperCase();
-          console.log('AI suggested category:', categoryKey);
-          
+          console.log("AI suggested category:", categoryKey);
+
           // Find and set the category object for the UI
-          const categoryObj = Object.values(ISSUE_CATEGORIES || {}).find(cat => 
-            cat.id === categoryKey || cat.name.toUpperCase() === categoryKey
+          const categoryObj = Object.values(ISSUE_CATEGORIES || {}).find(
+            (cat) =>
+              cat.id === categoryKey || cat.name.toUpperCase() === categoryKey
           );
-          console.log('Found category object:', categoryObj);
-          
+          console.log("Found category object:", categoryObj);
+
           if (categoryObj) {
             setSelectedCategory(categoryObj);
             setValue("category", categoryObj.id);
-            console.log('Category set to:', categoryObj.id);
+            console.log("Category set to:", categoryObj.id);
           } else {
-            console.warn('Category not found for:', categoryKey);
-            console.log('Available categories:', Object.values(ISSUE_CATEGORIES || {}));
+            console.warn("Category not found for:", categoryKey);
+            console.log(
+              "Available categories:",
+              Object.values(ISSUE_CATEGORIES || {})
+            );
           }
         }
-        
+
         if (response.data.suggestedPriority) {
           const priority = response.data.suggestedPriority.toLowerCase(); // Lowercase for UI
-          console.log('AI suggested priority:', priority);
+          console.log("AI suggested priority:", priority);
           setValue("priority", priority.toUpperCase()); // Uppercase for backend
           setSelectedPriority(priority); // Lowercase for UI state
-          console.log('Priority set to:', priority);
+          console.log("Priority set to:", priority);
         }
-        
-        toast.success("AI description applied and category/priority auto-selected!");
+
+        toast.success(
+          "AI description applied and category/priority auto-selected!"
+        );
       } else {
         toast.error("No description received from AI service");
       }
@@ -265,7 +307,10 @@ const ReportForm = () => {
         setOriginalDescription(currentDescription);
       }
 
-      const response = await reportService.translateText(currentDescription, "bangla");
+      const response = await reportService.translateText(
+        currentDescription,
+        "bangla"
+      );
       if (response.data && response.data.translatedText) {
         setValue("description", response.data.translatedText);
         toast.success("Description translated to Bangla!");
@@ -290,7 +335,10 @@ const ReportForm = () => {
 
     setIsTranslating(true);
     try {
-      const response = await reportService.translateText(currentDescription, "english");
+      const response = await reportService.translateText(
+        currentDescription,
+        "english"
+      );
       if (response.data && response.data.translatedText) {
         setValue("description", response.data.translatedText);
         toast.success("Description translated to English!");
@@ -344,28 +392,30 @@ const ReportForm = () => {
   // Handle clicking outside dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('.organization-selector')) {
+      if (!event.target.closest(".organization-selector")) {
         setShowOrganizationDropdown(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
   useEffect(() => {
     const handleClickOutside = (event) => {
-      const organizationSelector = event.target.closest('.organization-selector');
+      const organizationSelector = event.target.closest(
+        ".organization-selector"
+      );
       if (!organizationSelector && showOrganizationDropdown) {
         setShowOrganizationDropdown(false);
         setOrganizationSearch("");
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showOrganizationDropdown]);
 
@@ -390,36 +440,36 @@ const ReportForm = () => {
   const fetchOrganizations = async () => {
     try {
       const response = await reportService.getOrganizations();
-      console.log('Organizations API response:', response.data);
+      console.log("Organizations API response:", response.data);
       // Ensure we always set an array and handle potential circular references
       if (response.data && Array.isArray(response.data)) {
         // Filter out any invalid entries and clean the data
         const cleanOrgs = response.data
-          .filter(org => org && org.id && org.name)
-          .map(org => ({
+          .filter((org) => org && org.id && org.name)
+          .map((org) => ({
             id: org.id,
             name: org.name,
-            type: org.type || 'UNKNOWN',
-            city: org.city || 'Unknown',
-            serviceAreas: org.serviceAreas || '',
-            categories: org.categories || '',
-            description: org.description || '',
-            isActive: org.isActive !== false
+            type: org.type || "UNKNOWN",
+            city: org.city || "Unknown",
+            serviceAreas: org.serviceAreas || "",
+            categories: org.categories || "",
+            description: org.description || "",
+            isActive: org.isActive !== false,
           }));
-        console.log('Cleaned organizations:', cleanOrgs);
+        console.log("Cleaned organizations:", cleanOrgs);
         setOrganizations(cleanOrgs);
       } else {
-        console.warn('Organizations response is not an array:', response.data);
+        console.warn("Organizations response is not an array:", response.data);
         setOrganizations([]);
       }
     } catch (error) {
-      console.error('Error fetching organizations:', error);
+      console.error("Error fetching organizations:", error);
       setOrganizations([]); // Set empty array on error
       // Show user-friendly error
       if (error.response?.status === 401) {
-        toast.error('Please log in to view organizations');
+        toast.error("Please log in to view organizations");
       } else {
-        toast.error('Unable to load organizations. Please try again.');
+        toast.error("Unable to load organizations. Please try again.");
       }
     }
   };
@@ -460,10 +510,10 @@ const ReportForm = () => {
   const checkForDuplicates = async (reportData) => {
     setIsCheckingDuplicates(true);
     try {
-      console.log('Checking for duplicates with data:', reportData);
+      console.log("Checking for duplicates with data:", reportData);
       const response = await reportService.checkDuplicates(reportData);
-      console.log('Duplicate check response:', response.data);
-      
+      console.log("Duplicate check response:", response.data);
+
       if (response.data.hasDuplicates) {
         setDuplicates(response.data.duplicates);
         setShowDuplicateWarning(true);
@@ -479,10 +529,16 @@ const ReportForm = () => {
     }
   };
 
-  const proceedWithSubmission = async (reportData, skipDuplicateCheck = false) => {
+  const proceedWithSubmission = async (
+    reportData,
+    skipDuplicateCheck = false
+  ) => {
     setLoading(true);
     try {
-      const report = await reportService.createReport(reportData, selectedImage);
+      const report = await reportService.createReport(
+        reportData,
+        selectedImage
+      );
       toast.success("Report submitted successfully!");
       navigate("/dashboard");
     } catch (error) {
@@ -494,17 +550,19 @@ const ReportForm = () => {
   };
 
   const onSubmit = async (data) => {
-    console.log('Form submission data:', data);
-    console.log('Selected category:', selectedCategory);
-    console.log('Selected priority:', selectedPriority);
-    
+    console.log("Form submission data:", data);
+    console.log("Selected category:", selectedCategory);
+    console.log("Selected priority:", selectedPriority);
+
     if (!selectedLocation) {
       toast.error("Please select a location on the map");
       return;
     }
 
     if (selectedOrganizations.length === 0) {
-      toast.error("Please select at least one organization to handle this issue");
+      toast.error(
+        "Please select at least one organization to handle this issue"
+      );
       return;
     }
 
@@ -516,11 +574,11 @@ const ReportForm = () => {
       notifyVolunteers: notifyVolunteers,
     };
 
-    console.log('Final report data:', reportData);
+    console.log("Final report data:", reportData);
 
     // Check for duplicates first
     const hasDuplicates = await checkForDuplicates(reportData);
-    
+
     if (hasDuplicates) {
       // Store the report data for later submission
       setPendingReportData(reportData);
@@ -551,257 +609,301 @@ const ReportForm = () => {
 
         {/* Main Form Card */}
         <div className="report-form-card">
-        
-        {/* Progress Indicator */}
-        <div className="form-progress">
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${calculateProgress()}%` }}></div>
+          {/* Progress Indicator */}
+          <div className="form-progress">
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${calculateProgress()}%` }}
+              ></div>
+            </div>
+            <div className="progress-text">
+              Step {getCurrentStep()} of 7 - {getCurrentStepName()}
+            </div>
           </div>
-          <div className="progress-text">
-            Step {getCurrentStep()} of 7 - {getCurrentStepName()}
-          </div>
-        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="report-form-grid">
-            {/* Form Content */}
-            <div className="report-form-content space-y-6">
-              
-              {/* Step 1: Basic Information */}
-              <div className="form-section">
-                <div className="form-section-header">
-                  <h3 className="form-section-title">📝 Step 1: Issue Title</h3>
-                  <p className="form-section-subtitle">Start with a brief, clear title for your issue</p>
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="title" className="form-label">
-                    Issue Title *
-                  </label>
-                  <input
-                    id="title"
-                    type="text"
-                    className="form-input"
-                    placeholder="Brief description of the issue (e.g., 'Broken streetlight on Main Road')"
-                    {...register("title", {
-                      required: "Title is required",
-                      maxLength: {
-                        value: 200,
-                        message: "Title must be less than 200 characters",
-                      },
-                    })}
-                  />
-                  {errors.title && (
-                    <div className="error-message">{errors.title.message}</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Step 2: Image Upload and AI Analysis */}
-              <div className="form-section">
-                <div className="form-section-header">
-                  <h3 className="form-section-title">📷 Step 2: Upload Image & AI Analysis</h3>
-                  <p className="form-section-subtitle">Upload a photo and let AI help you describe the issue</p>
-                </div>
-                
-                <div className="form-group">
-                  <ImageUploader 
-                    selectedImage={selectedImage}
-                    imagePreview={imagePreview}
-                    handleImageSelect={handleImageChange}
-                  />
-                  
-                  <SimpleAIDescriptionGenerator
-                    selectedImage={selectedImage}
-                    isAnalyzing={isAnalyzingImage}
-                    onAnalyze={analyzeImageWithAI}
-                    onTranslateToBangla={translateDescriptionToBangla}
-                    onTranslateToEnglish={translateDescriptionToEnglish}
-                    onRestoreOriginal={restoreOriginalDescription}
-                    isTranslating={isTranslating}
-                    currentDescription={getValues("description")}
-                    originalDescription={originalDescription}
-                  />
-                </div>
-              </div>
-
-              {/* Step 3: Description */}
-              <div className="form-section">
-                <div className="form-section-header">
-                  <h3 className="form-section-title">📄 Step 3: Detailed Description</h3>
-                  <p className="form-section-subtitle">
-                    Provide detailed information about the issue. The AI may have already helped you with this!
-                  </p>
-                </div>
-                
-                <div className="form-group">
-                  <div className="flex items-center justify-between mb-3">
-                    <label htmlFor="description" className="form-label">
-                      Description *
-                    </label>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="report-form-grid">
+              {/* Form Content */}
+              <div className="report-form-content space-y-6">
+                {/* Step 1: Basic Information */}
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <h3 className="form-section-title">
+                      📝 Step 1: Issue Title
+                    </h3>
+                    <p className="form-section-subtitle">
+                      Start with a brief, clear title for your issue
+                    </p>
                   </div>
 
-                  {/* AI Generated Description Preview */}
-                  {showAiDescription && (
-                    <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-blue-800 flex items-center">
-                          <Sparkles size={16} className="mr-2" />
-                          AI Generated Description
-                        </h4>
-                        <div className="flex space-x-2">
-                          <button
-                            type="button"
-                            onClick={useAIDescription}
-                            className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
-                          >
-                            Use This
-                          </button>
-                          <button
-                            type="button"
-                            onClick={editAIDescription}
-                            className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center"
-                          >
-                            <Edit3 size={14} className="mr-1" />
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setShowAiDescription(false)}
-                            className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
-                          >
-                            Dismiss
-                          </button>
-                        </div>
+                  <div className="form-group">
+                    <label htmlFor="title" className="form-label">
+                      Issue Title *
+                    </label>
+                    <input
+                      id="title"
+                      type="text"
+                      className="form-input"
+                      placeholder="Brief description of the issue (e.g., 'Broken streetlight on Main Road')"
+                      {...register("title", {
+                        required: "Title is required",
+                        maxLength: {
+                          value: 200,
+                          message: "Title must be less than 200 characters",
+                        },
+                      })}
+                    />
+                    {errors.title && (
+                      <div className="error-message">
+                        {errors.title.message}
                       </div>
-                      <p className="text-gray-700 text-sm leading-relaxed">
-                        {aiGeneratedDescription}
-                      </p>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                </div>
 
-                  <textarea
-                    id="description"
-                    className="form-textarea"
-                    placeholder="Provide detailed information about the issue..."
-                    rows={5}
-                    {...register("description", {
-                      required: "Description is required",
+                {/* Step 2: Image Upload and AI Analysis */}
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <h3 className="form-section-title">
+                      📷 Step 2: Upload Image & AI Analysis
+                    </h3>
+                    <p className="form-section-subtitle">
+                      Upload a photo and let AI help you describe the issue
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <ImageUploader
+                      selectedImage={selectedImage}
+                      imagePreview={imagePreview}
+                      handleImageSelect={handleImageChange}
+                    />
+
+                    <SimpleAIDescriptionGenerator
+                      selectedImage={selectedImage}
+                      isAnalyzing={isAnalyzingImage}
+                      onAnalyze={analyzeImageWithAI}
+                      onTranslateToBangla={translateDescriptionToBangla}
+                      onTranslateToEnglish={translateDescriptionToEnglish}
+                      onRestoreOriginal={restoreOriginalDescription}
+                      isTranslating={isTranslating}
+                      currentDescription={getValues("description")}
+                      originalDescription={originalDescription}
+                    />
+                  </div>
+                </div>
+
+                {/* Step 3: Description */}
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <h3 className="form-section-title">
+                      📄 Step 3: Detailed Description
+                    </h3>
+                    <p className="form-section-subtitle">
+                      Provide detailed information about the issue. The AI may
+                      have already helped you with this!
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <div className="flex items-center justify-between mb-3">
+                      <label htmlFor="description" className="form-label">
+                        Description *
+                      </label>
+                    </div>
+
+                    {/* AI Generated Description Preview */}
+                    {showAiDescription && (
+                      <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-blue-800 flex items-center">
+                            <Sparkles size={16} className="mr-2" />
+                            AI Generated Description
+                          </h4>
+                          <div className="flex space-x-2">
+                            <button
+                              type="button"
+                              onClick={useAIDescription}
+                              className="px-3 py-1 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 transition-colors"
+                            >
+                              Use This
+                            </button>
+                            <button
+                              type="button"
+                              onClick={editAIDescription}
+                              className="px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors flex items-center"
+                            >
+                              <Edit3 size={14} className="mr-1" />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setShowAiDescription(false)}
+                              className="px-3 py-1 bg-gray-500 text-white text-sm rounded hover:bg-gray-600 transition-colors"
+                            >
+                              Dismiss
+                            </button>
+                          </div>
+                        </div>
+                        <p className="text-gray-700 text-sm leading-relaxed">
+                          {aiGeneratedDescription}
+                        </p>
+                      </div>
+                    )}
+
+                    <textarea
+                      id="description"
+                      className="form-textarea"
+                      placeholder="Provide detailed information about the issue..."
+                      rows={5}
+                      {...register("description", {
+                        required: "Description is required",
+                      })}
+                    />
+
+                    {/* Text-to-Speech Controls */}
+                    <div className="mt-3">
+                      <TextToSpeechButton
+                        text={getValues("description") || ""}
+                        className="description-tts"
+                      />
+                    </div>
+
+                    {errors.description && (
+                      <div className="form-error">
+                        {errors.description.message}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 4: Smart Issue Categorization */}
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <h3 className="form-section-title">
+                      🤖 Step 4: AI Categorization
+                    </h3>
+                    <p className="form-section-subtitle">
+                      Our AI will analyze your description and suggest the best
+                      category and priority level
+                    </p>
+                  </div>
+
+                  <CategorySelector
+                    description={getValues("description") || ""}
+                    imageFile={selectedImage}
+                    location={locationAddress}
+                    selectedCategory={selectedCategory}
+                    selectedPriority={selectedPriority}
+                    onCategoryChange={handleCategoryChange}
+                    onPriorityChange={handlePriorityChange}
+                    autoAnalyze={false}
+                  />
+
+                  {/* Hidden form fields for category and priority (for form submission) */}
+                  <input
+                    type="hidden"
+                    {...register("category", {
+                      required: "Category is required",
                     })}
                   />
-                  {errors.description && (
-                    <div className="form-error">{errors.description.message}</div>
+                  <input type="hidden" {...register("priority")} />
+                  {errors.category && (
+                    <div className="form-error">{errors.category.message}</div>
                   )}
                 </div>
-              </div>
 
-              {/* Step 4: Smart Issue Categorization */}
-              <div className="form-section">
-                <div className="form-section-header">
-                  <h3 className="form-section-title">🤖 Step 4: AI Categorization</h3>
-                  <p className="form-section-subtitle">
-                    Our AI will analyze your description and suggest the best category and priority level
-                  </p>
+                {/* Step 5: Location Selection */}
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <h3 className="form-section-title">
+                      📍 Step 5: Select Location
+                    </h3>
+                    <p className="form-section-subtitle">
+                      Search for a location, use your current location, or click
+                      on the map to pinpoint the exact location
+                    </p>
+                  </div>
+
+                  <div className="form-group">
+                    <EnhancedLocationPicker
+                      onLocationSelect={handleLocationSelect}
+                      initialPosition={mapPosition}
+                      onAddressChange={handleAddressChange}
+                      selectedLocation={selectedLocation}
+                      locationAddress={locationAddress}
+                      onLocationAddressChange={handleLocationAddressChange}
+                    />
+
+                    <input type="hidden" {...register("latitude")} />
+                    <input type="hidden" {...register("longitude")} />
+                  </div>
                 </div>
-                
-                <CategorySelector
-                  description={getValues("description") || ""}
-                  imageFile={selectedImage}
-                  location={locationAddress}
-                  selectedCategory={selectedCategory}
-                  selectedPriority={selectedPriority}
-                  onCategoryChange={handleCategoryChange}
-                  onPriorityChange={handlePriorityChange}
-                  autoAnalyze={false}
-                />
 
-                {/* Hidden form fields for category and priority (for form submission) */}
-                <input type="hidden" {...register("category", { required: "Category is required" })} />
-                <input type="hidden" {...register("priority")} />
-                {errors.category && (
-                  <div className="form-error">{errors.category.message}</div>
-                )}
-              </div>
+                {/* Step 6: Organization Selection */}
+                <div className="form-section organization-section">
+                  <div className="form-section-header">
+                    <h3 className="form-section-title">
+                      🏢 Step 6: Select Organizations
+                    </h3>
+                    <p className="form-section-subtitle">
+                      Choose which organizations should handle this issue
+                    </p>
+                  </div>
 
-              {/* Step 5: Location Selection */}
-              <div className="form-section">
-                <div className="form-section-header">
-                  <h3 className="form-section-title">📍 Step 5: Select Location</h3>
-                  <p className="form-section-subtitle">
-                    Search for a location, use your current location, or click on the map to pinpoint the exact location
-                  </p>
-                </div>
-                
-                <div className="form-group">
-                  <EnhancedLocationPicker
-                    onLocationSelect={handleLocationSelect}
-                    initialPosition={mapPosition}
-                    onAddressChange={handleAddressChange}
-                    selectedLocation={selectedLocation}
-                    locationAddress={locationAddress}
-                    onLocationAddressChange={handleLocationAddressChange}
+                  <OrganizationSelector
+                    organizations={organizations}
+                    selectedOrganizations={selectedOrganizations}
+                    setSelectedOrganizations={setSelectedOrganizations}
+                    organizationSearch={organizationSearch}
+                    setOrganizationSearch={setOrganizationSearch}
+                    showOrganizationDropdown={showOrganizationDropdown}
+                    setShowOrganizationDropdown={setShowOrganizationDropdown}
+                    getFilteredOrganizations={getFilteredOrganizations}
+                    getGroupedOrganizations={getGroupedOrganizations}
+                    getSelectedOrganizationNames={getSelectedOrganizationNames}
+                    formatEnumValue={formatEnumValue}
                   />
-                  
-                  <input type="hidden" {...register("latitude")} />
-                  <input type="hidden" {...register("longitude")} />
                 </div>
-              </div>
 
-              {/* Step 6: Organization Selection */}
-              <div className="form-section organization-section">
-                <div className="form-section-header">
-                  <h3 className="form-section-title">🏢 Step 6: Select Organizations</h3>
-                  <p className="form-section-subtitle">
-                    Choose which organizations should handle this issue
-                  </p>
+                {/* Step 7: Volunteer Notification */}
+                <div className="form-section">
+                  <div className="form-section-header">
+                    <h3 className="form-section-title">
+                      🤝 Step 7: Volunteer Notification
+                    </h3>
+                    <p className="form-section-subtitle">
+                      Choose whether to notify volunteers about this issue
+                    </p>
+                  </div>
+
+                  <VolunteerNotification
+                    notifyVolunteers={notifyVolunteers}
+                    setNotifyVolunteers={setNotifyVolunteers}
+                  />
                 </div>
-                
-                <OrganizationSelector
-                  organizations={organizations}
-                  selectedOrganizations={selectedOrganizations}
-                  setSelectedOrganizations={setSelectedOrganizations}
-                  organizationSearch={organizationSearch}
-                  setOrganizationSearch={setOrganizationSearch}
-                  showOrganizationDropdown={showOrganizationDropdown}
-                  setShowOrganizationDropdown={setShowOrganizationDropdown}
-                  getFilteredOrganizations={getFilteredOrganizations}
-                  getGroupedOrganizations={getGroupedOrganizations}
-                  getSelectedOrganizationNames={getSelectedOrganizationNames}
-                  formatEnumValue={formatEnumValue}
-                />
-              </div>
 
-              {/* Step 7: Volunteer Notification */}
-              <div className="form-section">
-                <div className="form-section-header">
-                  <h3 className="form-section-title">🤝 Step 7: Volunteer Notification</h3>
-                  <p className="form-section-subtitle">
-                    Choose whether to notify volunteers about this issue
-                  </p>
-                </div>
-                
-                <VolunteerNotification 
-                  notifyVolunteers={notifyVolunteers}
-                  setNotifyVolunteers={setNotifyVolunteers}
-                />
-              </div>
-
-              {/* Submit Button */}
-              <div className="form-section">
-                <div className="flex justify-end pt-4 border-t border-gray-200">
-                  <button
-                    type="submit"
-                    disabled={loading || isCheckingDuplicates}
-                    className="btn btn-primary btn-lg flex items-center gap-3 px-8 py-3"
-                  >
-                    <Save size={20} />
-                    {isCheckingDuplicates ? "Checking for duplicates..." : loading ? "Submitting..." : "Submit Report"}
-                  </button>
+                {/* Submit Button */}
+                <div className="form-section">
+                  <div className="flex justify-end pt-4 border-t border-gray-200">
+                    <button
+                      type="submit"
+                      disabled={loading || isCheckingDuplicates}
+                      className="btn btn-primary btn-lg flex items-center gap-3 px-8 py-3"
+                    >
+                      <Save size={20} />
+                      {isCheckingDuplicates
+                        ? "Checking for duplicates..."
+                        : loading
+                        ? "Submitting..."
+                        : "Submit Report"}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </form>
+          </form>
         </div>
       </div>
 

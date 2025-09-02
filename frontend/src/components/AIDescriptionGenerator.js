@@ -1,5 +1,6 @@
-import React from 'react';
+import React from "react";
 import { Sparkles, Edit3 } from "lucide-react";
+import TextToSpeechButton from "./TextToSpeechButton";
 
 const AIDescriptionGenerator = ({
   selectedImage,
@@ -8,7 +9,7 @@ const AIDescriptionGenerator = ({
   showAiDescription,
   onAnalyze,
   useAIDescription,
-  editAIDescription
+  editAIDescription,
 }) => {
   if (!selectedImage) return null;
 
@@ -39,6 +40,8 @@ const AIDescriptionGenerator = ({
           </div>
           <div className="ai-description-content">
             {aiGeneratedDescription}
+            {/* Text-to-Speech Button */}
+            <TextToSpeechButton text={aiGeneratedDescription} />
           </div>
           <div className="ai-description-actions">
             <button
