@@ -166,6 +166,10 @@ public class CommentController {
                         CommentReaction::getType,
                         Collectors.counting()
                 ));
+        // Ensure reactionCounts is never null
+        if (reactionCounts == null) {
+            reactionCounts = new java.util.HashMap<>();
+        }
         cr.setReactionCounts(reactionCounts);
 
         // Set user's reaction if logged in
