@@ -1,0 +1,46 @@
+name: Deploy FixPoint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    # Setup Java for Backend
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    # Setup Node for Frontend
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    # Build Backend
+    - name: Build Backend
+      run: ./mvnw clean package -DskipTests
+      
+    # Build Frontend
+    - name: Build Frontend
+      run: |
+        cd frontend
+        npm install
+        npm run build
+        
+    # Deploy to GitHub Pages (Frontend only)
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./frontend/build

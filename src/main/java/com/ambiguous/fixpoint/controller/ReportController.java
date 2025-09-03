@@ -302,12 +302,41 @@ public class ReportController {
     @PostMapping("/check-duplicates")
     public ResponseEntity<?> checkDuplicates(@RequestBody ReportRequest reportRequest) {
         try {
+            System.out.println("=== DUPLICATE CHECK REQUEST RECEIVED ===");
+            System.out.println("Raw request object: " + reportRequest);
+            System.out.println("Category: " + reportRequest.getCategory());
+            System.out.println("Description: " + reportRequest.getDescription());
+            System.out.println("Title: " + reportRequest.getTitle());
+            System.out.println("Latitude: " + reportRequest.getLatitude());
+            System.out.println("Longitude: " + reportRequest.getLongitude());
+            System.out.println("Priority: " + reportRequest.getPriority());
+            System.out.println("Location Address: " + reportRequest.getLocationAddress());
+            System.out.println("Target Org IDs: " + reportRequest.getTargetOrganizationIds());
+            System.out.println("Notify Volunteers: " + reportRequest.getNotifyVolunteers());
+            System.out.println("==========================================");
+            
             // Create a temporary Report object for duplicate checking
             Report tempReport = new Report();
             tempReport.setCategory(reportRequest.getCategory());
             tempReport.setDescription(reportRequest.getDescription());
             tempReport.setLatitude(reportRequest.getLatitude());
             tempReport.setLongitude(reportRequest.getLongitude());
+
+            // Check if coordinates are missing
+            if (reportRequest.getLatitude() == null || reportRequest.getLongitude() == null) {
+                System.out.println("WARNING: Missing latitude/longitude coordinates!");
+                System.out.println("Duplicate detection requires location coordinates to work properly.");
+                
+                // Return empty result if no coordinates
+                Map<String, Object> response = new HashMap<>();
+                response.put("hasDuplicates", false);
+                response.put("duplicateCount", 0);
+                response.put("duplicates", new ArrayList<>());
+                response.put("error", "Missing coordinates for duplicate detection");
+                return ResponseEntity.ok(response);
+            }
+
+            System.out.println("Creating temp report with coordinates: " + tempReport.getLatitude() + ", " + tempReport.getLongitude());
 
             // Find potential duplicates
             List<DuplicateDetectionService.DuplicateResult> duplicates = 

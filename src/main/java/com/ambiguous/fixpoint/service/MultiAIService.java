@@ -52,6 +52,11 @@ public class MultiAIService {
             
         } catch (Exception e) {
             System.err.println("AI generation failed: " + e.getMessage());
+            System.err.println("Exception type: " + e.getClass().getSimpleName());
+            if (e.getCause() != null) {
+                System.err.println("Cause: " + e.getCause().getMessage());
+            }
+            e.printStackTrace();
             return generateEnhancedFallback(image, category);
         }
     }
@@ -101,9 +106,28 @@ public class MultiAIService {
         headers.set("Content-Type", "application/json");
         
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
         
-        return parseGeminiResponse(response.getBody());
+        System.out.println("Making Gemini API request to: " + url);
+        System.out.println("Request body size: " + requestBody.toString().length() + " characters");
+        
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            
+            System.out.println("Gemini API response status: " + response.getStatusCode());
+            System.out.println("Gemini API response body: " + response.getBody());
+            
+            return parseGeminiResponse(response.getBody());
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            System.err.println("Gemini API HTTP error: " + e.getStatusCode() + " - " + e.getMessage());
+            System.err.println("Response body: " + e.getResponseBodyAsString());
+            
+            if (e.getStatusCode().value() == 429) {
+                System.err.println("Rate limit exceeded for Gemini API. Consider upgrading your plan or trying later.");
+            } else if (e.getStatusCode().value() == 403) {
+                System.err.println("Gemini API key may be invalid or expired.");
+            }
+            throw e;
+        }
     }
 
     /**
@@ -336,7 +360,8 @@ public class MultiAIService {
      */
     private boolean isGeminiConfigured() {
         return geminiApiKey != null && !geminiApiKey.isEmpty() && 
-               !geminiApiKey.equals("your_gemini_api_key_here");
+               !geminiApiKey.equals("your_gemini_api_key_here") &&
+               !geminiApiKey.equals("");
     }
 
     /**
@@ -483,6 +508,80 @@ public class MultiAIService {
         status.put("openaiConfigured", isOpenAIConfigured());
         status.put("fallbackAvailable", true);
         return status;
+    }
+
+    /**
+     * Analyze text using Gemini AI for semantic analysis
+     */
+    public String analyzeTextWithGemini(String prompt) {
+        try {
+            if (!isGeminiConfigured()) {
+                return "AI service not configured";
+            }
+
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+            
+            Map<String, Object> requestBody = new HashMap<>();
+            List<Map<String, Object>> contents = new ArrayList<>();
+            Map<String, Object> content = new HashMap<>();
+            List<Map<String, Object>> parts = new ArrayList<>();
+            
+            // Add text part
+            Map<String, Object> textPart = new HashMap<>();
+            textPart.put("text", prompt);
+            parts.add(textPart);
+            
+            content.put("parts", parts);
+            contents.add(content);
+            requestBody.put("contents", contents);
+            
+            // Generation config
+            Map<String, Object> generationConfig = new HashMap<>();
+            generationConfig.put("temperature", 0.1);  // Low temperature for consistent results
+            generationConfig.put("maxOutputTokens", 100);  // Short response needed
+            requestBody.put("generationConfig", generationConfig);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            
+            System.out.println("Making Gemini text analysis request");
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            
+            return parseGeminiTextResponse(response.getBody());
+            
+        } catch (Exception e) {
+            System.err.println("Error in Gemini text analysis: " + e.getMessage());
+            return "Error in AI analysis";
+        }
+    }
+
+    private String parseGeminiTextResponse(String responseBody) {
+        try {
+            // Parse JSON response and extract text
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            com.fasterxml.jackson.databind.JsonNode root = mapper.readTree(responseBody);
+            
+            com.fasterxml.jackson.databind.JsonNode candidates = root.get("candidates");
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                com.fasterxml.jackson.databind.JsonNode firstCandidate = candidates.get(0);
+                com.fasterxml.jackson.databind.JsonNode content = firstCandidate.get("content");
+                if (content != null) {
+                    com.fasterxml.jackson.databind.JsonNode parts = content.get("parts");
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        com.fasterxml.jackson.databind.JsonNode firstPart = parts.get(0);
+                        com.fasterxml.jackson.databind.JsonNode text = firstPart.get("text");
+                        if (text != null) {
+                            return text.asText().trim();
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing Gemini text response: " + e.getMessage());
+        }
+        return "Unable to parse response";
     }
 
     /**

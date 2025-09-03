@@ -1,9 +1,6 @@
 package com.ambiguous.fixpoint.controller;
 
-import com.ambiguous.fixpoint.dto.JwtAuthenticationResponse;
-import com.ambiguous.fixpoint.dto.LoginRequest;
-import com.ambiguous.fixpoint.dto.OrganizationRegistrationRequest;
-import com.ambiguous.fixpoint.dto.SignUpRequest;
+import com.ambiguous.fixpoint.dto.*;
 import com.ambiguous.fixpoint.entity.Organization;
 import com.ambiguous.fixpoint.entity.User;
 import com.ambiguous.fixpoint.service.AuthService;
@@ -50,13 +47,71 @@ public class AuthController {
             User result = authService.registerUser(signUpRequest);
             
             Map<String, String> response = new HashMap<>();
-            response.put("message", "User registered successfully");
+            response.put("message", "User registered successfully. Please check your email for verification code.");
             response.put("username", result.getUsername());
+            response.put("email", result.getEmail());
+            response.put("emailVerified", "false");
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> error = new HashMap<>();
             error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyOtpRequest verifyRequest) {
+        try {
+            boolean isVerified = authService.verifyEmail(verifyRequest.getEmail(), verifyRequest.getOtpCode());
+            
+            if (isVerified) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Email verified successfully! Welcome to FixPoint.");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Invalid or expired verification code");
+                return ResponseEntity.badRequest().body(error);
+            }
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<?> resendOtp(@Valid @RequestBody ResendOtpRequest resendRequest) {
+        try {
+            boolean otpSent = authService.resendOtp(resendRequest.getEmail());
+            
+            if (otpSent) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Verification code sent to your email");
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", "Failed to send verification code");
+                return ResponseEntity.badRequest().body(error);
+            }
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
+
+    @GetMapping("/email-verification-status")
+    public ResponseEntity<?> getEmailVerificationStatus(@RequestParam String email) {
+        try {
+            boolean isVerified = authService.isEmailVerified(email);
+            Map<String, Boolean> response = new HashMap<>();
+            response.put("emailVerified", isVerified);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("message", "User not found");
             return ResponseEntity.badRequest().body(error);
         }
     }

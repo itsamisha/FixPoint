@@ -33,6 +33,12 @@ public class AuthService {
     @Autowired
     OrganizationRepository organizationRepository;
 
+    @Autowired
+    private OtpService otpService;
+
+    @Autowired
+    private EmailService emailService;
+
     public JwtAuthenticationResponse authenticateUser(LoginRequest loginRequest) {
         System.out.println("DEBUG: Attempting authentication for: " + loginRequest.getUsernameOrEmail());
         
@@ -123,7 +129,20 @@ public class AuthService {
             user.setOrganization(organization);
         }
 
+        // Set email as unverified initially
+        user.setEmailVerified(false);
+
         User savedUser = userRepository.save(user);
+        
+        // Generate and send OTP for email verification
+        try {
+            otpService.generateAndSendOtp(savedUser.getEmail(), savedUser.getFullName());
+        } catch (Exception e) {
+            // If OTP sending fails, delete the user and throw exception
+            userRepository.delete(savedUser);
+            throw new RuntimeException("Failed to send verification email. Please try again.");
+        }
+        
         return savedUser;
     }
 
@@ -133,6 +152,57 @@ public class AuthService {
 
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    /**
+     * Verify email with OTP
+     */
+    public boolean verifyEmail(String email, String otpCode) {
+        // Find user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Verify OTP
+        boolean isOtpValid = otpService.verifyOtp(email, otpCode);
+        
+        if (isOtpValid) {
+            // Mark email as verified
+            user.setEmailVerified(true);
+            userRepository.save(user);
+            
+            // Send welcome email
+            emailService.sendWelcomeEmail(user.getEmail(), user.getFullName());
+            
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Resend OTP for email verification
+     */
+    public boolean resendOtp(String email) {
+        // Find user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check if email is already verified
+        if (user.getEmailVerified()) {
+            throw new RuntimeException("Email is already verified");
+        }
+
+        // Generate and send new OTP
+        return otpService.generateAndSendOtp(email, user.getFullName());
+    }
+
+    /**
+     * Check if user's email is verified
+     */
+    public boolean isEmailVerified(String email) {
+        return userRepository.findByEmail(email)
+                .map(User::getEmailVerified)
+                .orElse(false);
     }
 
     private UserSummary convertToUserSummary(User user) {

@@ -50,9 +50,10 @@ export const reportService = {
     });
   },
 
-  // Check for duplicate reports
+  // Check for duplicate reports (public endpoint, no auth needed)
   checkDuplicates: (reportData) => {
-    return api.post("/api/reports/check-duplicates", reportData);
+    console.log("🔍 Calling duplicate check API with data:", reportData);
+    return publicApi.post("/api/reports/check-duplicates", reportData);
   },
 
   // Get user's reports

@@ -214,6 +214,12 @@ public class AIController {
         return ResponseEntity.ok(capabilities);
     }
 
+    @GetMapping("/status")
+    public ResponseEntity<?> getStatus() {
+        Map<String, Object> status = multiAIService.getProviderStatus();
+        return ResponseEntity.ok(status);
+    }
+
     @PostMapping("/categorize-issue")
     public ResponseEntity<Map<String, Object>> categorizeIssue(
             @RequestParam("description") String description,

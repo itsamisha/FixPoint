@@ -16,9 +16,12 @@ public class DuplicateDetectionService {
     @Autowired
     private ReportRepository reportRepository;
 
-    private static final double LOCATION_THRESHOLD = 5.0; // km (increased for testing)
-    private static final double DESCRIPTION_SIMILARITY_THRESHOLD = 0.3; // reduced for testing
-    private static final int TIME_WINDOW_HOURS = 168; // 7 days (increased for testing)
+    @Autowired
+    private MultiAIService multiAIService;
+
+    private static final double LOCATION_THRESHOLD = 10.0; // km (increased for better detection)
+    private static final double DESCRIPTION_SIMILARITY_THRESHOLD = 0.2; // reduced for better detection
+    private static final int TIME_WINDOW_HOURS = 720; // 30 days (increased for better detection)
 
     /**
      * Check for duplicate reports based on location, description, and time
@@ -39,13 +42,17 @@ public class DuplicateDetectionService {
         List<Report> duplicates = new ArrayList<>();
 
         for (Report existingReport : recentReports) {
-            System.out.println("Checking report ID: " + existingReport.getId());
+            System.out.println("🔍 Checking report ID: " + existingReport.getId());
+            System.out.println("📝 Existing description: '" + existingReport.getDescription() + "'");
+            System.out.println("📝 New description: '" + newReport.getDescription() + "'");
+            
             if (isDuplicate(newReport, existingReport)) {
-                System.out.println("*** DUPLICATE FOUND! Report ID: " + existingReport.getId() + " ***");
+                System.out.println("✅ *** DUPLICATE FOUND! Report ID: " + existingReport.getId() + " ***");
                 duplicates.add(existingReport);
             } else {
-                System.out.println("Not a duplicate - Report ID: " + existingReport.getId());
+                System.out.println("❌ Not a duplicate - Report ID: " + existingReport.getId());
             }
+            System.out.println("---");
         }
 
         System.out.println("Found " + duplicates.size() + " duplicates");
@@ -134,28 +141,50 @@ public class DuplicateDetectionService {
     }
 
     /**
-     * Simple text similarity using Jaccard coefficient
+     * Enhanced description similarity using AI + basic similarity
      */
     private boolean isDescriptionSimilar(String desc1, String desc2) {
         if (desc1 == null || desc2 == null) {
+            System.out.println("🚫 One description is null");
             return false;
         }
 
-        // Convert to lowercase and split into words
+        System.out.println("🧠 Analyzing descriptions:");
+        System.out.println("   Description 1: '" + desc1 + "'");
+        System.out.println("   Description 2: '" + desc2 + "'");
+
+        // First try basic similarity for quick wins
         String[] words1 = desc1.toLowerCase().split("\\W+");
         String[] words2 = desc2.toLowerCase().split("\\W+");
-
-        // Calculate Jaccard similarity
-        double similarity = calculateJaccardSimilarity(words1, words2);
-        return similarity >= DESCRIPTION_SIMILARITY_THRESHOLD;
+        double basicSimilarity = calculateJaccardSimilarity(words1, words2);
+        
+        System.out.println("📊 Basic similarity score: " + basicSimilarity);
+        
+        // If basic similarity is high, no need for AI
+        if (basicSimilarity >= 0.8) {  // Raised threshold so AI gets used more often
+            System.out.println("✅ Very high basic similarity (" + basicSimilarity + "), considering as duplicate");
+            return true;
+        }
+        
+        // If basic similarity is very low, skip AI to save resources  
+        if (basicSimilarity < 0.05) {  // Lowered threshold so AI gets used more often
+            System.out.println("❌ Very low basic similarity (" + basicSimilarity + "), skipping AI check");
+            return false;
+        }
+        
+        // Use AI for semantic similarity in the middle range
+        System.out.println("🤖 Using AI for semantic similarity check (basic similarity: " + basicSimilarity + ")...");
+        boolean aiResult = isSemanticallySimilar(desc1, desc2);
+        System.out.println("🎯 AI result: " + aiResult);
+        return aiResult;
     }
 
     /**
      * Calculate Jaccard similarity coefficient
      */
     private double calculateJaccardSimilarity(String[] words1, String[] words2) {
-        java.util.Set<String> set1 = java.util.Set.of(words1);
-        java.util.Set<String> set2 = java.util.Set.of(words2);
+        java.util.Set<String> set1 = new java.util.HashSet<>(java.util.Arrays.asList(words1));
+        java.util.Set<String> set2 = new java.util.HashSet<>(java.util.Arrays.asList(words2));
 
         // Find intersection
         java.util.Set<String> intersection = new java.util.HashSet<>(set1);
@@ -171,6 +200,77 @@ public class DuplicateDetectionService {
         }
         
         return (double) intersection.size() / union.size();
+    }
+
+    /**
+     * AI-powered semantic similarity check using Gemini
+     */
+    private boolean isSemanticallySimilar(String description1, String description2) {
+        try {
+            // Skip AI if descriptions are too similar already (basic check)
+            String[] words1 = description1.toLowerCase().split("\\W+");
+            String[] words2 = description2.toLowerCase().split("\\W+");
+            double basicSimilarity = calculateJaccardSimilarity(words1, words2);
+            
+            if (basicSimilarity > 0.7) {
+                System.out.println("High basic similarity (" + basicSimilarity + "), skipping AI check");
+                return true;
+            }
+
+            // Use AI to determine semantic similarity
+            String prompt = buildSemanticSimilarityPrompt(description1, description2);
+            String aiResponse = multiAIService.analyzeTextWithGemini(prompt);
+            
+            System.out.println("AI semantic analysis result: " + aiResponse);
+            
+            // Parse AI response for similarity score
+            return parseSemanticSimilarityResponse(aiResponse);
+            
+        } catch (Exception e) {
+            System.err.println("Error in AI semantic similarity check: " + e.getMessage());
+            // Fall back to basic similarity
+            String[] words1 = description1.toLowerCase().split("\\W+");
+            String[] words2 = description2.toLowerCase().split("\\W+");
+            return calculateJaccardSimilarity(words1, words2) > DESCRIPTION_SIMILARITY_THRESHOLD;
+        }
+    }
+
+    private String buildSemanticSimilarityPrompt(String desc1, String desc2) {
+        return String.format(
+            "Analyze if these two issue descriptions refer to the same problem or very similar problems that could be duplicates:\n\n" +
+            "Description 1: \"%s\"\n" +
+            "Description 2: \"%s\"\n\n" +
+            "Consider factors like:\n" +
+            "- Same type of infrastructure issue (roads, lighting, waste, etc.)\n" +
+            "- Similar problem description (potholes, damages, blockages, etc.)\n" +
+            "- Could reasonably be the same physical issue\n\n" +
+            "Respond with ONLY 'SIMILAR' if they likely refer to the same issue, or 'DIFFERENT' if they are clearly different issues.\n" +
+            "Examples:\n" +
+            "- 'Large pothole on Main St' and 'Road damage on Main Street' = SIMILAR\n" +
+            "- 'Broken streetlight' and 'Pothole on road' = DIFFERENT\n" +
+            "- 'Garbage not collected' and 'Waste management issue' = SIMILAR\n\n" +
+            "Response:",
+            desc1, desc2
+        );
+    }
+
+    private boolean parseSemanticSimilarityResponse(String response) {
+        if (response == null) return false;
+        
+        String cleanResponse = response.trim().toUpperCase();
+        
+        // Look for SIMILAR in the response
+        if (cleanResponse.contains("SIMILAR")) {
+            System.out.println("AI determined descriptions are SIMILAR");
+            return true;
+        } else if (cleanResponse.contains("DIFFERENT")) {
+            System.out.println("AI determined descriptions are DIFFERENT");
+            return false;
+        }
+        
+        // If unclear response, fall back to basic similarity
+        System.out.println("Unclear AI response, falling back to basic similarity");
+        return false;
     }
 
     /**

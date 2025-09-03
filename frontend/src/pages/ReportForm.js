@@ -510,18 +510,32 @@ const ReportForm = () => {
   const checkForDuplicates = async (reportData) => {
     setIsCheckingDuplicates(true);
     try {
-      console.log("Checking for duplicates with data:", reportData);
+      console.log("🔍 Checking for duplicates with data:", reportData);
+      console.log("🔍 API Base URL:", process.env.REACT_APP_API_URL || 'http://localhost:8080');
+      console.log("📍 Exact coordinates:", {
+        latitude: reportData.latitude,
+        longitude: reportData.longitude,
+        type_lat: typeof reportData.latitude,
+        type_lng: typeof reportData.longitude
+      });
+      
       const response = await reportService.checkDuplicates(reportData);
-      console.log("Duplicate check response:", response.data);
+      console.log("📋 Duplicate check response:", response.data);
 
       if (response.data.hasDuplicates) {
+        console.log("⚠️ DUPLICATES FOUND! Count:", response.data.duplicateCount);
+        console.log("📋 Duplicate details:", response.data.duplicates);
+        
         setDuplicates(response.data.duplicates);
         setShowDuplicateWarning(true);
         return true;
+      } else {
+        console.log("✅ No duplicates found, proceeding with submission");
       }
       return false;
     } catch (error) {
-      console.error("Error checking for duplicates:", error);
+      console.error("❌ Error checking for duplicates:", error);
+      
       // Don't block submission if duplicate check fails
       return false;
     } finally {
@@ -550,6 +564,7 @@ const ReportForm = () => {
   };
 
   const onSubmit = async (data) => {
+    console.log("🚀 Form submission started");
     console.log("Form submission data:", data);
     console.log("Selected category:", selectedCategory);
     console.log("Selected priority:", selectedPriority);
@@ -574,17 +589,26 @@ const ReportForm = () => {
       notifyVolunteers: notifyVolunteers,
     };
 
-    console.log("Final report data:", reportData);
+    console.log("📋 Final report data:", reportData);
+    console.log("� Coordinates being sent:", {
+      latitude: reportData.latitude,
+      longitude: reportData.longitude,
+      selectedLocation: selectedLocation
+    });
+    console.log("�🔍 About to check for duplicates...");
 
     // Check for duplicates first
     const hasDuplicates = await checkForDuplicates(reportData);
+    console.log("🔍 Duplicate check result:", hasDuplicates);
 
     if (hasDuplicates) {
+      console.log("⚠️ Duplicates found, storing report data and showing modal");
       // Store the report data for later submission
       setPendingReportData(reportData);
       return;
     }
 
+    console.log("✅ No duplicates, proceeding with submission");
     // No duplicates found, proceed with submission
     await proceedWithSubmission(reportData);
   };

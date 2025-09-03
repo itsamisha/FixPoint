@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import { authService } from '../services/authService';
 
 const AuthContext = createContext();
 
@@ -61,8 +62,8 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await api.post('/api/auth/signup', userData);
-      return { success: true, message: response.data.message };
+      const response = await authService.register(userData);
+      return { success: true, message: response.message, data: response };
     } catch (error) {
       return { 
         success: false, 

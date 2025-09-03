@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Frontend Test</title>
+</head>
+<body>
+    <h1>Direct Frontend Duplicate Test</h1>
+    
+    <button onclick="testDirectly()">Test Duplicate Check Directly</button>
+    <div id="output"></div>
+
+    <script>
+        async function testDirectly() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Testing...</p>';
+            
+            const reportData = {
+                title: "Test road issue",
+                description: "There is a large pothole on Main Street",
+                category: "ROADS_INFRASTRUCTURE", 
+                latitude: 23.8103,
+                longitude: 90.4125
+            };
+
+            try {
+                console.log("🔍 Starting duplicate check...");
+                console.log("Data:", reportData);
+                
+                const response = await fetch('http://localhost:3000/api/reports/check-duplicates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(reportData)
+                });
+                
+                console.log("Response status:", response.status);
+                console.log("Response headers:", response.headers);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log("✅ Success:", result);
+                
+                output.innerHTML = `
+                    <h3>✅ Success!</h3>
+                    <p>Status: ${response.status}</p>
+                    <p>Has Duplicates: ${result.hasDuplicates}</p>
+                    <p>Duplicate Count: ${result.duplicateCount}</p>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error("❌ Error:", error);
+                
+                output.innerHTML = `
+                    <h3>❌ Error!</h3>
+                    <p>${error.message}</p>
+                    <p>Check browser console for details</p>
+                `;
+            }
+        }
+
+        // Test with backend port too
+        async function testBackendPort() {
+            const output = document.getElementById('output');
+            output.innerHTML += '<p>Testing backend port...</p>';
+            
+            const reportData = {
+                title: "Test road issue",
+                description: "There is a large pothole on Main Street",
+                category: "ROADS_INFRASTRUCTURE", 
+                latitude: 23.8103,
+                longitude: 90.4125
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/reports/check-duplicates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(reportData)
+                });
+                
+                console.log("Backend response status:", response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log("✅ Backend Success:", result);
+                
+                output.innerHTML += `
+                    <h3>✅ Backend Success!</h3>
+                    <p>Status: ${response.status}</p>
+                    <p>Has Duplicates: ${result.hasDuplicates}</p>
+                    <p>Duplicate Count: ${result.duplicateCount}</p>
+                `;
+                
+            } catch (error) {
+                console.error("❌ Backend Error:", error);
+                output.innerHTML += `<p>❌ Backend Error: ${error.message}</p>`;
+            }
+        }
+
+        window.onload = function() {
+            // Test both ports
+            testDirectly();
+            setTimeout(testBackendPort, 2000);
+        };
+    </script>
+</body>
+</html>

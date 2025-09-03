@@ -20,6 +20,7 @@ import OrganizationSettings from "./pages/OrganizationSettings";
 import AssignedReports from "./pages/AssignedReports";
 import StaffDashboard from "./pages/StaffDashboard";
 import VolunteerDashboard from "./pages/VolunteerDashboard";
+import EmailVerification from "./components/EmailVerification";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<EmailVerification />} />
                 <Route path="/map" element={<MapView />} />
                 <Route path="/reports/:id" element={<ReportDetails />} />
                 <Route

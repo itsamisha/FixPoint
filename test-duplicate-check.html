@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duplicate Detection Test</title>
+</head>
+<body>
+    <h1>Duplicate Detection Test</h1>
+    
+    <div>
+        <h2>Test Duplicate Check</h2>
+        <form id="duplicateForm">
+            <label>Title:</label><br>
+            <input type="text" id="title" value="Road damage on Main Street" style="width: 400px;"><br><br>
+            
+            <label>Description:</label><br>
+            <textarea id="description" rows="4" style="width: 400px;">There is a large pothole on Main Street causing damage to vehicles. This needs immediate attention.</textarea><br><br>
+            
+            <label>Category:</label><br>
+            <select id="category">
+                <option value="ROADS_INFRASTRUCTURE">Roads Infrastructure</option>
+                <option value="SANITATION_WASTE">Sanitation Waste</option>
+                <option value="STREET_LIGHTING">Street Lighting</option>
+                <option value="WATER_DRAINAGE">Water Drainage</option>
+                <option value="TRAFFIC_PARKING">Traffic Parking</option>
+                <option value="PUBLIC_SAFETY">Public Safety</option>
+                <option value="ENVIRONMENTAL">Environmental</option>
+            </select><br><br>
+            
+            <label>Latitude:</label><br>
+            <input type="number" id="latitude" value="23.8103" step="any" style="width: 200px;"><br><br>
+            
+            <label>Longitude:</label><br>
+            <input type="number" id="longitude" value="90.4125" step="any" style="width: 200px;"><br><br>
+            
+            <button type="button" onclick="checkDuplicates()">Check for Duplicates</button>
+        </form>
+        
+        <h3>Result:</h3>
+        <pre id="duplicateResult"></pre>
+    </div>
+
+    <script>
+        async function checkDuplicates() {
+            const formData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                category: document.getElementById('category').value,
+                latitude: parseFloat(document.getElementById('latitude').value),
+                longitude: parseFloat(document.getElementById('longitude').value)
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/reports/check-duplicates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                document.getElementById('duplicateResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('duplicateResult').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -99,8 +99,13 @@ const Register = () => {
         });
 
         if (result.status === 200) {
-          toast.success("Organization registered successfully! Please log in.");
-          navigate("/login");
+          toast.success("Organization registered successfully! Please check your email for verification.");
+          navigate("/verify-email", { 
+            state: { 
+              email: data.organizationEmail,
+              message: "Organization registration completed. Please verify your email."
+            }
+          });
         }
       } else {
         // Regular user registration
@@ -116,8 +121,13 @@ const Register = () => {
 
         result = await registerUser(userData);
         if (result.success) {
-          toast.success("Registration successful! Please log in.");
-          navigate("/login");
+          toast.success("Registration successful! Please check your email for verification.");
+          navigate("/verify-email", { 
+            state: { 
+              email: data.email,
+              message: "Registration completed. Please verify your email to continue."
+            }
+          });
         } else {
           toast.error(result.message);
         }
