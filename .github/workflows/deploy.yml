@@ -45,6 +45,10 @@ jobs:
         gemini.api.url=https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent
         EOF
         
+    # Make Maven wrapper executable
+    - name: Make Maven wrapper executable
+      run: chmod +x ./mvnw
+        
     # Run Backend Tests
     - name: Test Backend
       run: ./mvnw test
@@ -83,6 +87,10 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18'
+        
+    # Make Maven wrapper executable
+    - name: Make Maven wrapper executable
+      run: chmod +x ./mvnw
         
     # Build Backend
     - name: Build Backend
