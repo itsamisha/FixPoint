@@ -214,8 +214,8 @@ export const reportService = {
     });
   },
 
-  // Assign report to a volunteer or staff member
-  assignReport: (reportId, userId) => {
+  // Assign report to a volunteer or staff member (general assignment)
+  assignReportToUser: (reportId, userId) => {
     return api.put(`/api/reports/${reportId}/assign`, { assignedToId: userId });
   },
 

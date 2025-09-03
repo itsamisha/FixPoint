@@ -66,6 +66,8 @@ jobs:
         cd frontend
         npm install
         npm run build
+      env:
+        CI: false
         
   build-and-deploy:
     needs: test
@@ -102,6 +104,8 @@ jobs:
         cd frontend
         npm install
         npm run build
+      env:
+        CI: false
         
     # Deploy to GitHub Pages (Frontend only)
     - name: Deploy to GitHub Pages
