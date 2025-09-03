@@ -1,12 +1,20 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+// Determine if we're running on GitHub Pages (production)
+const isProduction = window.location.hostname === 'itsamisha.github.io';
+const API_BASE_URL = isProduction 
+  ? 'https://your-backend-url.herokuapp.com' // Replace with your actual deployed backend URL
+  : (process.env.REACT_APP_API_URL || 'http://localhost:8080');
+
+// Demo mode for GitHub Pages when no backend is available
+export const DEMO_MODE = isProduction && API_BASE_URL.includes('your-backend-url');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: DEMO_MODE ? 1000 : 10000, // Quick timeout in demo mode
 });
 
 // Public API client (no auth)
