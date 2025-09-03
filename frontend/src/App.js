@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, HashRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -23,11 +23,15 @@ import VolunteerDashboard from "./pages/VolunteerDashboard";
 import EmailVerification from "./components/EmailVerification";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Use HashRouter for GitHub Pages, BrowserRouter for local development
+const isGitHubPages = window.location.hostname === 'itsamisha.github.io';
+const RouterComponent = isGitHubPages ? HashRouter : Router;
+
 function App() {
   return (
     <AuthProvider>
       <ChatProvider>
-        <Router>
+        <RouterComponent>
           <div className="App">
             <Navbar />
             <main>
@@ -107,7 +111,7 @@ function App() {
             <Chatbot />
             <ToastContainer position="top-right" autoClose={3000} />
           </div>
-        </Router>
+        </RouterComponent>
       </ChatProvider>
     </AuthProvider>
   );

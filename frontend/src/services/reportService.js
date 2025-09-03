@@ -1,14 +1,73 @@
-import api, { publicApi } from "./api";
+import api, { publicApi, DEMO_MODE } from "./api";
+
+// Mock data for demo mode
+const MOCK_REPORTS = [
+  {
+    id: 1,
+    title: "Pothole on Main Street",
+    description: "Large pothole causing traffic issues",
+    category: "ROAD_INFRASTRUCTURE",
+    priority: "HIGH",
+    status: "SUBMITTED",
+    address: "123 Main Street, Demo City",
+    latitude: 40.7128,
+    longitude: -74.0060,
+    createdAt: "2025-09-01T10:00:00Z",
+    reporterName: "Demo User"
+  },
+  {
+    id: 2,
+    title: "Broken Street Light",
+    description: "Street light not working, safety concern",
+    category: "PUBLIC_LIGHTING",
+    priority: "MEDIUM",
+    status: "IN_PROGRESS", 
+    address: "456 Oak Avenue, Demo City",
+    latitude: 40.7589,
+    longitude: -73.9851,
+    createdAt: "2025-09-02T14:30:00Z",
+    reporterName: "Demo Citizen"
+  },
+  {
+    id: 3,
+    title: "Park Maintenance Needed",
+    description: "Playground equipment needs repair",
+    category: "PARKS_RECREATION",
+    priority: "LOW",
+    status: "RESOLVED",
+    address: "789 Park Lane, Demo City", 
+    latitude: 40.7505,
+    longitude: -73.9934,
+    createdAt: "2025-08-30T09:15:00Z",
+    reporterName: "Demo Family"
+  }
+];
 
 export const reportService = {
   // Get all reports
   getReports: (params = {}) => {
+    if (DEMO_MODE) {
+      return Promise.resolve({ data: { content: MOCK_REPORTS, totalPages: 1, totalElements: MOCK_REPORTS.length } });
+    }
     return api.get("/api/reports", { params });
   },
 
   // Get public reports
   getPublicReports: (params = {}) => {
     console.log("Fetching public reports with params:", params);
+    
+    if (DEMO_MODE) {
+      console.log("Running in demo mode, returning mock data");
+      return Promise.resolve({ 
+        data: { 
+          content: MOCK_REPORTS, 
+          totalPages: 1, 
+          totalElements: MOCK_REPORTS.length,
+          pageable: { pageNumber: 0, pageSize: 6 }
+        } 
+      });
+    }
+    
     return publicApi.get("/api/public/reports", { params }).catch((error) => {
       console.error("API Error in getPublicReports:", error.response || error);
       throw error;

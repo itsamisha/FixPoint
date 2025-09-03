@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Users, CheckCircle, AlertCircle } from 'lucide-react';
+import { MapPin, Users, CheckCircle, AlertCircle, Info } from 'lucide-react';
 import ReportCard from '../components/ReportCard';
 import { reportService } from '../services/reportService';
 import { useAuth } from '../contexts/AuthContext';
+import { DEMO_MODE } from '../services/api';
 
 const Home = () => {
   const { user } = useAuth();
@@ -48,6 +49,18 @@ const Home = () => {
 
   return (
     <div>
+      {DEMO_MODE && (
+        <div className="bg-blue-100 border border-blue-300 px-4 py-3 rounded-lg mb-6 mx-6 mt-6">
+          <div className="flex items-center">
+            <Info className="h-5 w-5 text-blue-600 mr-2" />
+            <div>
+              <p className="text-blue-800 font-medium">Demo Mode</p>
+              <p className="text-blue-700 text-sm">This is a demonstration version with sample data. The backend service is not available.</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
