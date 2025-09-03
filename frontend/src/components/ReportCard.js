@@ -1,44 +1,66 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Eye, MessageSquare, ThumbsUp, MapPin, Calendar, User, UserPlus } from 'lucide-react';
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  Eye,
+  MessageSquare,
+  ThumbsUp,
+  MapPin,
+  Calendar,
+  User,
+  UserPlus,
+} from "lucide-react";
+import "./ReportCard.css";
 
-const ReportCard = ({ 
-  report, 
-  onVote, 
-  showVoteButton = false, 
-  showAssignButton = false, 
-  onAssign 
+const ReportCard = ({
+  report,
+  onVote,
+  showVoteButton = false,
+  showAssignButton = false,
+  onAssign,
 }) => {
   const getStatusClass = (status) => {
     switch (status?.toLowerCase()) {
-      case 'submitted': return 'status-submitted';
-      case 'in_progress': return 'status-in_progress';
-      case 'resolved': return 'status-resolved';
-      case 'rejected': return 'status-rejected';
-      default: return 'status-submitted';
+      case "submitted":
+        return "status-submitted";
+      case "in_progress":
+        return "status-in_progress";
+      case "resolved":
+        return "status-resolved";
+      case "rejected":
+        return "status-rejected";
+      default:
+        return "status-submitted";
     }
   };
 
   const getPriorityClass = (priority) => {
     switch (priority?.toLowerCase()) {
-      case 'low': return 'priority-low';
-      case 'medium': return 'priority-medium';
-      case 'high': return 'priority-high';
-      case 'urgent': return 'priority-urgent';
-      default: return 'priority-medium';
+      case "low":
+        return "priority-low";
+      case "medium":
+        return "priority-medium";
+      case "high":
+        return "priority-high";
+      case "urgent":
+        return "priority-urgent";
+      default:
+        return "priority-medium";
     }
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const formatCategory = (category) => {
-    return category?.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    return category
+      ?.replace(/_/g, " ")
+      .toLowerCase()
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   };
 
   const handleVote = (e) => {
@@ -52,39 +74,44 @@ const ReportCard = ({
   const handleAssign = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('ReportCard handleAssign called with report:', report);
+    console.log("ReportCard handleAssign called with report:", report);
     if (onAssign) {
-      console.log('Calling onAssign function');
+      console.log("Calling onAssign function");
       onAssign(report);
     } else {
-      console.log('onAssign function is not provided');
+      console.log("onAssign function is not provided");
     }
   };
 
   return (
-    <div className="card">
+    <div className="report-card">
       <div className="card-body">
         <div className="flex justify-between items-start mb-4">
           <h3 className="card-title">{report.title}</h3>
           <div className="flex gap-2">
             <span className={`status-badge ${getStatusClass(report.status)}`}>
-              {report.status?.replace(/_/g, ' ')}
+              {report.status?.replace(/_/g, " ")}
             </span>
-            <span className={`priority-badge ${getPriorityClass(report.priority)}`}>
+            <span
+              className={`priority-badge ${getPriorityClass(report.priority)}`}
+            >
               {report.priority}
             </span>
           </div>
         </div>
 
-        <p className="text-gray-600 mb-4" style={{ maxHeight: '60px', overflow: 'hidden' }}>
+        <p
+          className="text-gray-600 mb-4"
+          style={{ maxHeight: "60px", overflow: "hidden" }}
+        >
           {report.description}
         </p>
 
         {report.imagePath && (
           <div className="mb-4">
-            <img 
-              src={`http://localhost:8080/${report.imagePath}`} 
-              alt="Report" 
+            <img
+              src={`http://localhost:8080/${report.imagePath}`}
+              alt="Report"
               className="w-full h-48 object-cover rounded"
             />
           </div>
@@ -101,12 +128,17 @@ const ReportCard = ({
           </div>
           <div className="flex items-center gap-1">
             <User size={16} />
-            <span>{report.reporter?.fullName || report.reporter?.username}</span>
+            <span>
+              {report.reporter?.fullName || report.reporter?.username}
+            </span>
           </div>
           {report.assignedTo && (
             <div className="flex items-center gap-1 text-blue-600">
               <UserPlus size={16} />
-              <span>Assigned to: {report.assignedTo.fullName || report.assignedTo.username}</span>
+              <span>
+                Assigned to:{" "}
+                {report.assignedTo.fullName || report.assignedTo.username}
+              </span>
             </div>
           )}
         </div>
@@ -132,28 +164,27 @@ const ReportCard = ({
 
           <div className="flex gap-2">
             {showVoteButton && (
-              <button 
+              <button
                 onClick={handleVote}
-                className={`btn ${report.hasUserVoted ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn ${
+                  report.hasUserVoted ? "btn-primary" : "btn-outline"
+                }`}
               >
                 <ThumbsUp size={16} />
-                {report.hasUserVoted ? 'Voted' : 'Vote'}
+                {report.hasUserVoted ? "Voted" : "Vote"}
               </button>
             )}
             {showAssignButton && (
-              <button 
+              <button
                 onClick={handleAssign}
                 className="btn btn-success"
                 title="Assign to Staff"
               >
                 <UserPlus size={16} />
-                {report.assignedTo ? 'Reassign' : 'Assign'}
+                {report.assignedTo ? "Reassign" : "Assign"}
               </button>
             )}
-            <Link 
-              to={`/reports/${report.id}`} 
-              className="btn btn-outline"
-            >
+            <Link to={`/reports/${report.id}`} className="btn btn-outline">
               <Eye size={16} />
               View Details
             </Link>

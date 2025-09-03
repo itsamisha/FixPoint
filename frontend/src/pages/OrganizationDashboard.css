@@ -61,9 +61,17 @@
 }
 
 .tab-button.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
-  background-color: #eff6ff;
+  color: #1e293b !important; /* Dark text for better visibility on gradient */
+  border-bottom-color: transparent;
+  background: linear-gradient(
+    135deg,
+    #667eea 0%,
+    #764ba2 100%
+  ) !important; /* Colorful gradient background */
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important; /* Add shadow for depth */
+  transform: translateY(-2px) !important; /* Enhanced lift effect */
+  border-radius: 0.5rem 0.5rem 0 0;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important; /* White text shadow for better contrast */
 }
 
 .tab-icon {
@@ -468,8 +476,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-text {
@@ -507,30 +519,30 @@
   .dashboard-header h1 {
     font-size: 2rem;
   }
-  
+
   .tab-list {
     flex-direction: column;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .reports-grid {
     grid-template-columns: 1fr;
     padding: 1rem;
   }
-  
+
   .staff-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
-  
+
   .staff-actions {
     align-self: flex-end;
   }
-  
+
   .modal-content {
     margin: 1rem;
     width: calc(100% - 2rem);
@@ -541,20 +553,20 @@
   .dashboard-content {
     padding: 0 0.5rem;
   }
-  
+
   .tab-button {
     padding: 0.75rem;
     font-size: 0.875rem;
   }
-  
+
   .stat-card {
     padding: 1rem;
   }
-  
+
   .report-card {
     padding: 1rem;
   }
-  
+
   .staff-item {
     padding: 1rem;
   }

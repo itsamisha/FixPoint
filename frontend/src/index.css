@@ -5,8 +5,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -15,7 +15,7 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
@@ -102,13 +102,18 @@ code {
 }
 
 .btn:before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
   transition: left 0.5s ease;
 }
 
@@ -165,7 +170,7 @@ code {
 }
 
 .hero-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -542,4 +547,148 @@ code {
   .grid-cols-3 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
+}
+
+/* Force all text elements in active tabs to be dark globally */
+.tab-navigation .tab-list .tab-button.active *,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active * {
+  color: #1e293b !important;
+}
+
+/* AGGRESSIVE GLOBAL TEXT VISIBILITY OVERRIDE */
+.tab-navigation .tab-list .tab-button.active,
+.tab-navigation .tab-list .tab-button.active span,
+.tab-navigation .tab-list .tab-button.active div,
+.tab-navigation .tab-list .tab-button.active p,
+.tab-navigation .tab-list .tab-button.active strong,
+.tab-navigation .tab-list .tab-button.active em,
+.tab-navigation .tab-list .tab-button.active b,
+.tab-navigation .tab-list .tab-button.active i,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active span,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active div,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active p,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active strong,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active em,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active b,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active i {
+  color: #1e293b !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.tab-button.active {
+  color: #1e293b !important; /* Dark text for better visibility on gradient */
+  background: linear-gradient(
+    135deg,
+    #667eea 0%,
+    #764ba2 100%
+  ) !important; /* Colorful gradient background */
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important; /* Add shadow for depth */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important; /* White text shadow for better contrast */
+}
+
+/* Enhanced stats section text */
+.stat-number {
+  color: #111827 !important;
+  font-weight: 800 !important;
+  text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8) !important;
+}
+
+.stat-label {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* FIXED TAB NAVIGATION TEXT VISIBILITY */
+.tab-navigation,
+.tab-list,
+.tab-button {
+  color: #1f2937 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Inactive tab text - make it clearly visible */
+.tab-button {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.tab-button span,
+.tab-button div,
+.tab-button p,
+.tab-button strong,
+.tab-button em,
+.tab-button b,
+.tab-button i {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Active tab text - make it clearly visible on gradient background */
+.tab-button.active {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+.tab-button.active span,
+.tab-button.active div,
+.tab-button.active p,
+.tab-button.active strong,
+.tab-button.active em,
+.tab-button.active b,
+.tab-button.active i {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Hover state for tabs */
+.tab-button:hover {
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+.tab-button:hover span,
+.tab-button:hover div,
+.tab-button:hover p,
+.tab-button:hover strong,
+.tab-button:hover em,
+.tab-button:hover b,
+.tab-button:hover i {
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Specific tab navigation container styling */
+.tab-navigation .tab-list .tab-button,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button {
+  color: #374151 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.tab-navigation .tab-list .tab-button.active,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Ensure all text elements within tabs are visible */
+.tab-navigation *,
+.volunteer-dashboard .tab-navigation * {
+  color: inherit !important;
+}
+
+/* Force text visibility in tab content areas */
+.tab-content,
+.tab-panel {
+  color: #1f2937 !important;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3) !important;
 }

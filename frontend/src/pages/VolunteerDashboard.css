@@ -1228,3 +1228,39 @@
     justify-content: center;
   }
 }
+
+/* Ensure all child elements inherit the dark color */
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active * {
+  color: inherit !important;
+}
+
+/* AGGRESSIVE TEXT VISIBILITY OVERRIDE */
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active span,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active div,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active p,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active strong,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active em,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active b,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active i {
+  color: #1e293b !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Target the icon with maximum specificity */
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active .tab-icon,
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active svg {
+  color: #1e293b !important;
+  fill: #1e293b !important;
+  stroke: #1e293b !important;
+}
+
+/* Force the button text to be dark */
+.volunteer-dashboard .tab-navigation .tab-list .tab-button.active {
+  color: #1e293b !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3) !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+  font-weight: 700 !important;
+}

@@ -70,8 +70,8 @@ const VolunteerDashboard = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // Fetch all community reports
-      const allReportsResponse = await reportService.getReports();
+      // Fetch all community reports (public reports for volunteers)
+      const allReportsResponse = await reportService.getPublicReports();
       const allReportsData =
         allReportsResponse?.data?.content || allReportsResponse?.data || [];
       setAllReports(allReportsData);
@@ -123,7 +123,7 @@ const VolunteerDashboard = () => {
   const handleStartTask = async (reportId) => {
     try {
       // Start a task by assigning it to the current volunteer
-      await reportService.assignReport(reportId, user.id);
+      await reportService.assignReportToUser(reportId, user.id);
 
       // Update the report locally to show it's now assigned
       setAllReports((prev) =>
@@ -314,6 +314,14 @@ const VolunteerDashboard = () => {
                 activeTab === "overview" ? "active" : ""
               }`}
               onClick={() => setActiveTab("overview")}
+              style={
+                activeTab === "overview"
+                  ? {
+                      color: "#1e293b",
+                      textShadow: "0 1px 2px rgba(255, 255, 255, 0.8)",
+                    }
+                  : {}
+              }
             >
               <BarChart3 className="tab-icon" />
               Overview
@@ -323,6 +331,14 @@ const VolunteerDashboard = () => {
                 activeTab === "community" ? "active" : ""
               }`}
               onClick={() => setActiveTab("community")}
+              style={
+                activeTab === "community"
+                  ? {
+                      color: "#1e293b",
+                      textShadow: "0 1px 2px rgba(255, 255, 255, 0.8)",
+                    }
+                  : {}
+              }
             >
               <Users className="tab-icon" />
               Community Reports
@@ -332,6 +348,14 @@ const VolunteerDashboard = () => {
                 activeTab === "my-tasks" ? "active" : ""
               }`}
               onClick={() => setActiveTab("my-tasks")}
+              style={
+                activeTab === "my-tasks"
+                  ? {
+                      color: "#1e293b",
+                      textShadow: "0 1px 2px rgba(255, 255, 255, 0.8)",
+                    }
+                  : {}
+              }
             >
               <FileText className="tab-icon" />
               My Tasks
@@ -341,6 +365,14 @@ const VolunteerDashboard = () => {
                 activeTab === "leaderboard" ? "active" : ""
               }`}
               onClick={() => setActiveTab("leaderboard")}
+              style={
+                activeTab === "leaderboard"
+                  ? {
+                      color: "#1e293b",
+                      textShadow: "0 1px 2px rgba(255, 255, 255, 0.8)",
+                    }
+                  : {}
+              }
             >
               <Trophy className="tab-icon" />
               Leaderboard

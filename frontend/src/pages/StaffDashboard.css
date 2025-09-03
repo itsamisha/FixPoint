@@ -252,8 +252,15 @@
 }
 
 .tab-button.active {
-  color: white;
+  color: #1e293b !important; /* Dark text for better visibility on gradient */
   box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(
+    135deg,
+    #667eea 0%,
+    #764ba2 100%
+  ) !important; /* Colorful gradient background */
+  transform: translateY(-2px) !important; /* Enhanced lift effect */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important; /* White text shadow for better contrast */
 }
 
 .tab-button.active::before {
