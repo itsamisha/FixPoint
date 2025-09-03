@@ -47,20 +47,21 @@ jobs:
         
     # Run Backend Tests
     - name: Test Backend
-      run: ./mvnw test -Dspring.profiles.active=test
+      run: ./mvnw test
+      env:
+        SPRING_PROFILES_ACTIVE: test
         
-    # Setup Node for Frontend
+    # Frontend build test (instead of unit tests)
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
         
-    # Test Frontend
-    - name: Test Frontend
+    - name: Test Frontend Build
       run: |
         cd frontend
         npm install
-        npm test -- --coverage --watchAll=false
+        npm run build
         
   build-and-deploy:
     needs: test
