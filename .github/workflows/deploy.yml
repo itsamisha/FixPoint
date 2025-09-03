@@ -73,6 +73,7 @@ jobs:
         npm run build
       env:
         CI: false
+        PUBLIC_URL: /FixPoint
         
   build-and-deploy:
     needs: test
@@ -116,6 +117,7 @@ jobs:
         npm run build
       env:
         CI: false
+        PUBLIC_URL: /FixPoint
         
     # Deploy to GitHub Pages (Frontend only)
     - name: Setup Pages

@@ -2,6 +2,7 @@
   "name": "fixpoint-frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://itsamisha.github.io/FixPoint",
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@stomp/stompjs": "^7.1.1",
