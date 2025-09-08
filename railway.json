@@ -1,0 +1,6 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "chmod +x build.sh && ./build.sh"
+  }
+}

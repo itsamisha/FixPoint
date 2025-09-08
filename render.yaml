@@ -3,7 +3,7 @@ services:
   - type: web
     name: fixpoint-backend
     env: java
-    buildCommand: ./mvnw clean package -DskipTests
+    buildCommand: chmod +x build.sh && ./build.sh
     startCommand: java -jar target/fixpoint-0.0.1-SNAPSHOT.jar
     envVars:
       - key: SPRING_PROFILES_ACTIVE
