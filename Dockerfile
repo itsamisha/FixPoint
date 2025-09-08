@@ -1,4 +1,4 @@
-# Use Maven image for building
+# Use Maven image for building - Railway Fix
 FROM maven:3.8.6-openjdk-17-slim AS build
 
 # Set working directory
