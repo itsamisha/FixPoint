@@ -1,3 +1,4 @@
+# Ignore these files and directories when building Docker image
 target/
 .git/
 .gitignore
@@ -5,3 +6,21 @@ README.md
 *.md
 frontend/
 uploads/
+data/
+*.log
+.env
+.DS_Store
+.vscode
+.idea
+*.iml
+node_modules/
+npm-debug.log
+.npm
+.nyc_output
+coverage
+.coverage
+*.html
+test-*.json
+*.bat
+*.sh
+.mvn/wrapper/maven-wrapper.jar

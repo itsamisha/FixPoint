@@ -30,9 +30,10 @@
         <div class="section">
             <h3>📋 Backend URL Configuration</h3>
             <div class="endpoint-url">
-                <strong>Expected Render URL:</strong> https://fixpoint-backend.onrender.com
+                <strong>Expected Render URL:</strong> https://your-service-name.onrender.com
             </div>
-            <p><strong>Note:</strong> Replace 'fixpoint-backend' with your actual Render service name if different.</p>
+            <p><strong>Note:</strong> Render will assign a unique service name. Update the frontend API configuration with your actual URL.</p>
+            <p><strong>Docker Deployment:</strong> This project uses Docker for deployment on Render.</p>
         </div>
 
         <div class="section">
@@ -47,19 +48,21 @@
         <div class="section">
             <h3>📝 Deployment Instructions</h3>
             <div class="info">
-                <strong>To deploy to Render:</strong><br>
+                <strong>To deploy to Render with Docker:</strong><br>
                 1. Go to <a href="https://render.com" target="_blank">render.com</a><br>
                 2. Connect your GitHub repository<br>
                 3. Choose "Web Service"<br>
-                4. Use the render.yaml configuration in your repo<br>
-                5. Set environment variables if needed<br>
-                6. Deploy!
+                4. Select "Docker" as the environment<br>
+                5. Render will automatically use the Dockerfile<br>
+                6. Set environment variables if needed (PORT is auto-set)<br>
+                7. Deploy and wait for the build to complete!<br>
+                8. Update frontend API URLs with your actual Render URL
             </div>
         </div>
     </div>
 
     <script>
-        const RENDER_BASE = 'https://fixpoint-backend.onrender.com';
+        const RENDER_BASE = 'https://your-service-name.onrender.com'; // Update this with your actual Render URL
 
         function log(message, type = 'info') {
             const element = document.getElementById('testResults');

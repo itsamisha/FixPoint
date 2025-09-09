@@ -3,7 +3,7 @@ import axios from 'axios';
 // Determine if we're running on GitHub Pages (production)
 const isProduction = window.location.hostname === 'itsamisha.github.io';
 const API_BASE_URL = isProduction 
-  ? 'https://fixpoint-backend.onrender.com' // Your Render backend URL
+  ? 'https://fixpoint-backend.onrender.com' // Your Render backend URL (update with actual service name)
   : (process.env.REACT_APP_API_URL || 'http://localhost:8080');
 
 // Demo mode is now disabled since we have a real backend

@@ -1,5 +1,5 @@
-# Use Maven image for building - Railway Fix
-FROM maven:3.8.6-openjdk-17-slim AS build
+# Use Maven image for building - Render Docker deployment
+FROM maven:3.9.4-openjdk-17 AS build
 
 # Set working directory
 WORKDIR /app
@@ -25,8 +25,8 @@ WORKDIR /app
 # Copy the built JAR from build stage
 COPY --from=build /app/target/fixpoint-0.0.1-SNAPSHOT.jar app.jar
 
-# Expose port
-EXPOSE 8080
+# Expose port (Render will set PORT environment variable)
+EXPOSE $PORT
 
-# Run the application
-CMD ["java", "-jar", "app.jar", "--server.port=8080"]
+# Run the application with dynamic port
+CMD ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8080}"]
