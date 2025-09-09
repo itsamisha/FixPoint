@@ -13,7 +13,7 @@ import { getApiBaseUrl } from '../utils/apiConfig';
 
 // Use backend URL for WebSocket connection
 const WS_URL = `${getApiBaseUrl()}/ws-chat`;
-const API_USERS = "/api/chat/users";
+const API_USERS = "/api/public/chat/users";
 
 const ChatContext = createContext();
 

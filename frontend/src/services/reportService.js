@@ -44,12 +44,12 @@ const MOCK_REPORTS = [
 ];
 
 export const reportService = {
-  // Get all reports
+  // Get all reports (for authenticated users)
   getReports: (params = {}) => {
     if (DEMO_MODE) {
       return Promise.resolve({ data: { content: MOCK_REPORTS, totalPages: 1, totalElements: MOCK_REPORTS.length } });
     }
-    return api.get("/api/reports", { params });
+    return api.get("/api/public/reports", { params }); // Use public endpoint for now
   },
 
   // Get public reports
