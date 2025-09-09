@@ -27,10 +27,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.role = :role AND u.isActive = true")
     List<User> findActiveUsersByRole(@Param("role") User.Role role);
     
-    @Query("SELECT u FROM User u WHERE u.isVolunteer = true AND u.isActive = true")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.organization WHERE u.isVolunteer = true AND u.isActive = true")
     List<User> findActiveVolunteers();
     
-    @Query("SELECT u FROM User u WHERE u.isActive = true ORDER BY u.createdAt DESC")
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.organization WHERE u.isActive = true ORDER BY u.createdAt DESC")
     List<User> findAllActiveUsers();
     
     List<User> findByUserType(User.UserType userType);

@@ -8,6 +8,7 @@ import com.ambiguous.fixpoint.repository.ReportRepository;
 import com.ambiguous.fixpoint.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -132,6 +133,7 @@ public class TestDataController {
     }
 
     @GetMapping("/users")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getAllUsers() {
         try {
             List<User> users = userRepository.findAll();

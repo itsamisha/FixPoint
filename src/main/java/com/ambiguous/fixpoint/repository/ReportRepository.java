@@ -15,8 +15,11 @@ import java.util.List;
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
     
-    // Default findAll method with User relationships eagerly fetched
-    @Query("SELECT r FROM Report r LEFT JOIN FETCH r.reporter LEFT JOIN FETCH r.assignedTo")
+    // Default findAll method with User and Organization relationships eagerly fetched
+    @Query("SELECT DISTINCT r FROM Report r " +
+           "LEFT JOIN FETCH r.reporter " +
+           "LEFT JOIN FETCH r.assignedTo " +
+           "LEFT JOIN FETCH r.targetOrganizations")
     List<Report> findAllWithUsers();
     
     List<Report> findByReporter(User reporter);
@@ -70,19 +73,31 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findByCategoryAndCreatedAtAfter(Report.Category category, LocalDateTime createdAt);
     
     // Find all reports, prioritizing those with images first, then by latest created date
-    @Query("SELECT r FROM Report r LEFT JOIN FETCH r.reporter LEFT JOIN FETCH r.assignedTo ORDER BY " +
+    @Query("SELECT DISTINCT r FROM Report r " +
+           "LEFT JOIN FETCH r.reporter " +
+           "LEFT JOIN FETCH r.assignedTo " +
+           "LEFT JOIN FETCH r.targetOrganizations " +
+           "ORDER BY " +
            "CASE WHEN r.imagePath IS NOT NULL AND r.imagePath != '' THEN 0 ELSE 1 END, " +
            "r.createdAt DESC")
     Page<Report> findAllWithImagesPrioritizedOrderByCreatedAtDesc(Pageable pageable);
     
     // Find reports by status, prioritizing those with images first, then by latest created date
-    @Query("SELECT r FROM Report r LEFT JOIN FETCH r.reporter LEFT JOIN FETCH r.assignedTo WHERE r.status = :status ORDER BY " +
+    @Query("SELECT DISTINCT r FROM Report r " +
+           "LEFT JOIN FETCH r.reporter " +
+           "LEFT JOIN FETCH r.assignedTo " +
+           "LEFT JOIN FETCH r.targetOrganizations " +
+           "WHERE r.status = :status ORDER BY " +
            "CASE WHEN r.imagePath IS NOT NULL AND r.imagePath != '' THEN 0 ELSE 1 END, " +
            "r.createdAt DESC")
     Page<Report> findByStatusWithImagesPrioritizedOrderByCreatedAtDesc(@Param("status") Report.Status status, Pageable pageable);
     
     // Find reports by category, prioritizing those with images first, then by latest created date
-    @Query("SELECT r FROM Report r LEFT JOIN FETCH r.reporter LEFT JOIN FETCH r.assignedTo WHERE r.category = :category ORDER BY " +
+    @Query("SELECT DISTINCT r FROM Report r " +
+           "LEFT JOIN FETCH r.reporter " +
+           "LEFT JOIN FETCH r.assignedTo " +
+           "LEFT JOIN FETCH r.targetOrganizations " +
+           "WHERE r.category = :category ORDER BY " +
            "CASE WHEN r.imagePath IS NOT NULL AND r.imagePath != '' THEN 0 ELSE 1 END, " +
            "r.createdAt DESC")
     Page<Report> findByCategoryWithImagesPrioritizedOrderByCreatedAtDesc(@Param("category") Report.Category category, Pageable pageable);
