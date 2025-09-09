@@ -2,7 +2,6 @@
   "name": "fixpoint-frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://itsamisha.github.io/FixPoint",
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@stomp/stompjs": "^7.1.1",
@@ -49,5 +48,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8080"
+  "proxy": "http://localhost:8080",
+  "devDependencies": {
+    "http-proxy-middleware": "^3.0.5"
+  }
 }

@@ -13,6 +13,7 @@ import com.ambiguous.fixpoint.repository.ReportRepository;
 import com.ambiguous.fixpoint.repository.UserRepository;
 import com.ambiguous.fixpoint.security.UserPrincipal;
 import com.ambiguous.fixpoint.dto.UserSummary;
+import com.ambiguous.fixpoint.service.NotificationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,9 @@ public class CommentController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping
     public ResponseEntity<List<CommentResponse>> listComments(
@@ -70,6 +74,10 @@ public class CommentController {
 
         Comment comment = new Comment(request.getContent(), report, user);
         Comment saved = commentRepository.save(comment);
+        
+        // Send notification to report owner and organization admins (if not the commenter)
+        notificationService.createCommentNotificationForAll(saved);
+        
         return ResponseEntity.ok(toResponse(saved, user));
     }
 
@@ -89,6 +97,12 @@ public class CommentController {
 
         Comment reply = new Comment(request.getContent(), report, user, parentComment);
         Comment saved = commentRepository.save(reply);
+        
+        // Send notification to parent comment author (if not the same user)
+        if (!parentComment.getUser().getId().equals(user.getId())) {
+            notificationService.createCommentReplyNotification(saved, parentComment.getUser());
+        }
+        
         return ResponseEntity.ok(toResponse(saved, user));
     }
 

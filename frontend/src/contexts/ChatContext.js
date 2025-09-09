@@ -6,11 +6,14 @@ import React, {
   useState,
 } from "react";
 import SockJS from "sockjs-client";
-import { CompatClient, Stomp } from "@stomp/stompjs";
+import { Stomp } from "@stomp/stompjs";
 import api from "../services/api";
 import { useAuth } from "./AuthContext";
 
-const WS_URL = "/ws-chat";
+// Use backend URL for WebSocket connection
+const WS_URL = process.env.NODE_ENV === 'production' 
+  ? "/ws-chat" 
+  : "http://localhost:8080/ws-chat";
 const API_USERS = "/api/chat/users";
 
 const ChatContext = createContext();
@@ -69,7 +72,7 @@ export const ChatProvider = ({ children }) => {
     
     try {
       const socket = new SockJS(WS_URL);
-      const client = Stomp.over(socket);
+      const client = Stomp.over(() => socket);
       
       // Disable console debug logs
       client.debug = () => {};

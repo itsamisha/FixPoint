@@ -64,4 +64,34 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     
     // For duplicate detection
     List<Report> findByCategoryAndCreatedAtAfter(Report.Category category, LocalDateTime createdAt);
+    
+    // Find all reports, prioritizing those with images first, then by latest created date
+    @Query("SELECT r FROM Report r ORDER BY " +
+           "CASE WHEN r.imagePath IS NOT NULL AND r.imagePath != '' THEN 0 ELSE 1 END, " +
+           "r.createdAt DESC")
+    Page<Report> findAllWithImagesPrioritizedOrderByCreatedAtDesc(Pageable pageable);
+    
+    // Find reports by status, prioritizing those with images first, then by latest created date
+    @Query("SELECT r FROM Report r WHERE r.status = :status ORDER BY " +
+           "CASE WHEN r.imagePath IS NOT NULL AND r.imagePath != '' THEN 0 ELSE 1 END, " +
+           "r.createdAt DESC")
+    Page<Report> findByStatusWithImagesPrioritizedOrderByCreatedAtDesc(@Param("status") Report.Status status, Pageable pageable);
+    
+    // Find reports by category, prioritizing those with images first, then by latest created date
+    @Query("SELECT r FROM Report r WHERE r.category = :category ORDER BY " +
+           "CASE WHEN r.imagePath IS NOT NULL AND r.imagePath != '' THEN 0 ELSE 1 END, " +
+           "r.createdAt DESC")
+    Page<Report> findByCategoryWithImagesPrioritizedOrderByCreatedAtDesc(@Param("category") Report.Category category, Pageable pageable);
+    
+    // Find reports with images, ordered by latest first
+    @Query("SELECT r FROM Report r WHERE r.imagePath IS NOT NULL AND r.imagePath != '' ORDER BY r.createdAt DESC")
+    Page<Report> findReportsWithImagesOrderByCreatedAtDesc(Pageable pageable);
+    
+    // Find reports with images by status, ordered by latest first
+    @Query("SELECT r FROM Report r WHERE r.imagePath IS NOT NULL AND r.imagePath != '' AND r.status = :status ORDER BY r.createdAt DESC")
+    Page<Report> findReportsWithImagesByStatusOrderByCreatedAtDesc(@Param("status") Report.Status status, Pageable pageable);
+    
+    // Find reports with images by category, ordered by latest first
+    @Query("SELECT r FROM Report r WHERE r.imagePath IS NOT NULL AND r.imagePath != '' AND r.category = :category ORDER BY r.createdAt DESC")
+    Page<Report> findReportsWithImagesByCategoryOrderByCreatedAtDesc(@Param("category") Report.Category category, Pageable pageable);
 }

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import NotificationBell from "./NotificationBell";
 
 const chatButtonStyle = {
   position: "fixed",
@@ -62,6 +63,7 @@ const Navbar = () => {
           <div className="navbar-actions">
             {user ? (
               <>
+                <NotificationBell />
                 <div className="user-welcome">
                   <span>👋 Welcome, {user.fullName || user.username}!</span>
                 </div>

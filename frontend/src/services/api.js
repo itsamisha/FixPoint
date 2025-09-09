@@ -14,7 +14,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: DEMO_MODE ? 1000 : 10000, // Quick timeout in demo mode
+  timeout: DEMO_MODE ? 1000 : 60000, // Increased timeout to 60 seconds for translation
 });
 
 // Public API client (no auth)

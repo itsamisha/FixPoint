@@ -108,6 +108,24 @@ public class ReportController {
         }
     }
 
+    @GetMapping("/with-images")
+    public ResponseEntity<Page<ReportSummary>> getReportsWithImages(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? 
+                Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        User user = userRepository.findById(currentUser.getId()).orElse(null);
+        Page<ReportSummary> reports = reportService.getReportsWithImages(pageable, user);
+
+        return ResponseEntity.ok(reports);
+    }
+
     @GetMapping("/my-reports")
     public ResponseEntity<Page<ReportSummary>> getUserReports(
             @RequestParam(defaultValue = "0") int page,

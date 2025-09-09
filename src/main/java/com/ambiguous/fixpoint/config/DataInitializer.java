@@ -3,8 +3,10 @@ package com.ambiguous.fixpoint.config;
 import com.ambiguous.fixpoint.entity.Organization;
 import com.ambiguous.fixpoint.entity.User;
 import com.ambiguous.fixpoint.entity.Report;
+import com.ambiguous.fixpoint.entity.Notification;
 import com.ambiguous.fixpoint.repository.UserRepository;
 import com.ambiguous.fixpoint.repository.ReportRepository;
+import com.ambiguous.fixpoint.repository.NotificationRepository;
 import com.ambiguous.fixpoint.service.OrganizationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -27,6 +29,9 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private ReportRepository reportRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -98,6 +103,9 @@ public class DataInitializer implements CommandLineRunner {
         adminUser.setOrganization(testOrg);
         
         userRepository.save(adminUser);
+        
+        // Create dummy notifications for admin user
+        createDummyNotifications(adminUser);
         
         // Create a staff user for testing
         User staffUser = new User();
@@ -1167,6 +1175,72 @@ public class DataInitializer implements CommandLineRunner {
             } catch (Exception e) {
                 System.err.println("Error creating report " + i + ": " + e.getMessage());
             }
+        }
+    }
+    
+    private void createDummyNotifications(User adminUser) {
+        try {
+            System.out.println("Creating dummy notifications for admin user...");
+            
+            // Check if notifications already exist for this user
+            long existingCount = notificationRepository.countByUserAndIsReadFalse(adminUser);
+            if (existingCount > 0) {
+                System.out.println("Admin user already has " + existingCount + " unread notifications, skipping...");
+                return;
+            }
+            
+            // Create various types of notifications
+            Object[][] notificationData = {
+                {"New Report Submitted", "A new infrastructure report has been submitted for review", Notification.NotificationType.REPORT_STATUS_CHANGE},
+                {"Progress Update", "Road repair project on Main Street is 75% complete", Notification.NotificationType.PROGRESS_UPDATE},
+                {"System Announcement", "System maintenance scheduled for tonight from 11 PM to 1 AM", Notification.NotificationType.SYSTEM_ANNOUNCEMENT},
+                {"New Comment", "A citizen has commented on the drainage repair project", Notification.NotificationType.NEW_COMMENT},
+                {"Report Assigned", "Traffic signal maintenance task has been assigned to your team", Notification.NotificationType.REPORT_ASSIGNED},
+                {"Task Completed", "Pothole repair on Park Avenue has been completed", Notification.NotificationType.REPORT_RESOLVED},
+                {"Urgent Report", "Emergency water pipe burst reported in downtown area", Notification.NotificationType.REPORT_STATUS_CHANGE},
+                {"Weekly Summary", "Your team has completed 15 tasks this week", Notification.NotificationType.SYSTEM_ANNOUNCEMENT}
+            };
+            
+            int createdCount = 0;
+            for (Object[] data : notificationData) {
+                try {
+                    Notification notification = new Notification();
+                    notification.setTitle((String) data[0]);
+                    notification.setMessage((String) data[1]);
+                    notification.setType((Notification.NotificationType) data[2]);
+                    notification.setUser(adminUser);
+                    notification.setIsRead(false);
+                    
+                    // Set creation time (vary between recent and older)
+                    notification.setCreatedAt(LocalDateTime.now().minusHours((int) (Math.random() * 72))); // Last 3 days
+                    
+                    // Set action URLs for some notifications
+                    if (data[2] == Notification.NotificationType.REPORT_STATUS_CHANGE ||
+                        data[2] == Notification.NotificationType.REPORT_ASSIGNED ||
+                        data[2] == Notification.NotificationType.REPORT_RESOLVED) {
+                        notification.setActionUrl("/reports");
+                    } else if (data[2] == Notification.NotificationType.NEW_COMMENT) {
+                        notification.setActionUrl("/reports");
+                    }
+                    
+                    // Set progress percentage for progress updates
+                    if (data[2] == Notification.NotificationType.PROGRESS_UPDATE) {
+                        notification.setProgressPercentage(75);
+                    }
+                    
+                    notificationRepository.save(notification);
+                    createdCount++;
+                    
+                } catch (Exception e) {
+                    System.err.println("Error creating notification: " + e.getMessage());
+                }
+            }
+            
+            System.out.println("Created " + createdCount + " dummy notifications for admin user");
+            
+        } catch (Exception e) {
+            System.err.println("Error creating dummy notifications: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }

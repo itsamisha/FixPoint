@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, HashRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./components/NotificationOverrides.css";
 
 import { AuthProvider } from "./contexts/AuthContext";
 import { ChatProvider } from "./contexts/ChatContext";
@@ -22,6 +23,7 @@ import StaffDashboard from "./pages/StaffDashboard";
 import VolunteerDashboard from "./pages/VolunteerDashboard";
 import EmailVerification from "./components/EmailVerification";
 import ProtectedRoute from "./components/ProtectedRoute";
+import NotificationTestPage from "./pages/NotificationTestPage";
 
 // Use HashRouter for GitHub Pages, BrowserRouter for local development
 const isGitHubPages = window.location.hostname === 'itsamisha.github.io';
@@ -103,6 +105,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ReportForm />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/notifications/test"
+                  element={
+                    <ProtectedRoute>
+                      <NotificationTestPage />
                     </ProtectedRoute>
                   }
                 />

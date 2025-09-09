@@ -1,10 +1,14 @@
+
 package com.ambiguous.fixpoint.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import com.ambiguous.fixpoint.entity.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SignUpRequest {
     @NotBlank
     @Size(min = 3, max = 50)

@@ -49,6 +49,9 @@ public class ReportService {
     private OrganizationService organizationService;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private PDFExportService pdfExportService;
 
     private final String uploadDir = "uploads/";
@@ -90,17 +93,20 @@ public class ReportService {
     }
 
     public Page<ReportSummary> getAllReports(Pageable pageable, User currentUser) {
-        Page<Report> reports = reportRepository.findAll(pageable);
+        // Show all reports but prioritize those with images first, then sort by latest first
+        Page<Report> reports = reportRepository.findAllWithImagesPrioritizedOrderByCreatedAtDesc(pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
     public Page<ReportSummary> getReportsByStatus(Report.Status status, Pageable pageable, User currentUser) {
-        Page<Report> reports = reportRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
+        // Show all reports in status but prioritize those with images first, then sort by latest first
+        Page<Report> reports = reportRepository.findByStatusWithImagesPrioritizedOrderByCreatedAtDesc(status, pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
     public Page<ReportSummary> getReportsByCategory(Report.Category category, Pageable pageable, User currentUser) {
-        Page<Report> reports = reportRepository.findByCategoryOrderByCreatedAtDesc(category, pageable);
+        // Show all reports in category but prioritize those with images first, then sort by latest first
+        Page<Report> reports = reportRepository.findByCategoryWithImagesPrioritizedOrderByCreatedAtDesc(category, pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
@@ -112,6 +118,11 @@ public class ReportService {
     public Optional<ReportSummary> getReportById(Long id, User currentUser) {
         Optional<Report> report = reportRepository.findById(id);
         return report.map(r -> convertToReportSummary(r, currentUser));
+    }
+    
+    public Page<ReportSummary> getReportsWithImages(Pageable pageable, User currentUser) {
+        Page<Report> reports = reportRepository.findReportsWithImagesOrderByCreatedAtDesc(pageable);
+        return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
     public List<ReportSummary> getReportsInArea(Double minLat, Double maxLat, Double minLng, Double maxLng, User currentUser) {
@@ -125,6 +136,7 @@ public class ReportService {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
 
+        Report.Status oldStatus = report.getStatus();
         report.setStatus(status);
         if (resolutionNotes != null) {
             report.setResolutionNotes(resolutionNotes);
@@ -132,9 +144,17 @@ public class ReportService {
         
         if (status == Report.Status.RESOLVED) {
             report.setResolvedAt(LocalDateTime.now());
+            // Notify reporter that their report is resolved
+            notificationService.createReportResolvedNotification(report, report.getReporter());
         }
 
         Report updatedReport = reportRepository.save(report);
+        
+        // Notify reporter and organization admins of status change
+        if (!oldStatus.equals(status)) {
+            notificationService.createStatusChangeNotificationForAll(updatedReport, oldStatus, status);
+        }
+        
         return convertToReportSummary(updatedReport, admin);
     }
 
@@ -147,6 +167,9 @@ public class ReportService {
 
         report.setAssignedTo(assignee);
         Report updatedReport = reportRepository.save(report);
+        
+        // Notify assignee about new assignment
+        notificationService.createReportAssignmentNotification(updatedReport, assignee);
         return convertToReportSummary(updatedReport, admin);
     }
 
@@ -309,7 +332,14 @@ public class ReportService {
             }
         }
 
+        report.setProgressUpdatedAt(LocalDateTime.now());
         report = reportRepository.save(report);
+        
+        // Send notification to reporter and organization admins about progress update
+        if (progressPercentage != null) {
+            notificationService.createProgressNotificationForAll(report, progressPercentage);
+        }
+        
         return convertToReportSummary(report);
     }
 
