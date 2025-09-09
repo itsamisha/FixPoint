@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -92,39 +93,46 @@ public class ReportService {
         return convertToReportSummary(savedReport, null);
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getAllReports(Pageable pageable, User currentUser) {
         // Show all reports but prioritize those with images first, then sort by latest first
         Page<Report> reports = reportRepository.findAllWithImagesPrioritizedOrderByCreatedAtDesc(pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsByStatus(Report.Status status, Pageable pageable, User currentUser) {
         // Show all reports in status but prioritize those with images first, then sort by latest first
         Page<Report> reports = reportRepository.findByStatusWithImagesPrioritizedOrderByCreatedAtDesc(status, pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsByCategory(Report.Category category, Pageable pageable, User currentUser) {
         // Show all reports in category but prioritize those with images first, then sort by latest first
         Page<Report> reports = reportRepository.findByCategoryWithImagesPrioritizedOrderByCreatedAtDesc(category, pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getUserReports(User user, Pageable pageable) {
         Page<Report> reports = reportRepository.findByReporterOrderByCreatedAtDesc(user, pageable);
         return reports.map(report -> convertToReportSummary(report, user));
     }
 
+    @Transactional(readOnly = true)
     public Optional<ReportSummary> getReportById(Long id, User currentUser) {
-        Optional<Report> report = reportRepository.findById(id);
+        Optional<Report> report = reportRepository.findByIdWithRelations(id);
         return report.map(r -> convertToReportSummary(r, currentUser));
     }
     
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsWithImages(Pageable pageable, User currentUser) {
         Page<Report> reports = reportRepository.findReportsWithImagesOrderByCreatedAtDesc(pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
+    @Transactional(readOnly = true)
     public List<ReportSummary> getReportsInArea(Double minLat, Double maxLat, Double minLng, Double maxLng, User currentUser) {
         List<Report> reports = reportRepository.findReportsInArea(minLat, maxLat, minLng, maxLng);
         return reports.stream()
@@ -132,8 +140,9 @@ public class ReportService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public ReportSummary updateReportStatus(Long reportId, Report.Status status, String resolutionNotes, User admin) {
-        Report report = reportRepository.findById(reportId)
+        Report report = reportRepository.findByIdWithRelations(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
 
         Report.Status oldStatus = report.getStatus();

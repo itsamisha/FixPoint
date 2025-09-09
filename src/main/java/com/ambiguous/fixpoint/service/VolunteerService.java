@@ -6,6 +6,7 @@ import com.ambiguous.fixpoint.repository.UserRepository;
 import com.ambiguous.fixpoint.repository.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class VolunteerService {
     /**
      * Get volunteer leaderboard with completed task counts and ratings
      */
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> getVolunteerLeaderboard() {
         // Get all active volunteers
         List<User> volunteers = userRepository.findActiveVolunteers();
@@ -109,6 +111,7 @@ public class VolunteerService {
     /**
      * Get volunteer statistics for a specific volunteer
      */
+    @Transactional(readOnly = true)
     public Map<String, Object> getVolunteerStats(Long volunteerId) {
         User volunteer = userRepository.findById(volunteerId)
             .orElseThrow(() -> new RuntimeException("Volunteer not found"));
@@ -138,6 +141,7 @@ public class VolunteerService {
     /**
      * Get all volunteers with basic information
      */
+    @Transactional(readOnly = true)
     public List<Map<String, Object>> getAllVolunteers() {
         List<User> volunteers = userRepository.findActiveVolunteers();
         
