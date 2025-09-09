@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getImageUrl } from '../utils/apiConfig';port React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { getImageUrl } from '../utils/apiConfig';
 import {
   ArrowLeft,
   MapPin,
