@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import SockJS from 'sockjs-client';
 import { Stomp } from '@stomp/stompjs';
 
-// Get the API base URL from environment or default to localhost:8080
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+// Get the API base URL - use same logic as api.js
+const isProduction = window.location.hostname === 'itsamisha.github.io';
+const API_BASE_URL = isProduction 
+  ? 'https://web-production-8aac9.up.railway.app' 
+  : (process.env.REACT_APP_API_URL || 'http://localhost:8080');
 
 const useWebSocket = (onNotificationReceived) => {
   const stompClient = useRef(null);

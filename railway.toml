@@ -1,0 +1,7 @@
+[build]
+  builder = "NIXPACKS"
+
+[deploy]
+  startCommand = "java -Dserver.port=$PORT -jar target/fixpoint-0.0.1-SNAPSHOT.jar"
+  restartPolicyType = "ON_FAILURE"
+  restartPolicyMaxRetries = 10

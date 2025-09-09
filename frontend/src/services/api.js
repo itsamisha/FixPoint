@@ -3,18 +3,18 @@ import axios from 'axios';
 // Determine if we're running on GitHub Pages (production)
 const isProduction = window.location.hostname === 'itsamisha.github.io';
 const API_BASE_URL = isProduction 
-  ? 'https://web-production-8aac9.up.railway.app/api' // Your Railway backend URL
+  ? 'https://web-production-8aac9.up.railway.app' // Your Railway backend URL
   : (process.env.REACT_APP_API_URL || 'http://localhost:8080');
 
-// Demo mode for GitHub Pages when no backend is available
-export const DEMO_MODE = isProduction && API_BASE_URL.includes('your-backend-url');
+// Demo mode is now disabled since we have a real backend
+export const DEMO_MODE = false;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: DEMO_MODE ? 1000 : 60000, // Increased timeout to 60 seconds for translation
+  timeout: 60000, // 60 seconds timeout for production
 });
 
 // Public API client (no auth)
