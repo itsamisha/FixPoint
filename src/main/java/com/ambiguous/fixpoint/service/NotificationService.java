@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -267,6 +268,7 @@ public class NotificationService {
     /**
      * Get all notifications for a user
      */
+    @Transactional(readOnly = true)
     public Page<Notification> getUserNotifications(User user, Pageable pageable) {
         return notificationRepository.findByUserOrderByCreatedAtDesc(user, pageable);
     }
@@ -274,6 +276,7 @@ public class NotificationService {
     /**
      * Get unread notifications for a user
      */
+    @Transactional(readOnly = true)
     public List<Notification> getUnreadNotifications(User user) {
         return notificationRepository.findByUserAndIsReadFalseOrderByCreatedAtDesc(user);
     }

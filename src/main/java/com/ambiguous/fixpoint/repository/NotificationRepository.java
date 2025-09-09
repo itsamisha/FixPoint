@@ -18,19 +18,38 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     
     // Find notifications for a specific user, ordered by latest first
-    Page<Notification> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
+    @Query("SELECT DISTINCT n FROM Notification n " +
+           "LEFT JOIN FETCH n.user " +
+           "LEFT JOIN FETCH n.report " +
+           "LEFT JOIN FETCH n.comment " +
+           "WHERE n.user = :user ORDER BY n.createdAt DESC")
+    Page<Notification> findByUserOrderByCreatedAtDesc(@Param("user") User user, Pageable pageable);
     
     // Find unread notifications for a user
-    List<Notification> findByUserAndIsReadFalseOrderByCreatedAtDesc(User user);
+    @Query("SELECT DISTINCT n FROM Notification n " +
+           "LEFT JOIN FETCH n.user " +
+           "LEFT JOIN FETCH n.report " +
+           "LEFT JOIN FETCH n.comment " +
+           "WHERE n.user = :user AND n.isRead = false ORDER BY n.createdAt DESC")
+    List<Notification> findByUserAndIsReadFalseOrderByCreatedAtDesc(@Param("user") User user);
     
     // Count unread notifications for a user
     long countByUserAndIsReadFalse(User user);
     
     // Find notifications by type for a user
-    Page<Notification> findByUserAndTypeOrderByCreatedAtDesc(User user, Notification.NotificationType type, Pageable pageable);
+    @Query("SELECT DISTINCT n FROM Notification n " +
+           "LEFT JOIN FETCH n.user " +
+           "LEFT JOIN FETCH n.report " +
+           "LEFT JOIN FETCH n.comment " +
+           "WHERE n.user = :user AND n.type = :type ORDER BY n.createdAt DESC")
+    Page<Notification> findByUserAndTypeOrderByCreatedAtDesc(@Param("user") User user, @Param("type") Notification.NotificationType type, Pageable pageable);
     
     // Find notifications for a specific report
-    @Query("SELECT n FROM Notification n WHERE n.report.id = :reportId ORDER BY n.createdAt DESC")
+    @Query("SELECT DISTINCT n FROM Notification n " +
+           "LEFT JOIN FETCH n.user " +
+           "LEFT JOIN FETCH n.report " +
+           "LEFT JOIN FETCH n.comment " +
+           "WHERE n.report.id = :reportId ORDER BY n.createdAt DESC")
     List<Notification> findByReportOrderByCreatedAtDesc(@Param("reportId") Long reportId);
     
     // Mark all notifications as read for a user

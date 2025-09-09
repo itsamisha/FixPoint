@@ -33,9 +33,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.organization WHERE u.isActive = true ORDER BY u.createdAt DESC")
     List<User> findAllActiveUsers();
     
-    List<User> findByUserType(User.UserType userType);
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.organization WHERE u.userType = :userType")
+    List<User> findByUserType(@Param("userType") User.UserType userType);
     
-    List<User> findByOrganizationAndUserType(com.ambiguous.fixpoint.entity.Organization organization, User.UserType userType);
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.organization WHERE u.organization = :organization AND u.userType = :userType")
+    List<User> findByOrganizationAndUserType(@Param("organization") com.ambiguous.fixpoint.entity.Organization organization, @Param("userType") User.UserType userType);
     
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.organization WHERE u.id = :id")
     Optional<User> findByIdWithOrganization(@Param("id") Long id);
