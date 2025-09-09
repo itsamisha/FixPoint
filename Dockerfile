@@ -26,11 +26,11 @@ COPY --from=build /app/target/fixpoint-0.0.1-SNAPSHOT.jar app.jar
 # Create data directory for H2 database
 RUN mkdir -p /app/data
 
-# Expose port
-EXPOSE 8080
+# Expose port (Render will set PORT environment variable)
+EXPOSE $PORT
 
 # Set environment
 ENV SPRING_PROFILES_ACTIVE=production
 
-# Run the application
-CMD ["java", "-jar", "app.jar"]
+# Run the application with dynamic port binding
+CMD ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8080}"]
