@@ -5,7 +5,7 @@ import { Stomp } from '@stomp/stompjs';
 // Get the API base URL - use same logic as api.js
 const isProduction = window.location.hostname === 'itsamisha.github.io';
 const API_BASE_URL = isProduction 
-  ? 'https://web-production-8aac9.up.railway.app' 
+  ? 'https://fixpoint-backend.onrender.com' 
   : (process.env.REACT_APP_API_URL || 'http://localhost:8080');
 
 const useWebSocket = (onNotificationReceived) => {

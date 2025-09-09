@@ -3,25 +3,16 @@ services:
   - type: web
     name: fixpoint-backend
     env: java
-    buildCommand: chmod +x build.sh && ./build.sh
+    buildCommand: ./mvnw clean package -DskipTests
     startCommand: java -jar target/fixpoint-0.0.1-SNAPSHOT.jar
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: production
-      - key: SERVER_PORT
+      - key: PORT
         value: 10000
-    
-  # Frontend Service  
-  - type: web
-    name: fixpoint-frontend
-    env: node
-    buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npx serve -s build -l 3000
-    envVars:
-      - key: REACT_APP_API_URL
-        value: https://fixpoint-backend.onrender.com
-
-databases:
-  - name: fixpoint-db
-    databaseName: fixpoint
-    user: fixpoint
+      - key: EMAIL_USERNAME
+        value: tahseennabiha35@gmail.com
+      - key: EMAIL_PASSWORD
+        value: gfltqeedcqqrqqtb
+      - key: GEMINI_API_KEY
+        value: AIzaSyAmpBVl_Bp20E7ojhzrbsY2nyVH1TqYyow

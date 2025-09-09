@@ -13,7 +13,7 @@ import { useAuth } from "./AuthContext";
 // Use backend URL for WebSocket connection
 const isProduction = window.location.hostname === 'itsamisha.github.io';
 const WS_URL = isProduction 
-  ? "https://web-production-8aac9.up.railway.app/ws-chat" 
+  ? "https://fixpoint-backend.onrender.com/ws-chat" 
   : "http://localhost:8080/ws-chat";
 const API_USERS = "/api/chat/users";
 
