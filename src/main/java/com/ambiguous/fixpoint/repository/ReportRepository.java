@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ReportRepository extends JpaRepository<Report, Long> {
@@ -32,12 +33,28 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     
     Page<Report> findByCategoryOrderByCreatedAtDesc(Report.Category category, Pageable pageable);
     
-    Page<Report> findByReporterOrderByCreatedAtDesc(User reporter, Pageable pageable);
+    @Query("SELECT DISTINCT r FROM Report r " +
+           "LEFT JOIN FETCH r.reporter " +
+           "LEFT JOIN FETCH r.assignedTo " +
+           "LEFT JOIN FETCH r.targetOrganizations " +
+           "WHERE r.reporter = :reporter ORDER BY r.createdAt DESC")
+    Page<Report> findByReporterOrderByCreatedAtDesc(@Param("reporter") User reporter, Pageable pageable);
+    
+    @Query("SELECT DISTINCT r FROM Report r " +
+           "LEFT JOIN FETCH r.reporter " +
+           "LEFT JOIN FETCH r.assignedTo " +
+           "LEFT JOIN FETCH r.targetOrganizations " +
+           "WHERE r.id = :id")
+    Optional<Report> findByIdWithRelations(@Param("id") Long id);
     
     @Query("SELECT r FROM Report r LEFT JOIN FETCH r.reporter LEFT JOIN FETCH r.assignedTo WHERE r.assignedTo = :user ORDER BY r.createdAt DESC")
     Page<Report> findByAssignedToOrderByCreatedAtDesc(@Param("user") User user, Pageable pageable);
     
-    @Query("SELECT r FROM Report r WHERE r.latitude BETWEEN :minLat AND :maxLat " +
+    @Query("SELECT DISTINCT r FROM Report r " +
+           "LEFT JOIN FETCH r.reporter " +
+           "LEFT JOIN FETCH r.assignedTo " +
+           "LEFT JOIN FETCH r.targetOrganizations " +
+           "WHERE r.latitude BETWEEN :minLat AND :maxLat " +
            "AND r.longitude BETWEEN :minLng AND :maxLng")
     List<Report> findReportsInArea(@Param("minLat") Double minLat, 
                                   @Param("maxLat") Double maxLat,
@@ -103,7 +120,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     Page<Report> findByCategoryWithImagesPrioritizedOrderByCreatedAtDesc(@Param("category") Report.Category category, Pageable pageable);
     
     // Find reports with images, ordered by latest first
-    @Query("SELECT r FROM Report r WHERE r.imagePath IS NOT NULL AND r.imagePath != '' ORDER BY r.createdAt DESC")
+    @Query("SELECT DISTINCT r FROM Report r " +
+           "LEFT JOIN FETCH r.reporter " +
+           "LEFT JOIN FETCH r.assignedTo " +
+           "LEFT JOIN FETCH r.targetOrganizations " +
+           "WHERE r.imagePath IS NOT NULL AND r.imagePath != '' ORDER BY r.createdAt DESC")
     Page<Report> findReportsWithImagesOrderByCreatedAtDesc(Pageable pageable);
     
     // Find reports with images by status, ordered by latest first

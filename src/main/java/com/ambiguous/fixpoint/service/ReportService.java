@@ -114,21 +114,25 @@ public class ReportService {
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getUserReports(User user, Pageable pageable) {
         Page<Report> reports = reportRepository.findByReporterOrderByCreatedAtDesc(user, pageable);
         return reports.map(report -> convertToReportSummary(report, user));
     }
 
+    @Transactional(readOnly = true)
     public Optional<ReportSummary> getReportById(Long id, User currentUser) {
-        Optional<Report> report = reportRepository.findById(id);
+        Optional<Report> report = reportRepository.findByIdWithRelations(id);
         return report.map(r -> convertToReportSummary(r, currentUser));
     }
     
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsWithImages(Pageable pageable, User currentUser) {
         Page<Report> reports = reportRepository.findReportsWithImagesOrderByCreatedAtDesc(pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
+    @Transactional(readOnly = true)
     public List<ReportSummary> getReportsInArea(Double minLat, Double maxLat, Double minLng, Double maxLng, User currentUser) {
         List<Report> reports = reportRepository.findReportsInArea(minLat, maxLat, minLng, maxLng);
         return reports.stream()
@@ -136,8 +140,9 @@ public class ReportService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public ReportSummary updateReportStatus(Long reportId, Report.Status status, String resolutionNotes, User admin) {
-        Report report = reportRepository.findById(reportId)
+        Report report = reportRepository.findByIdWithRelations(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
 
         Report.Status oldStatus = report.getStatus();
