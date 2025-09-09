@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -92,18 +93,21 @@ public class ReportService {
         return convertToReportSummary(savedReport, null);
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getAllReports(Pageable pageable, User currentUser) {
         // Show all reports but prioritize those with images first, then sort by latest first
         Page<Report> reports = reportRepository.findAllWithImagesPrioritizedOrderByCreatedAtDesc(pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsByStatus(Report.Status status, Pageable pageable, User currentUser) {
         // Show all reports in status but prioritize those with images first, then sort by latest first
         Page<Report> reports = reportRepository.findByStatusWithImagesPrioritizedOrderByCreatedAtDesc(status, pageable);
         return reports.map(report -> convertToReportSummary(report, currentUser));
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsByCategory(Report.Category category, Pageable pageable, User currentUser) {
         // Show all reports in category but prioritize those with images first, then sort by latest first
         Page<Report> reports = reportRepository.findByCategoryWithImagesPrioritizedOrderByCreatedAtDesc(category, pageable);
