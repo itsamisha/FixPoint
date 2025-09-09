@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getImageUrl } from '../utils/apiConfig';port React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -204,7 +206,7 @@ const ReportDetails = () => {
               </div>
               <div className="card-body">
                 <img
-                  src={`http://localhost:8080/${report.imagePath}`}
+                  src={getImageUrl(report.imagePath)}
                   alt="Issue"
                   className="w-full rounded-lg shadow-lg"
                 />
@@ -234,7 +236,7 @@ const ReportDetails = () => {
                       After Photo
                     </h4>
                     <img
-                      src={`http://localhost:8080/${report.resolutionImagePath}`}
+                      src={getImageUrl(report.resolutionImagePath)}
                       alt="Resolution"
                       className="w-full rounded-lg shadow-lg"
                     />

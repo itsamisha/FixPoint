@@ -1,10 +1,8 @@
 import axios from 'axios';
+import { getApiBaseUrl } from '../utils/apiConfig';
 
-// Determine if we're running on GitHub Pages (production)
-const isProduction = window.location.hostname === 'itsamisha.github.io';
-const API_BASE_URL = isProduction 
-  ? 'https://fixpoint-ajtz.onrender.com' // Your actual Render backend URL
-  : (process.env.REACT_APP_API_URL || 'http://localhost:8080');
+// Get the API base URL
+const API_BASE_URL = getApiBaseUrl();
 
 // Demo mode is now disabled since we have a real backend
 export const DEMO_MODE = false;

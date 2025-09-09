@@ -1,6 +1,9 @@
 class ChatbotService {
   constructor() {
-    this.baseURL = "http://localhost:8080/api/public";
+    const isProduction = window.location.hostname === 'itsamisha.github.io';
+    this.baseURL = isProduction 
+      ? "https://fixpoint-ajtz.onrender.com/api/public"
+      : "http://localhost:8080/api/public";
   }
 
   async sendMessage(message, context = "") {

@@ -9,12 +9,10 @@ import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import api from "../services/api";
 import { useAuth } from "./AuthContext";
+import { getApiBaseUrl } from '../utils/apiConfig';
 
 // Use backend URL for WebSocket connection
-const isProduction = window.location.hostname === 'itsamisha.github.io';
-const WS_URL = isProduction 
-  ? "https://fixpoint-ajtz.onrender.com/ws-chat" 
-  : "http://localhost:8080/ws-chat";
+const WS_URL = `${getApiBaseUrl()}/ws-chat`;
 const API_USERS = "/api/chat/users";
 
 const ChatContext = createContext();

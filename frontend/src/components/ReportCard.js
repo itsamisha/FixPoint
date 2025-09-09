@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { getImageUrl } from "../utils/apiConfig";
 import {
   Eye,
   MessageSquare,
@@ -110,7 +111,7 @@ const ReportCard = ({
         {report.imagePath && (
           <div className="mb-4">
             <img
-              src={`http://localhost:8080/${report.imagePath}`}
+              src={getImageUrl(report.imagePath)}
               alt="Report"
               className="w-full h-48 object-cover rounded"
             />

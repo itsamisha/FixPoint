@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '../utils/apiConfig';
 import { Link } from 'react-router-dom';
 import { Plus, Filter, Search } from 'lucide-react';
 import { toast } from 'react-toastify';
@@ -60,7 +61,7 @@ const Dashboard = () => {
       
       // Try basic fetch first
       try {
-        const url = new URL('http://localhost:8080/api/public/reports');
+        const url = new URL(`${getApiBaseUrl()}/api/public/reports`);
         Object.keys(params).forEach(key => {
           if (params[key]) url.searchParams.append(key, params[key]);
         });

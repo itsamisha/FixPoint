@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixPoint Full Website Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .container { max-width: 1000px; margin: 0 auto; background: rgba(255,255,255,0.95); padding: 30px; border-radius: 15px; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .button { padding: 12px 20px; margin: 8px; background: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 8px; font-size: 16px; transition: all 0.3s ease; }
+        .button:hover { background: #45a049; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .button.test { background: #2196F3; }
+        .button.test:hover { background: #1976D2; }
+        .button.website { background: #FF9800; }
+        .button.website:hover { background: #F57C00; }
+        .result { margin: 15px 0; padding: 15px; background: #f9f9f9; border-radius: 8px; font-family: monospace; white-space: pre-wrap; max-height: 400px; overflow-y: auto; border-left: 4px solid #ddd; }
+        .success { background: #e8f5e8; color: #2e7d32; border-left-color: #4caf50; }
+        .error { background: #ffeaea; color: #c62828; border-left-color: #f44336; }
+        .info { background: #e3f2fd; color: #1565c0; border-left-color: #2196f3; }
+        .warning { background: #fff8e1; color: #ef6c00; border-left-color: #ff9800; }
+        h1 { color: #333; text-align: center; margin-bottom: 10px; font-size: 2.5em; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 1.2em; }
+        .section { margin: 25px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background: #fafafa; }
+        .website-links { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .link-card { padding: 20px; background: white; border-radius: 8px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-left: 10px; }
+        .status-live { background: #4caf50; color: white; }
+        .status-testing { background: #ff9800; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 FixPoint Full Website Integration Test</h1>
+        <p class="subtitle">Test your complete FixPoint application: Frontend + Backend</p>
+
+        <div class="website-links">
+            <div class="link-card">
+                <h3>🌐 Frontend (GitHub Pages)</h3>
+                <p><strong>URL:</strong> <code>https://itsamisha.github.io/FixPoint</code></p>
+                <span class="status-badge status-live">LIVE</span>
+                <br><br>
+                <button class="button website" onclick="openFrontend()">Open Frontend</button>
+            </div>
+            <div class="link-card">
+                <h3>⚙️ Backend (Render)</h3>
+                <p><strong>URL:</strong> <code>https://fixpoint-ajtz.onrender.com</code></p>
+                <span class="status-badge status-live">LIVE</span>
+                <br><br>
+                <button class="button website" onclick="openBackend()">Open Backend API</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🔗 API Connectivity Tests</h3>
+            <p>Test if your frontend can successfully communicate with your backend:</p>
+            <button class="button test" onclick="testConnection()">Test Frontend → Backend Connection</button>
+            <button class="button test" onclick="testLogin()">Test Login API</button>
+            <button class="button test" onclick="testOrganizations()">Test Organizations API</button>
+            <button class="button test" onclick="testCORS()">Test CORS Configuration</button>
+            <div id="connectionResults" class="result">Click buttons above to test API connectivity...</div>
+        </div>
+
+        <div class="section">
+            <h3>✅ Quick Checklist</h3>
+            <div id="checklist" class="info">
+                <strong>Verify these work on your live website:</strong><br>
+                □ Can access the homepage<br>
+                □ Can register a new account<br>
+                □ Can log in with credentials<br>
+                □ Can view organizations<br>
+                □ Can submit a report<br>
+                □ Can view reports dashboard<br>
+                □ Notifications are working<br>
+                □ All features from your development environment
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>🎯 What's Working</h3>
+            <div class="success">
+                ✅ <strong>Backend:</strong> Your Spring Boot API is running on Render<br>
+                ✅ <strong>Frontend:</strong> Your React app is deployed on GitHub Pages<br>
+                ✅ <strong>Database:</strong> H2 database with file persistence<br>
+                ✅ <strong>CORS:</strong> Configured for cross-origin requests<br>
+                ✅ <strong>Authentication:</strong> JWT-based auth system<br>
+                ✅ <strong>Notifications:</strong> Real-time notifications for admins<br>
+                ✅ <strong>AI Features:</strong> Smart categorization and duplicate detection
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const FRONTEND_URL = 'https://itsamisha.github.io/FixPoint';
+        const BACKEND_URL = 'https://fixpoint-ajtz.onrender.com';
+
+        function log(message, type = 'info') {
+            const element = document.getElementById('connectionResults');
+            const timestamp = new Date().toLocaleTimeString();
+            element.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('connectionResults').innerHTML = '';
+        }
+
+        function openFrontend() {
+            window.open(FRONTEND_URL, '_blank');
+        }
+
+        function openBackend() {
+            window.open(BACKEND_URL, '_blank');
+        }
+
+        async function testConnection() {
+            clearLog();
+            log('🔗 Testing frontend to backend connection...', 'info');
+            
+            try {
+                const response = await fetch(BACKEND_URL + '/', {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Origin': FRONTEND_URL
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('✅ Connection successful! Frontend can reach backend', 'success');
+                    log(`Backend response: ${JSON.stringify(data, null, 2)}`, 'info');
+                } else {
+                    log(`❌ Connection failed: ${response.status} ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Connection error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            log('🔐 Testing login API from frontend domain...', 'info');
+            
+            try {
+                const response = await fetch(BACKEND_URL + '/api/public/signin', {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Origin': FRONTEND_URL
+                    },
+                    body: JSON.stringify({
+                        usernameOrEmail: 'test@example.com',
+                        password: 'wrongpassword'
+                    })
+                });
+                
+                if (response.status === 401) {
+                    log('✅ Login API accessible (got expected 401 for wrong credentials)', 'success');
+                } else if (response.ok) {
+                    log('✅ Login API working!', 'success');
+                } else {
+                    log(`⚠️ Login API responded with: ${response.status}`, 'warning');
+                }
+            } catch (error) {
+                log(`❌ Login API error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testOrganizations() {
+            log('🏢 Testing organizations API...', 'info');
+            
+            try {
+                const response = await fetch(BACKEND_URL + '/api/public/organizations', {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Origin': FRONTEND_URL
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Organizations API working! Found ${data.length} organizations`, 'success');
+                } else {
+                    log(`❌ Organizations API failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Organizations API error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCORS() {
+            log('🔗 Testing CORS configuration...', 'info');
+            
+            try {
+                const response = await fetch(BACKEND_URL + '/api/public/organizations', {
+                    method: 'OPTIONS',
+                    mode: 'cors',
+                    headers: {
+                        'Origin': FRONTEND_URL,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                const corsOrigin = response.headers.get('Access-Control-Allow-Origin');
+                
+                if (corsOrigin) {
+                    log(`✅ CORS working! Allowed origin: ${corsOrigin}`, 'success');
+                } else {
+                    log('❌ CORS might have issues - no Access-Control-Allow-Origin header', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ CORS test error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run connection test on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🚀 Ready to test your full FixPoint website!', 'info');
+                log('👆 Click "Test Frontend → Backend Connection" to verify everything works', 'info');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,7 +1,10 @@
 // AI Service for communication with backend AI endpoints
 class AIService {
   constructor() {
-    this.baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+    const isProduction = window.location.hostname === 'itsamisha.github.io';
+    this.baseUrl = isProduction 
+      ? 'https://fixpoint-ajtz.onrender.com'
+      : (process.env.REACT_APP_API_URL || 'http://localhost:8080');
   }
 
   // Generate description from image
