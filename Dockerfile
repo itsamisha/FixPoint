@@ -1,10 +1,8 @@
 # Multi-stage build for Render deployment
-FROM openjdk:17-jdk-slim AS build
+FROM eclipse-temurin:17-jdk-alpine AS build
 
 # Install Maven
-RUN apt-get update && \
-    apt-get install -y maven && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache maven
 
 # Set working directory
 WORKDIR /app
@@ -18,7 +16,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # Runtime stage
-FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
