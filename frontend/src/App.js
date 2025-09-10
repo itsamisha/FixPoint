@@ -1,32 +1,37 @@
 import React from "react";
-import { BrowserRouter as Router, HashRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  HashRouter,
+  Routes,
+  Route,
+} from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./components/NotificationOverrides.css";
+import "./components/NotificationCenter/NotificationOverrides.css";
 
 import { AuthProvider } from "./contexts/AuthContext";
 import { ChatProvider } from "./contexts/ChatContext";
-import Navbar from "./components/Navbar";
-import Chatbot from "./components/Chatbot";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import DashboardRouter from "./pages/DashboardRouter";
-import ReportForm from "./pages/ReportForm";
-import ReportDetails from "./pages/ReportDetails";
-import MapView from "./pages/MapView";
-import StaffManagement from "./pages/StaffManagement";
-import OrganizationReports from "./pages/OrganizationReports";
-import OrganizationSettings from "./pages/OrganizationSettings";
-import AssignedReports from "./pages/AssignedReports";
-import StaffDashboard from "./pages/StaffDashboard";
-import VolunteerDashboard from "./pages/VolunteerDashboard";
-import EmailVerification from "./components/EmailVerification";
-import ProtectedRoute from "./components/ProtectedRoute";
-import NotificationTestPage from "./pages/NotificationTestPage";
+import Navbar from "./components/Navigation/Navbar";
+import Chatbot from "./components/Chatbot/Chatbot";
+import Home from "./pages/General/Home";
+import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
+import DashboardRouter from "./pages/Dashboard/DashboardRouter";
+import ReportForm from "./pages/Reports/ReportForm";
+import ReportDetails from "./pages/Reports/ReportDetails";
+import MapView from "./pages/Maps/MapView";
+import StaffManagement from "./pages/Staff/StaffManagement";
+import OrganizationReports from "./pages/Organization/OrganizationReports";
+import OrganizationSettings from "./pages/Organization/OrganizationSettings";
+import AssignedReports from "./pages/Reports/AssignedReports";
+import StaffDashboard from "./pages/Staff/StaffDashboard";
+import VolunteerDashboard from "./pages/Volunteers/VolunteerDashboard";
+import EmailVerification from "./components/EmailVerification/EmailVerification";
+import ProtectedRoute from "./components/Security/ProtectedRoute";
+import NotificationTestPage from "./pages/Testing/NotificationTestPage";
 
 // Use HashRouter for GitHub Pages, BrowserRouter for local development
-const isGitHubPages = window.location.hostname === 'itsamisha.github.io';
+const isGitHubPages = window.location.hostname === "itsamisha.github.io";
 const RouterComponent = isGitHubPages ? HashRouter : Router;
 
 function App() {
