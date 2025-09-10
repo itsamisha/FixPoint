@@ -13,6 +13,7 @@ import com.ambiguous.fixpoint.repository.VoteRepository;
 import com.ambiguous.fixpoint.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,23 +96,92 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public Page<ReportSummary> getAllReports(Pageable pageable, User currentUser) {
-        // Show all reports but prioritize those with images first, then sort by latest first
-        Page<Report> reports = reportRepository.findAllWithImagesPrioritizedOrderByCreatedAtDesc(pageable);
-        return reports.map(report -> convertToReportSummary(report, currentUser));
+        // Two-step approach to avoid collection fetch with pagination warning
+        Page<Report> reportPage = reportRepository.findAllWithImagesPrioritizedOrderByCreatedAtDesc(pageable);
+        
+        if (reportPage.getContent().isEmpty()) {
+            return reportPage.map(report -> convertToReportSummary(report, currentUser));
+        }
+        
+        // Get IDs and fetch full data
+        List<Long> reportIds = reportPage.getContent().stream()
+                .map(Report::getId)
+                .collect(Collectors.toList());
+        
+        List<Report> reportsWithRelations = reportRepository.findAllByIdsWithRelations(reportIds);
+        
+        // Maintain order from original query
+        Map<Long, Report> reportMap = reportsWithRelations.stream()
+                .collect(Collectors.toMap(Report::getId, r -> r));
+        
+        List<ReportSummary> summaries = reportPage.getContent().stream()
+                .map(report -> {
+                    Report fullReport = reportMap.get(report.getId());
+                    return convertToReportSummary(fullReport != null ? fullReport : report, currentUser);
+                })
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(summaries, pageable, reportPage.getTotalElements());
     }
 
     @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsByStatus(Report.Status status, Pageable pageable, User currentUser) {
-        // Show all reports in status but prioritize those with images first, then sort by latest first
-        Page<Report> reports = reportRepository.findByStatusWithImagesPrioritizedOrderByCreatedAtDesc(status, pageable);
-        return reports.map(report -> convertToReportSummary(report, currentUser));
+        // Two-step approach to avoid collection fetch with pagination warning
+        Page<Report> reportPage = reportRepository.findByStatusWithImagesPrioritizedOrderByCreatedAtDesc(status, pageable);
+        
+        if (reportPage.getContent().isEmpty()) {
+            return reportPage.map(report -> convertToReportSummary(report, currentUser));
+        }
+        
+        // Get IDs and fetch full data
+        List<Long> reportIds = reportPage.getContent().stream()
+                .map(Report::getId)
+                .collect(Collectors.toList());
+        
+        List<Report> reportsWithRelations = reportRepository.findAllByIdsWithRelations(reportIds);
+        
+        // Maintain order from original query
+        Map<Long, Report> reportMap = reportsWithRelations.stream()
+                .collect(Collectors.toMap(Report::getId, r -> r));
+        
+        List<ReportSummary> summaries = reportPage.getContent().stream()
+                .map(report -> {
+                    Report fullReport = reportMap.get(report.getId());
+                    return convertToReportSummary(fullReport != null ? fullReport : report, currentUser);
+                })
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(summaries, pageable, reportPage.getTotalElements());
     }
 
     @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsByCategory(Report.Category category, Pageable pageable, User currentUser) {
-        // Show all reports in category but prioritize those with images first, then sort by latest first
-        Page<Report> reports = reportRepository.findByCategoryWithImagesPrioritizedOrderByCreatedAtDesc(category, pageable);
-        return reports.map(report -> convertToReportSummary(report, currentUser));
+        // Two-step approach to avoid collection fetch with pagination warning
+        Page<Report> reportPage = reportRepository.findByCategoryWithImagesPrioritizedOrderByCreatedAtDesc(category, pageable);
+        
+        if (reportPage.getContent().isEmpty()) {
+            return reportPage.map(report -> convertToReportSummary(report, currentUser));
+        }
+        
+        // Get IDs and fetch full data
+        List<Long> reportIds = reportPage.getContent().stream()
+                .map(Report::getId)
+                .collect(Collectors.toList());
+        
+        List<Report> reportsWithRelations = reportRepository.findAllByIdsWithRelations(reportIds);
+        
+        // Maintain order from original query
+        Map<Long, Report> reportMap = reportsWithRelations.stream()
+                .collect(Collectors.toMap(Report::getId, r -> r));
+        
+        List<ReportSummary> summaries = reportPage.getContent().stream()
+                .map(report -> {
+                    Report fullReport = reportMap.get(report.getId());
+                    return convertToReportSummary(fullReport != null ? fullReport : report, currentUser);
+                })
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(summaries, pageable, reportPage.getTotalElements());
     }
 
     @Transactional(readOnly = true)
@@ -279,9 +349,35 @@ public class ReportService {
         return userSummary;
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsAssignedToUser(Long userId, Pageable pageable) {
-        Page<Report> reports = reportRepository.findByAssignedToId(userId, pageable);
-        return reports.map(this::convertToReportSummary);
+        // Two-step approach to avoid collection fetch with pagination warning
+        Page<Report> reportPage = reportRepository.findByAssignedToId(userId, pageable);
+        User currentUser = userRepository.findById(userId).orElse(null);
+        
+        if (reportPage.getContent().isEmpty()) {
+            return reportPage.map(report -> convertToReportSummary(report, currentUser));
+        }
+        
+        // Get IDs and fetch full data
+        List<Long> reportIds = reportPage.getContent().stream()
+                .map(Report::getId)
+                .collect(Collectors.toList());
+        
+        List<Report> reportsWithRelations = reportRepository.findAssignedByIdsWithRelations(reportIds);
+        
+        // Maintain order from original query
+        Map<Long, Report> reportMap = reportsWithRelations.stream()
+                .collect(Collectors.toMap(Report::getId, r -> r));
+        
+        List<ReportSummary> summaries = reportPage.getContent().stream()
+                .map(report -> {
+                    Report fullReport = reportMap.get(report.getId());
+                    return convertToReportSummary(fullReport != null ? fullReport : report, currentUser);
+                })
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(summaries, pageable, reportPage.getTotalElements());
     }
 
     public Page<ReportSummary> getReportsByTargetOrganization(Long organizationId, Pageable pageable) {

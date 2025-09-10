@@ -1,0 +1,18 @@
+services:
+  # Backend Service
+  - type: web
+    name: fixpoint-backend
+    env: java
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/fixpoint-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: PORT
+        value: 10000
+      - key: EMAIL_USERNAME
+        value: tahseennabiha35@gmail.com
+      - key: EMAIL_PASSWORD
+        value: gfltqeedcqqrqqtb
+      - key: GEMINI_API_KEY
+        value: AIzaSyAmpBVl_Bp20E7ojhzrbsY2nyVH1TqYyow
