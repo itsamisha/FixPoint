@@ -62,8 +62,8 @@ _Comprehensive report form with image upload, GPS location mapping, and detailed
 ![AI Auto-Generated Description](./assets/4_AI_auto_generateddescriptionandvoicetotext.png)
 _AI automatically generates descriptions from uploaded images and converts voice to text_
 
-![AI Categorization & Priority](./assets/4*AIcategorizationand priority.png)
-\_Smart categorization and priority assessment using advanced AI analysis*
+![AI Categorization & Priority](./assets/4_AIcategorizationand priority.png)
+_Smart categorization and priority assessment using advanced AI analysis_
 
 ![Duplicate Check](./assets/6_duplicatecheck.png)
 _Intelligent duplicate detection prevents spam and consolidates similar reports_
@@ -95,11 +95,20 @@ _Real-time progress tracking and status updates for issue resolution_
 
 **Building Community Through Active Engagement**
 
-![AI Chatbot](./assets/AIchatbot.png)
-_Intelligent AI assistant providing guidance on civic engagement, issue reporting, and community participation_
-
-![Chat System](./assets/chat.png)
-_Built-in messaging system for seamless communication between users, admins, and volunteers_
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img src="./assets/AIchatbot.png" alt="AI Chatbot" width="100%"/>
+        <br><em>Intelligent AI assistant providing guidance on civic engagement, issue reporting, and community participation</em>
+      </td>
+      <td align="center" width="50%">
+        <img src="./assets/chat.png" alt="Chat System" width="100%"/>
+        <br><em>Built-in messaging system for seamless communication between users, admins, and volunteers</em>
+      </td>
+    </tr>
+  </table>
+</div>
 
 ![Comments](./assets/comment.png)
 _Community discussion and feedback system for each reported issue_
