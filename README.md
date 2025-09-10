@@ -280,14 +280,6 @@ _Professional PDF export functionality for reports and analytics_
    ```
    The frontend will start on `http://localhost:3000`
 
-### Default Admin User
-
-On first run, create an admin user through the registration form, then update the role in the database:
-
-```sql
-UPDATE users SET role = 'ADMIN' WHERE username = 'your-admin-username';
-```
-
 ## 📱 User Roles & Workflows
 
 ### Citizen Workflow
@@ -394,17 +386,6 @@ UPDATE users SET role = 'ADMIN' WHERE username = 'your-admin-username';
 
 ## 🧪 Development
 
-### Running Tests
-
-```bash
-# Backend tests
-./mvnw test
-
-# Frontend tests
-cd frontend
-npm test
-```
-
 ### Building for Production
 
 ```bash
@@ -418,12 +399,13 @@ npm run build
 
 ### Environment Variables
 
-Create a `.env` file in the frontend directory:
+Create a `.env` file in the frontend directory (optional for development):
 
 ```
 REACT_APP_API_URL=http://localhost:8080
-REACT_APP_GOOGLE_MAPS_API_KEY=your_maps_api_key
 ```
+
+**Note**: The application automatically detects the environment and uses the appropriate API URL. For production, it automatically connects to the deployed backend.
 
 ## 🚀 Deployment
 
