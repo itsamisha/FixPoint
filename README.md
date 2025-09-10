@@ -1,10 +1,8 @@
 # FixPoint - Civic Issue Reporting Platform
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Frontend-blue)](https://itsamisha.github.io/FixPoint/)
-[![Backend API](https://img.shields.io/badge/Backend%20API-Live-green)](https://fixpoint-ajtz.onrender.com)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-**Connecting Communities, One Issue at a Time**
+- **Frontend**: [https://itsamisha.github.io/FixPoint/](https://itsamisha.github.io/FixPoint/)
+- **Backend**: [https://fixpoint-ajtz.onrender.com](https://fixpoint-ajtz.onrender.com)
+- **Demo Video**: [YouTube Demo](https://youtube.com/watch?v=demo)
 
 FixPoint is a comprehensive web application that connects citizens with local authorities to report and resolve civic issues in their communities. Built with Spring Boot backend and React frontend, it promotes civic engagement, transparency, and collaborative problem-solving through AI-powered features and real-time communication.
 
@@ -41,6 +39,92 @@ In many urban and semi-urban neighborhoods, small civic problems such as broken 
 - **Priority Assessment**: AI determines issue priority based on safety and impact
 - **AI Chatbot**: Interactive assistant for civic engagement guidance
 - **Auto-Translation**: Seamless Bangla ↔ English translation
+
+## Feature Screenshots
+
+### 1. Homepage
+
+**Welcome to FixPoint - Your Civic Engagement Platform**
+
+![Homepage](./assets/homepage.png)
+_Clean, modern homepage with role-based authentication for Citizens, Admins, Staff, and Volunteers_
+
+![Signup & Authentication](./assets/2_signup_auth.png)
+_Seamless user registration and login system with intuitive role selection_
+
+### 2. Reporting Issues
+
+**From Problem to Solution - The Complete Reporting Experience**
+
+![Issue Reporting by Citizen](./assets/3_reporting_issue_by_citizen.png)
+_Comprehensive report form with image upload, GPS location mapping, and detailed descriptions_
+
+![AI Auto-Generated Description](./assets/4_AI_auto_generateddescriptionandvoicetotext.png)
+_AI automatically generates descriptions from uploaded images and converts voice to text and vice-versa_
+
+![AI Categorization & Priority](./assets/4*AIcategorizationand priority.png)
+\_Smart categorization and priority assessment using advanced AI analysis*
+
+![Duplicate Check](./assets/6_duplicatecheck.png)
+_Intelligent duplicate detection prevents spam and consolidates similar reports_
+
+### 3. Interactive Mapping & Organization
+
+**Visual Problem Tracking and Targeted Reporting**
+
+![Map and Organization Selection](./assets/5_mapandorganizationselect.png)
+_Interactive map interface with organization dropdown for targeted reporting_
+
+![Task in Map View](./assets/taskinmapview.png)
+_Real-time map showing all community issues with filtering and status indicators_
+
+### 4. Dashboard & Management
+
+**Comprehensive Control Center for All Users**
+
+![Dashboard](./assets/7_dashboard.png)
+_Unified dashboard providing overview of reports, statistics, and quick actions_
+
+![Reports Overview](./assets/8_reportshpw.png)
+_Detailed reports view with filtering, sorting, and bulk operations_
+
+![Update Progress](./assets/8_updateprogress.png)
+_Real-time progress tracking and status updates for issue resolution_
+
+### 5. Communication & Collaboration
+
+**Building Community Through Active Engagement**
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img src="./assets/AIchatbot.png" alt="AI Chatbot" width="100%"/>
+        <br><em>Intelligent AI assistant providing guidance on civic engagement, issue reporting, and community participation</em>
+      </td>
+      <td align="center" width="50%">
+        <img src="./assets/chat.png" alt="Chat System" width="100%"/>
+        <br><em>Built-in messaging system for seamless communication between users, admins, and volunteers</em>
+      </td>
+    </tr>
+  </table>
+</div>
+
+![Comments](./assets/comment.png)
+_Community discussion and feedback system for each reported issue_
+
+![Notifications](./assets/notification.png)
+_Real-time notifications keep users informed about report updates and community activities_
+
+### 6. Recognition & Documentation
+
+**Celebrating Community Contributions**
+
+![Certificate Generation](./assets/cirtificate.png)
+_Automated certificate generation for volunteers and contributors_
+
+![PDF Reports](./assets/reportpdf.png)
+_Professional PDF export functionality for reports and analytics_
 
 ## Technology Stack
 
