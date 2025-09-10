@@ -1,7 +1,5 @@
 # FixPoint - Civic Issue Reporting Platform
 
-## Live Demo
-
 - **Frontend**: [https://fixpoint-frontend.vercel.app](https://fixpoint-frontend.vercel.app)
 - **Backend**: [https://fixpoint-backend.onrender.com](https://fixpoint-backend.onrender.com)
 - **Demo Video**: [YouTube Demo](https://youtube.com/watch?v=demo)
