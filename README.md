@@ -1,92 +1,114 @@
 # FixPoint - Civic Issue Reporting Platform
 
+![FixPoint Logo](./docs/logo.svg)
+
 FixPoint is a comprehensive web application that connects citizens with local authorities to report and resolve civic issues in their communities. Built with Spring Boot backend and React frontend, it promotes civic engagement, transparency, and collaborative problem-solving through AI-powered features and real-time communication.
 
-## Problem Statement
+## 🎯 Problem Statement
 
 In many urban and semi-urban neighborhoods, small civic problems such as broken streetlights, potholes, garbage overflow, and stray animals often go unreported and unattended. Citizens are frequently unsure of where to report such problems, or they feel disheartened by the lack of visible response.
 
 **FixPoint addresses this challenge by providing a user-friendly web application that enables residents to report local issues quickly and easily.**
 
-## Key Features
+## ✨ Key Features
 
 ### For Citizens
 
-- ** Issue Reporting**: Submit reports with photos, descriptions, and precise GPS locations
-- ** Interactive Map**: Browse community issues on an interactive map with filtering options
-- ** Progress Tracking**: Monitor the status of submitted reports with real-time updates
-- ** Community Engagement**: Vote on issues, add comments, and participate in discussions
-- ** Volunteer System**: Opt-in to help resolve local problems and earn certificates
-- ** Voice Features**: Voice-to-text and text-to-speech conversion for accessibility
-- ** Multi-language Support**: Report in Bangla with automatic English translation
+- **📱 Issue Reporting**: Submit reports with photos, descriptions, and precise GPS locations
+- **🗺️ Interactive Map**: Browse community issues on an interactive map with filtering options
+- **📊 Progress Tracking**: Monitor the status of submitted reports with real-time updates
+- **💬 Community Engagement**: Vote on issues, add comments, and participate in discussions
+- **🤝 Volunteer System**: Opt-in to help resolve local problems and earn certificates
+- **🎤 Voice Features**: Voice-to-text and text-to-speech conversion for accessibility
+- **🌐 Multi-language Support**: Report in Bangla with automatic English translation
 
 ### For Administrators & NGO Staff
 
-- ** Dashboard Management**: Access filtered views of reports by area, category, or severity
-- ** Status Management**: Update report lifecycle (Submitted → In Progress → Resolved)
-- ** Assignment System**: Assign reports to teams, contractors, or volunteers
-- ** Analytics**: Generate statistical reports and visualizations
-- ** Quality Control**: Validate, merge, or remove duplicate/spam reports
-- ** PDF Export**: Generate and export detailed reports
+- **📋 Dashboard Management**: Access filtered views of reports by area, category, or severity
+- **🔄 Status Management**: Update report lifecycle (Submitted → In Progress → Resolved)
+- **👥 Assignment System**: Assign reports to teams, contractors, or volunteers
+- **📈 Analytics**: Generate statistical reports and visualizations
+- **✅ Quality Control**: Validate, merge, or remove duplicate/spam reports
+- **📄 PDF Export**: Generate and export detailed reports
 
 ### Advanced AI Features
 
-- ** AI-Powered Description Generation**: Automatically generate descriptions from uploaded images
-- ** Smart Categorization**: AI suggests issue categories based on photos and descriptions
-- ** Duplicate Detection**: Intelligent detection of similar reports to prevent spam
-- ** Priority Assessment**: AI determines issue priority based on safety and impact
-- ** AI Chatbot**: Interactive assistant for civic engagement guidance
-- ** Auto-Translation**: Seamless Bangla ↔ English translation
+- **🤖 AI-Powered Description Generation**: Automatically generate descriptions from uploaded images
+- **🧠 Smart Categorization**: AI suggests issue categories based on photos and descriptions
+- **🔍 Duplicate Detection**: Intelligent detection of similar reports to prevent spam
+- **⚡ Priority Assessment**: AI determines issue priority based on safety and impact
+- **💬 AI Chatbot**: Interactive assistant for civic engagement guidance
+- **🔄 Auto-Translation**: Seamless Bangla ↔ English translation
 
-## Feature Screenshots
+## 🖼️ Feature Screenshots - Complete User Journey
 
-### 1. Homepage & Authentication
+### 1. Getting Started
+**Welcome to FixPoint - Your Civic Engagement Platform**
 
 ![Homepage](./assets/homepage.png)
-_Clean homepage with role-based authentication (Citizen, Admin, Staff, Volunteer)_
+_Clean, modern homepage with role-based authentication for Citizens, Admins, Staff, and Volunteers_
 
 ![Signup & Authentication](./assets/2_signup_auth.png)
-_User registration and login system with role selection_
+_Seamless user registration and login system with intuitive role selection_
 
-### 2. Issue Reporting
+### 2. Reporting Issues
+**From Problem to Solution - The Complete Reporting Experience**
 
 ![Issue Reporting by Citizen](./assets/3_reporting_issue_by_citizen.png)
-_Comprehensive report form with image upload, location mapping, and detailed descriptions_
-
-### 3. AI-Powered Features
+_Comprehensive report form with image upload, GPS location mapping, and detailed descriptions_
 
 ![AI Auto-Generated Description](./assets/4_AI_auto_generateddescriptionandvoicetotext.png)
-_AI automatically generates descriptions from images and converts voice to text_
+_AI automatically generates descriptions from uploaded images and converts voice to text_
 
-![AI Categorization & Priority](./assets/4_AIcategorizationandpriority.png)
-\_Smart categorization and priority assessment using AI analysis*
+![AI Categorization & Priority](./assets/4_AIcategorizationand priority.png)
+_Smart categorization and priority assessment using advanced AI analysis_
 
-### 4. Interactive Map & Organization
+![Duplicate Check](./assets/6_duplicatecheck.png)
+_Intelligent duplicate detection prevents spam and consolidates similar reports_
+
+### 3. Interactive Mapping & Organization
+**Visual Problem Tracking and Targeted Reporting**
 
 ![Map and Organization Selection](./assets/5_mapandorganizationselect.png)
 _Interactive map interface with organization dropdown for targeted reporting_
 
-### 5. Additional Features
-
-![Issue Reporting](./assets/issue-reporting.png)
-_Comprehensive report form with image upload, AI description generation, and map integration_
-
-![Interactive Map](./assets/interactive-map.png)
+![Task in Map View](./assets/taskinmapview.png)
 _Real-time map showing all community issues with filtering and status indicators_
 
-![Admin Dashboard](./assets/admin-dashboard.png)
-_Comprehensive admin panel with report management, analytics, and assignment tools_
+### 4. Dashboard & Management
+**Comprehensive Control Center for All Users**
 
-![Chat System](./assets/chat-system.png)
-_Built-in messaging system for communication between users, admins, and volunteers_
+![Dashboard](./assets/7_dashboard.png)
+_Unified dashboard providing overview of reports, statistics, and quick actions_
 
-![AI Features](./assets/ai-features.png)
-_AI description generation, categorization, and chatbot integration_
+![Reports Overview](./assets/8_reportshpw.png)
+_Detailed reports view with filtering, sorting, and bulk operations_
 
-![Volunteer System](./assets/volunteer-system.png)
-_Volunteer registration, task assignment, and certificate generation_
+![Update Progress](./assets/8_updateprogress.png)
+_Real-time progress tracking and status updates for issue resolution_
 
-## Technology Stack
+### 5. Communication & Collaboration
+**Building Community Through Active Engagement**
+
+![Chat System](./assets/chat.png)
+_Built-in messaging system for seamless communication between users, admins, and volunteers_
+
+![Comments](./assets/comment.png)
+_Community discussion and feedback system for each reported issue_
+
+![Notifications](./assets/notification.png)
+_Real-time notifications keep users informed about report updates and community activities_
+
+### 6. Recognition & Documentation
+**Celebrating Community Contributions**
+
+![Certificate Generation](./assets/cirtificate.png)
+_Automated certificate generation for volunteers and contributors_
+
+![PDF Reports](./assets/reportpdf.png)
+_Professional PDF export functionality for reports and analytics_
+
+## 🛠️ Technology Stack
 
 ### Frontend
 
@@ -117,6 +139,14 @@ _Volunteer registration, task assignment, and certificate generation_
 - **Local File System** - Image Storage (Max 10MB)
 
 ### AI & ML Integration
+
+- **LangChain4j** (v0.27.1) - AI Framework
+- **Google Gemini 1.5 Flash** - Primary AI Model
+- **OpenAI GPT-3.5-turbo** - Backup AI Model
+- **Google Cloud Speech-to-Text** - Voice Recognition
+- **Web Speech API** - Text-to-Speech
+
+## 🤖 AI Features & Models
 
 ### 1. Auto-Generated Text for Images
 
@@ -173,7 +203,7 @@ _Volunteer registration, task assignment, and certificate generation_
 - **Factors**: Public safety risks, Infrastructure damage severity, Number of people affected
 - **Fallback**: Keyword-based assessment
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -240,6 +270,111 @@ On first run, create an admin user through the registration form, then update th
 UPDATE users SET role = 'ADMIN' WHERE username = 'your-admin-username';
 ```
 
+## 📱 User Roles & Workflows
+
+### Citizen Workflow
+
+1. **Register/Login** → Create account as Citizen
+2. **Report Issue** → Upload photo, add description, mark location
+3. **Track Progress** → Monitor status updates and admin responses
+4. **Community Engagement** → Vote, comment, and volunteer for issues
+5. **Receive Updates** → Get notifications on report progress
+
+### Admin Workflow
+
+1. **Login** → Access admin dashboard
+2. **Review Reports** → Filter and manage incoming reports
+3. **Assign Tasks** → Delegate to staff or volunteers
+4. **Update Status** → Track progress and mark resolution
+5. **Generate Reports** → Export analytics and PDF reports
+
+### Staff Workflow
+
+1. **Login** → Access assigned tasks
+2. **View Assignments** → See assigned reports and priorities
+3. **Update Progress** → Provide status updates and photos
+4. **Communicate** → Chat with citizens and admins
+5. **Mark Complete** → Submit resolution details
+
+### Volunteer Workflow
+
+1. **Register** → Sign up as volunteer with skills
+2. **Browse Opportunities** → Find issues matching skills
+3. **Accept Tasks** → Take on volunteer assignments
+4. **Complete Work** → Submit progress and photos
+5. **Earn Certificates** → Receive recognition for contributions
+
+## 🔧 API Endpoints
+
+### Authentication
+
+- `POST /api/auth/signin` - User login
+- `POST /api/auth/signup` - User registration
+- `GET /api/auth/check-username` - Check username availability
+- `GET /api/auth/check-email` - Check email availability
+
+### Reports
+
+- `GET /api/reports` - Get all reports (authenticated)
+- `POST /api/reports` - Create new report
+- `GET /api/reports/{id}` - Get report by ID
+- `GET /api/reports/my-reports` - Get user's reports
+- `GET /api/reports/area` - Get reports in geographical area
+- `POST /api/reports/{id}/vote` - Vote for a report
+- `PUT /api/reports/{id}/status` - Update report status (admin only)
+- `PUT /api/reports/{id}/assign` - Assign report (admin only)
+
+### AI Services
+
+- `POST /api/ai/generate-description` - Generate description from image
+- `POST /api/ai/categorize` - AI categorization
+- `POST /api/ai/translate` - Multi-language translation
+- `POST /api/ai/chat` - AI chatbot interaction
+- `POST /api/ai/check-duplicate` - Duplicate detection
+
+### Public Endpoints
+
+- `GET /api/public/reports` - Get public reports
+- `GET /api/public/reports/resolved` - Get resolved reports
+- `GET /api/public/reports/categories` - Get report categories
+- `GET /api/public/reports/statuses` - Get report statuses
+
+## 🗄️ Database Schema
+
+### Users Table
+
+- Basic user information (username, email, password)
+- Location data (latitude, longitude, address)
+- Role management (CITIZEN, ADMIN, NGO_STAFF, VOLUNTEER)
+- Volunteer status and skills
+
+### Reports Table
+
+- Issue details (title, description, category)
+- Status tracking (SUBMITTED, IN_PROGRESS, RESOLVED, REJECTED)
+- Location data with precise coordinates
+- Image attachments and resolution photos
+- Priority levels and vote counts
+- AI-generated metadata
+
+### Supporting Tables
+
+- Comments for community discussion
+- Votes for issue prioritization
+- Chat messages for real-time communication
+- Volunteer assignments and certificates
+- AI analysis results and confidence scores
+
+## 🔒 Security Features
+
+- **JWT Authentication**: Secure token-based authentication
+- **Role-based Access Control**: Different permissions for citizens, admins, staff, and volunteers
+- **CORS Configuration**: Proper cross-origin resource sharing setup
+- **Input Validation**: Comprehensive validation on both frontend and backend
+- **File Upload Security**: Secure image upload with size and type restrictions
+- **API Rate Limiting**: Protection against abuse and spam
+
+## 🧪 Development
 
 ### Running Tests
 
@@ -296,11 +431,43 @@ jwt.secret=${JWT_SECRET}
 ai.provider=${AI_PROVIDER}
 ```
 
-## Live Demo
+## 🌟 Live Demo
 
 - **Frontend**: [https://fixpoint-frontend.vercel.app](https://fixpoint-frontend.vercel.app)
 - **Backend**: [https://fixpoint-backend.onrender.com](https://fixpoint-backend.onrender.com)
 - **Demo Video**: [YouTube Demo](https://youtube.com/watch?v=demo)
+
+## 📊 Project Statistics
+
+- **Total Commits**: 200+
+- **Languages**: Java (Backend), JavaScript (Frontend)
+- **AI Models**: 8+ integrated features
+- **User Roles**: 4 (Citizen, Admin, Staff, Volunteer)
+- **Database Tables**: 10+ with relationships
+- **API Endpoints**: 30+ RESTful endpoints
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 🗺️ Roadmap
+
+- [ ] Mobile application (React Native)
+- [ ] Advanced analytics dashboard with ML insights
+- [ ] Real-time notifications (Push notifications)
+- [ ] Integration with government APIs
+- [ ] Offline capability with sync
+- [ ] Multi-tenant support for different cities
+- [ ] Advanced AI features (predictive analytics, sentiment analysis)
+- [ ] Gamification system with rewards and leaderboards
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 👥 Team
 
@@ -310,6 +477,22 @@ ai.provider=${AI_PROVIDER}
 - AI/ML integration
 - UI/UX design
 - DevOps and deployment
+
+## 📞 Support
+
+For support and questions:
+
+- Create an issue in the GitHub repository
+- Contact the development team
+- Check the documentation wiki
+
+## 🙏 Acknowledgments
+
+- OpenStreetMap for map data
+- Leaflet for mapping functionality
+- Spring Boot and React communities
+- Google AI and OpenAI for AI services
+- All contributors and beta testers
 
 ---
 
