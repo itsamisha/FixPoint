@@ -207,7 +207,7 @@ public class ReportController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
@@ -228,13 +228,26 @@ public class ReportController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Only organization admin/staff can access their organization's reports
-        if (!user.getOrganization().getId().equals(organizationId) || 
-            (user.getUserType() != User.UserType.ORGANIZATION_ADMIN && 
-             user.getUserType() != User.UserType.ORGANIZATION_STAFF)) {
+        // Check user authorization - organization members (staff, admin) OR volunteers can view organization reports
+        boolean isAuthorized = false;
+        
+        // Organization staff/admin can view their organization's reports
+        if (user.getOrganization() != null && user.getOrganization().getId().equals(organizationId) &&
+            (user.getUserType() == User.UserType.ORGANIZATION_ADMIN || 
+             user.getUserType() == User.UserType.ORGANIZATION_STAFF)) {
+            isAuthorized = true;
+        }
+        
+        // Volunteers can view reports for any organization to help with assignments
+        if (user.getIsVolunteer() != null && user.getIsVolunteer() || 
+            user.getUserType() == User.UserType.VOLUNTEER) {
+            isAuthorized = true;
+        }
+        
+        if (!isAuthorized) {
             Map<String, String> error = new HashMap<>();
             error.put("message", "Unauthorized to access organization reports");
             return ResponseEntity.status(403).body(error);
@@ -257,7 +270,7 @@ public class ReportController {
             @RequestBody Map<String, Long> requestBody,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Only organization admins can assign reports
@@ -284,7 +297,7 @@ public class ReportController {
             @RequestBody Map<String, Long> requestBody,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
@@ -416,7 +429,7 @@ public class ReportController {
             @RequestBody Map<String, Object> progressData,
             @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            Optional<User> userOpt = userRepository.findById(currentUser.getId());
+            Optional<User> userOpt = userRepository.findByIdWithOrganization(currentUser.getId());
             if (!userOpt.isPresent()) {
                 return ResponseEntity.badRequest().body(Map.of("message", "User not found"));
             }

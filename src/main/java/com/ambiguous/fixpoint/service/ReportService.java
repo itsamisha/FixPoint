@@ -237,11 +237,12 @@ public class ReportService {
         return convertToReportSummary(updatedReport, admin);
     }
 
+    @Transactional
     public ReportSummary assignReport(Long reportId, Long assigneeId, User admin) {
-        Report report = reportRepository.findById(reportId)
+        Report report = reportRepository.findByIdWithRelations(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
 
-        User assignee = userRepository.findById(assigneeId)
+        User assignee = userRepository.findByIdWithOrganization(assigneeId)
                 .orElseThrow(() -> new RuntimeException("Assignee not found"));
 
         report.setAssignedTo(assignee);
@@ -380,9 +381,10 @@ public class ReportService {
         return new PageImpl<>(summaries, pageable, reportPage.getTotalElements());
     }
 
+    @Transactional(readOnly = true)
     public Page<ReportSummary> getReportsByTargetOrganization(Long organizationId, Pageable pageable) {
         Page<Report> reports = reportRepository.findByTargetOrganizationsId(organizationId, pageable);
-        return reports.map(this::convertToReportSummary);
+        return reports.map(report -> convertToReportSummary(report, null));
     }
 
     private ReportSummary convertToReportSummary(Report report) {
@@ -392,8 +394,9 @@ public class ReportService {
     /**
      * Update progress for a report
      */
+    @Transactional
     public ReportSummary updateProgress(Long reportId, Integer progressPercentage, String progressNotes, String workStage, User user) {
-        Optional<Report> reportOpt = reportRepository.findById(reportId);
+        Optional<Report> reportOpt = reportRepository.findByIdWithRelations(reportId);
         if (!reportOpt.isPresent()) {
             throw new RuntimeException("Report not found");
         }

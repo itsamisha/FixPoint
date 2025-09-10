@@ -92,7 +92,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     List<Report> findAssignedByIdsWithRelations(@Param("ids") List<Long> ids);
     
     // Find reports targeted to a specific organization
-    @Query("SELECT r FROM Report r JOIN r.targetOrganizations o WHERE o.id = :organizationId")
+    @Query("SELECT r FROM Report r JOIN r.targetOrganizations o WHERE o.id = :organizationId ORDER BY r.createdAt DESC")
     Page<Report> findByTargetOrganizationsId(@Param("organizationId") Long organizationId, Pageable pageable);
     
     // For duplicate detection
