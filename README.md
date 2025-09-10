@@ -42,37 +42,48 @@ In many urban and semi-urban neighborhoods, small civic problems such as broken 
 
 ## 🖼️ Feature Screenshots
 
-### Homepage & Authentication
+### 1. Homepage & Authentication
 
 ![Homepage](./assets/homepage.png)
 _Clean homepage with role-based authentication (Citizen, Admin, Staff, Volunteer)_
 
-### Issue Reporting
+![Signup & Authentication](./assets/2_signup_auth.png)
+_User registration and login system with role selection_
+
+### 2. Issue Reporting
+
+![Issue Reporting by Citizen](./assets/3_reporting_issue_by_citizen.png)
+_Comprehensive report form with image upload, location mapping, and detailed descriptions_
+
+### 3. AI-Powered Features
+
+![AI Auto-Generated Description](./assets/4_AI_auto_generateddescriptionandvoicetotext.png)
+_AI automatically generates descriptions from images and converts voice to text_
+
+![AI Categorization & Priority](./assets/4*AIcategorizationand priority.png)
+\_Smart categorization and priority assessment using AI analysis*
+
+### 4. Interactive Map & Organization
+
+![Map and Organization Selection](./assets/5_mapandorganizationselect.png)
+_Interactive map interface with organization dropdown for targeted reporting_
+
+### 5. Additional Features
 
 ![Issue Reporting](./assets/issue-reporting.png)
 _Comprehensive report form with image upload, AI description generation, and map integration_
 
-### Interactive Map
-
 ![Interactive Map](./assets/interactive-map.png)
 _Real-time map showing all community issues with filtering and status indicators_
-
-### Admin Dashboard
 
 ![Admin Dashboard](./assets/admin-dashboard.png)
 _Comprehensive admin panel with report management, analytics, and assignment tools_
 
-### Real-time Chat
-
 ![Chat System](./assets/chat-system.png)
 _Built-in messaging system for communication between users, admins, and volunteers_
 
-### AI Features
-
 ![AI Features](./assets/ai-features.png)
 _AI description generation, categorization, and chatbot integration_
-
-### Volunteer System
 
 ![Volunteer System](./assets/volunteer-system.png)
 _Volunteer registration, task assignment, and certificate generation_
