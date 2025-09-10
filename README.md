@@ -243,7 +243,7 @@ REACT_APP_API_URL=http://localhost:8080
 REACT_APP_GOOGLE_MAPS_API_KEY=your_maps_api_key
 ```
 
-## 🚀 Deployment
+## Deployment
 
 ### Docker (Optional)
 
@@ -267,71 +267,14 @@ jwt.secret=${JWT_SECRET}
 ai.provider=${AI_PROVIDER}
 ```
 
-## 🌟 Live Demo
+## Live Demo
 
 - **Frontend**: [https://fixpoint-frontend.vercel.app](https://fixpoint-frontend.vercel.app)
 - **Backend**: [https://fixpoint-backend.onrender.com](https://fixpoint-backend.onrender.com)
 - **Demo Video**: [YouTube Demo](https://youtube.com/watch?v=demo)
 
-## 📊 Project Statistics
-
-- **Total Commits**: 200+
-- **Languages**: Java (Backend), JavaScript (Frontend)
-- **AI Models**: 8+ integrated features
-- **User Roles**: 4 (Citizen, Admin, Staff, Volunteer)
-- **Database Tables**: 10+ with relationships
-- **API Endpoints**: 30+ RESTful endpoints
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 🗺️ Roadmap
-
-- [ ] Mobile application (React Native)
-- [ ] Advanced analytics dashboard with ML insights
-- [ ] Real-time notifications (Push notifications)
-- [ ] Integration with government APIs
-- [ ] Offline capability with sync
-- [ ] Multi-tenant support for different cities
-- [ ] Advanced AI features (predictive analytics, sentiment analysis)
-- [ ] Gamification system with rewards and leaderboards
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Team
-
-**Team Ambiguous**
-
-- Full-stack development
-- AI/ML integration
-- UI/UX design
-- DevOps and deployment
-
-## 📞 Support
-
-For support and questions:
-
-- Create an issue in the GitHub repository
-- Contact the development team
-- Check the documentation wiki
-
-## 🙏 Acknowledgments
-
-- OpenStreetMap for map data
-- Leaflet for mapping functionality
-- Spring Boot and React communities
-- Google AI and OpenAI for AI services
-- All contributors and beta testers
-
 ---
 
 **Built with ❤️ by Team Ambiguous - Connecting Communities, One Issue at a Time**
 
-_"ধরুন, রাতে বাসা থেকে বের হয়ে দেখলেন রাস্তার লাইটটা নষ্ট হয়ে গেছে। বা সকালে হাঁটতে গিয়ে দেখলেন ডাস্টবিন উপচে রাস্তা ভরে গেছে। এমন ছোট ছোট সমস্যা আমাদের চারপাশে রোজই দেখা যায়… কিন্তু প্রশ্ন হলো – আমরা কার কাছে instantly এগুলো বলবো? FixPoint দিয়ে এখন সহজেই রিপোর্ট করুন!"_
+
