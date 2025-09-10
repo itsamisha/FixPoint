@@ -95,6 +95,9 @@ _Real-time progress tracking and status updates for issue resolution_
 
 **Building Community Through Active Engagement**
 
+![AI Chatbot](./assets/AIchatbot.png)
+_Intelligent AI assistant providing guidance on civic engagement, issue reporting, and community participation_
+
 ![Chat System](./assets/chat.png)
 _Built-in messaging system for seamless communication between users, admins, and volunteers_
 
