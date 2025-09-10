@@ -1,11 +1,37 @@
 {
+  "name": "fixpoint",
+  "version": "1.0.0",
+  "description": "FixPoint - Civic Issue Reporting Platform",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && ./mvnw spring-boot:run",
+    "frontend": "cd frontend && npm start",
+    "build": "npm run build:backend && npm run build:frontend",
+    "build:backend": "cd backend && ./mvnw clean package",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "npm run test:backend && npm run test:frontend",
+    "test:backend": "cd backend && ./mvnw test",
+    "test:frontend": "cd frontend && npm test",
+    "clean": "cd backend && ./mvnw clean && cd ../frontend && npm run clean"
+  },
   "dependencies": {
     "@stomp/stompjs": "^7.1.1",
     "qrcode.react": "^4.2.0",
-    "sockjs-client": "^1.6.1"
+    "sockjs-client": "^1.6.1",
+    "concurrently": "^8.2.2"
   },
   "devDependencies": {
     "css-minimizer-webpack-plugin": "^7.0.2",
     "jest-worker": "^30.1.0"
-  }
+  },
+  "keywords": [
+    "civic-engagement",
+    "issue-reporting",
+    "community",
+    "spring-boot",
+    "react"
+  ],
+  "author": "Team Ambiguous",
+  "license": "MIT"
 }

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification System Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        .button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🔔 FixPoint Notification System Test</h1>
+    
+    <div class="test-section">
+        <h3>📋 System Status</h3>
+        <button class="button" onclick="checkBackend()">Check Backend</button>
+        <button class="button" onclick="checkFrontend()">Check Frontend</button>
+        <div id="systemStatus" class="result">Click buttons to check system status</div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔐 Authentication Test</h3>
+        <input type="text" id="username" placeholder="Username (e.g., admin)" value="admin">
+        <input type="password" id="password" placeholder="Password (e.g., admin123)" value="admin123">
+        <button class="button" onclick="testLogin()">Login</button>
+        <button class="button" onclick="checkAuthStatus()">Check Auth Status</button>
+        <div id="authStatus" class="result">Not logged in</div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔔 Notification API Tests</h3>
+        <button class="button" onclick="testNotificationCount()">Test Notification Count</button>
+        <button class="button" onclick="testGetNotifications()">Get All Notifications</button>
+        <button class="button" onclick="testCreateNotification()">Test Create Notification</button>
+        <div id="notificationResults" class="result">Click buttons to test notification API</div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        let authToken = localStorage.getItem('token');
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+        }
+
+        async function checkBackend() {
+            try {
+                const response = await fetch(`${API_BASE}/actuator/health`);
+                if (response.ok) {
+                    log('systemStatus', '✅ Backend is running on port 8080', 'success');
+                } else {
+                    log('systemStatus', '❌ Backend health check failed', 'error');
+                }
+            } catch (error) {
+                log('systemStatus', `❌ Backend connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkFrontend() {
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    log('systemStatus', '✅ Frontend is running on port 3000', 'success');
+                } else {
+                    log('systemStatus', '❌ Frontend check failed', 'error');
+                }
+            } catch (error) {
+                log('systemStatus', `❌ Frontend connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/public/signin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.accessToken;
+                    localStorage.setItem('token', authToken);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    log('authStatus', `✅ Login successful for user: ${data.user.fullName || data.user.username}`, 'success');
+                    log('authStatus', `🎫 Token: ${authToken.substring(0, 20)}...`, 'info');
+                } else {
+                    const errorData = await response.text();
+                    log('authStatus', `❌ Login failed: ${response.status} - ${errorData}`, 'error');
+                }
+            } catch (error) {
+                log('authStatus', `❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (token && user) {
+                const userData = JSON.parse(user);
+                log('authStatus', `✅ User logged in: ${userData.fullName || userData.username}`, 'success');
+                log('authStatus', `🎫 Token exists: ${token.substring(0, 20)}...`, 'info');
+            } else {
+                log('authStatus', '❌ No user logged in', 'error');
+            }
+        }
+
+        async function testNotificationCount() {
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(`${API_BASE}/api/notifications/unread/count`, {
+                    headers
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('notificationResults', `✅ Notification count: ${data.count}`, 'success');
+                } else {
+                    log('notificationResults', `❌ Failed to get notification count: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('notificationResults', `❌ Notification count error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetNotifications() {
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+
+                const response = await fetch(`${API_BASE}/api/notifications`, {
+                    headers
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    log('notificationResults', `✅ Retrieved ${data.content?.length || data.length || 0} notifications`, 'success');
+                    if (data.content?.length > 0 || data.length > 0) {
+                        const notifications = data.content || data;
+                        notifications.slice(0, 3).forEach((notif, index) => {
+                            log('notificationResults', `📧 ${index + 1}. ${notif.title}: ${notif.message}`, 'info');
+                        });
+                    }
+                } else if (response.status === 401) {
+                    log('notificationResults', '❌ Unauthorized - please login first', 'error');
+                } else {
+                    log('notificationResults', `❌ Failed to get notifications: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('notificationResults', `❌ Get notifications error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateNotification() {
+            log('notificationResults', '⚠️ Note: This would require admin privileges to create notifications', 'info');
+        }
+
+        // Check auth status on page load
+        window.onload = function() {
+            checkAuthStatus();
+        };
+    </script>
+</body>
+</html>

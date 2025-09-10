@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Service Test</title>
+</head>
+<body>
+    <h1>AI Service Test</h1>
+    
+    <div>
+        <h2>Provider Status</h2>
+        <button onclick="checkStatus()">Check AI Provider Status</button>
+        <pre id="statusResult"></pre>
+    </div>
+    
+    <div>
+        <h2>Test Image Analysis</h2>
+        <input type="file" id="imageFile" accept="image/*">
+        <select id="category">
+            <option value="ROADS_INFRASTRUCTURE">Roads Infrastructure</option>
+            <option value="SANITATION_WASTE">Sanitation Waste</option>
+            <option value="STREET_LIGHTING">Street Lighting</option>
+        </select>
+        <button onclick="testImageAnalysis()">Test AI Analysis</button>
+        <pre id="analysisResult"></pre>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            try {
+                const response = await fetch('http://localhost:8080/api/ai/status');
+                const data = await response.json();
+                document.getElementById('statusResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('statusResult').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function testImageAnalysis() {
+            const fileInput = document.getElementById('imageFile');
+            const category = document.getElementById('category').value;
+            
+            if (!fileInput.files[0]) {
+                alert('Please select an image file');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            formData.append('category', category);
+
+            try {
+                const response = await fetch('http://localhost:8080/api/ai/analyze-image-enhanced', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                document.getElementById('analysisResult').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('analysisResult').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Auto-load status on page load
+        window.onload = function() {
+            checkStatus();
+        };
+    </script>
+</body>
+</html>

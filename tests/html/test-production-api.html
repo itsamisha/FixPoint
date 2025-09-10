@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FixPoint Production API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        .button:hover { background: #0056b3; }
+        .result { margin: 10px 0; padding: 10px; background: #f8f9fa; border-radius: 4px; font-family: monospace; white-space: pre-wrap; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🚀 FixPoint Production API Test</h1>
+    <p>Use this page to test the connection between your GitHub Pages frontend and Railway backend.</p>
+
+    <div class="test-section">
+        <h3>📋 Railway Backend Tests</h3>
+        <p><strong>Backend URL:</strong> <code>https://web-production-8aac9.up.railway.app</code></p>
+        <button class="button" onclick="testBackendRoot()">Test Root URL</button>
+        <button class="button" onclick="testBackendHealth()">Test Health Check</button>
+        <button class="button" onclick="testBackendAPI()">Test API Endpoint</button>
+        <button class="button" onclick="testBackendPublic()">Test Public Endpoint</button>
+        <div id="backendResults" class="result">Click buttons to test Railway backend...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔗 CORS and Authentication Tests</h3>
+        <button class="button" onclick="testCORS()">Test CORS Headers</button>
+        <button class="button" onclick="testLogin()">Test Login API</button>
+        <div id="corsResults" class="result">Click buttons to test CORS and authentication...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔧 Railway Deployment Check</h3>
+        <p>If the backend tests fail, check these:</p>
+        <ul>
+            <li>Go to your Railway dashboard</li>
+            <li>Check if the deployment completed successfully</li>
+            <li>Look at the build logs for any errors</li>
+            <li>Verify that the PORT environment variable is set</li>
+            <li>Check if the Java application started correctly</li>
+        </ul>
+        <button class="button" onclick="showDeploymentTips()">Show Deployment Tips</button>
+        <div id="deploymentTips" class="result">Click to see deployment troubleshooting tips...</div>
+    </div>
+
+    <script>
+        const RAILWAY_BASE = 'https://web-production-8aac9.up.railway.app';
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.innerHTML += `<div class="${type}">[${timestamp}] ${message}</div>`;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function testBackendRoot() {
+            clearLog('backendResults');
+            log('backendResults', '🔍 Testing Railway backend root URL...', 'info');
+            
+            try {
+                const response = await fetch(RAILWAY_BASE + '/', { 
+                    method: 'GET',
+                    mode: 'cors' 
+                });
+                
+                if (response.ok) {
+                    const text = await response.text();
+                    log('backendResults', `✅ Root URL accessible! Status: ${response.status}`, 'success');
+                    log('backendResults', `Response preview: ${text.substring(0, 200)}...`, 'info');
+                } else {
+                    log('backendResults', `⚠️ Root URL returned ${response.status}: ${response.statusText}`, 'warning');
+                    const text = await response.text();
+                    log('backendResults', `Response: ${text.substring(0, 300)}`, 'info');
+                }
+            } catch (error) {
+                log('backendResults', `❌ Root URL failed: ${error.message}`, 'error');
+                if (error.message.includes('CORS')) {
+                    log('backendResults', '💡 This might be a CORS issue or the backend is not running', 'warning');
+                }
+            }
+        }
+
+        async function testBackendHealth() {
+            log('backendResults', '🏥 Testing health endpoint...', 'info');
+            
+            try {
+                const response = await fetch(RAILWAY_BASE + '/actuator/health', { 
+                    method: 'GET',
+                    mode: 'cors' 
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('backendResults', `✅ Health check passed! Status: ${JSON.stringify(data)}`, 'success');
+                } else {
+                    log('backendResults', `❌ Health check failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('backendResults', `❌ Health check error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBackendAPI() {
+            log('backendResults', '📡 Testing API endpoint...', 'info');
+            
+            try {
+                const response = await fetch(RAILWAY_BASE + '/api/organizations', { 
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('backendResults', `✅ API endpoint working! Found ${data.length} organizations`, 'success');
+                } else {
+                    log('backendResults', `❌ API endpoint failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('backendResults', `❌ API endpoint error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBackendPublic() {
+            log('backendResults', '🌐 Testing public endpoint...', 'info');
+            
+            try {
+                const response = await fetch(RAILWAY_BASE + '/api/public/organizations', { 
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('backendResults', `✅ Public endpoint working! Found ${data.length} organizations`, 'success');
+                } else {
+                    log('backendResults', `❌ Public endpoint failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('backendResults', `❌ Public endpoint error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCORS() {
+            clearLog('corsResults');
+            log('corsResults', '🔗 Testing CORS headers...', 'info');
+            
+            try {
+                const response = await fetch(RAILWAY_BASE + '/api/organizations', {
+                    method: 'OPTIONS',
+                    mode: 'cors',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type'
+                    }
+                });
+                
+                log('corsResults', `✅ CORS preflight status: ${response.status}`, 'success');
+                
+                // Check CORS headers
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+                };
+                
+                log('corsResults', `CORS Headers: ${JSON.stringify(corsHeaders, null, 2)}`, 'info');
+                
+            } catch (error) {
+                log('corsResults', `❌ CORS test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            log('corsResults', '🔐 Testing login endpoint...', 'info');
+            
+            try {
+                const response = await fetch(RAILWAY_BASE + '/api/public/signin', {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        usernameOrEmail: 'admin',
+                        password: 'admin123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('corsResults', `✅ Login endpoint working! Token received`, 'success');
+                } else {
+                    log('corsResults', `⚠️ Login endpoint accessible but failed: ${response.status}`, 'warning');
+                    const errorData = await response.text();
+                    log('corsResults', `Error: ${errorData}`, 'error');
+                }
+            } catch (error) {
+                log('corsResults', `❌ Login endpoint error: ${error.message}`, 'error');
+            }
+        }
+
+        function showDeploymentTips() {
+            clearLog('deploymentTips');
+            log('deploymentTips', '🔧 Railway Deployment Troubleshooting:', 'info');
+            log('deploymentTips', '', 'info');
+            log('deploymentTips', '1. Check Railway Dashboard:', 'info');
+            log('deploymentTips', '   - Go to railway.app dashboard', 'info');
+            log('deploymentTips', '   - Check your project deployment status', 'info');
+            log('deploymentTips', '   - Look for build errors in the logs', 'info');
+            log('deploymentTips', '', 'info');
+            log('deploymentTips', '2. Common Issues:', 'info');
+            log('deploymentTips', '   - Build failing: Check Maven dependencies', 'info');
+            log('deploymentTips', '   - Port issues: Railway auto-sets PORT env var', 'info');
+            log('deploymentTips', '   - JAR not found: Check build output location', 'info');
+            log('deploymentTips', '', 'info');
+            log('deploymentTips', '3. Railway Environment Variables to check:', 'info');
+            log('deploymentTips', '   - PORT (auto-set by Railway)', 'info');
+            log('deploymentTips', '   - SPRING_PROFILES_ACTIVE=production', 'info');
+            log('deploymentTips', '   - EMAIL_USERNAME and EMAIL_PASSWORD', 'info');
+            log('deploymentTips', '', 'info');
+            log('deploymentTips', '4. If still not working:', 'info');
+            log('deploymentTips', '   - Check Railway logs for startup errors', 'info');
+            log('deploymentTips', '   - Verify railway.toml configuration', 'info');
+            log('deploymentTips', '   - Try manual redeploy in Railway dashboard', 'info');
+        }
+
+        // Auto-run basic tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testBackendRoot();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
