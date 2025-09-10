@@ -160,7 +160,7 @@ public class ReportController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
@@ -484,7 +484,7 @@ public class ReportController {
         try {
             System.out.println("PDF Export request received: " + exportRequest);
             
-            User user = userRepository.findById(currentUser.getId())
+            User user = userRepository.findByIdWithOrganization(currentUser.getId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             // Handle both Integer and Long values from JSON
@@ -518,7 +518,7 @@ public class ReportController {
             System.out.println("PDF generated successfully, size: " + pdfBytes.length + " bytes");
             
             return ResponseEntity.ok()
-                    .header("Content-Type", "application/pdf")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                     .header("Content-Disposition", "attachment; filename=reports_export.pdf")
                     .body(pdfBytes);
                     
@@ -542,7 +542,7 @@ public class ReportController {
             @RequestParam(defaultValue = "detailed") String format,
             @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            User user = userRepository.findById(currentUser.getId())
+            User user = userRepository.findByIdWithOrganization(currentUser.getId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             Map<String, Object> options = new HashMap<>();
@@ -555,7 +555,7 @@ public class ReportController {
             byte[] pdfBytes = reportService.exportSingleReportToPDF(id, options, user);
             
             return ResponseEntity.ok()
-                    .header("Content-Type", "application/pdf")
+                    .contentType(org.springframework.http.MediaType.APPLICATION_PDF)
                     .header("Content-Disposition", "attachment; filename=report_" + id + ".pdf")
                     .body(pdfBytes);
                     

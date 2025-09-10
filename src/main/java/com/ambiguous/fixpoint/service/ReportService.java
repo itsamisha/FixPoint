@@ -253,8 +253,9 @@ public class ReportService {
         return convertToReportSummary(updatedReport, admin);
     }
 
+    @Transactional
     public ReportSummary voteForReport(Long reportId, User user) {
-        Report report = reportRepository.findById(reportId)
+        Report report = reportRepository.findByIdWithRelations(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
 
         // Check if user already voted

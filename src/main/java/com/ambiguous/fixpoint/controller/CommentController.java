@@ -48,11 +48,11 @@ public class CommentController {
     public ResponseEntity<List<CommentResponse>> listComments(
             @PathVariable Long reportId,
             @AuthenticationPrincipal UserPrincipal currentUser) {
-        Report report = reportRepository.findById(reportId)
+        Report report = reportRepository.findByIdWithRelations(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
         
         User user = currentUser != null ? 
-                userRepository.findById(currentUser.getId()).orElse(null) : null;
+                userRepository.findByIdWithOrganization(currentUser.getId()).orElse(null) : null;
         
         List<Comment> comments = commentRepository.findByReportAndParentCommentIsNullOrderByCreatedAtAsc(report);
         List<CommentResponse> response = comments.stream()
@@ -67,9 +67,9 @@ public class CommentController {
             @Valid @RequestBody CommentRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser
     ) {
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Report report = reportRepository.findById(reportId)
+        Report report = reportRepository.findByIdWithRelations(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
 
         Comment comment = new Comment(request.getContent(), report, user);
@@ -88,9 +88,9 @@ public class CommentController {
             @Valid @RequestBody CommentRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser
     ) {
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Report report = reportRepository.findById(reportId)
+        Report report = reportRepository.findByIdWithRelations(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
         Comment parentComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Parent comment not found"));
@@ -113,7 +113,7 @@ public class CommentController {
             @Valid @RequestBody CommentReactionRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser
     ) {
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
@@ -148,7 +148,7 @@ public class CommentController {
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
         
         User user = currentUser != null ? 
-                userRepository.findById(currentUser.getId()).orElse(null) : null;
+                userRepository.findByIdWithOrganization(currentUser.getId()).orElse(null) : null;
         
         List<Comment> replies = commentRepository.findByParentCommentOrderByCreatedAtAsc(parentComment);
         List<CommentResponse> response = replies.stream()
