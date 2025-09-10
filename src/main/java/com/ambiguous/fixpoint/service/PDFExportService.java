@@ -8,6 +8,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class PDFExportService {
     private static final Font NORMAL_FONT = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL);
     private static final Font SMALL_FONT = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
 
+    @Transactional(readOnly = true)
     public byte[] exportReportsToPDF(List<Long> reportIds, Map<String, Object> options, User currentUser) {
         try {
             Document document = new Document(PageSize.A4);
@@ -40,7 +42,7 @@ public class PDFExportService {
             // Export each report
             for (int i = 0; i < reportIds.size(); i++) {
                 Long reportId = reportIds.get(i);
-                Report report = reportRepository.findById(reportId).orElse(null);
+                Report report = reportRepository.findByIdWithRelations(reportId).orElse(null);
                 
                 if (report != null && canUserAccessReport(report, currentUser)) {
                     if (i > 0) {
@@ -58,9 +60,10 @@ public class PDFExportService {
         }
     }
 
+    @Transactional(readOnly = true)
     public byte[] exportSingleReportToPDF(Long reportId, Map<String, Object> options, User currentUser) {
         try {
-            Report report = reportRepository.findById(reportId)
+            Report report = reportRepository.findByIdWithRelations(reportId)
                     .orElseThrow(() -> new RuntimeException("Report not found"));
             
             if (!canUserAccessReport(report, currentUser)) {

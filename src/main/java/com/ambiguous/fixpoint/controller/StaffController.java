@@ -124,10 +124,10 @@ public class StaffController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            User currentUserEntity = userRepository.findById(currentUser.getId())
+            User currentUserEntity = userRepository.findByIdWithOrganization(currentUser.getId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            User staff = userRepository.findById(id)
+            User staff = userRepository.findByIdWithOrganization(id)
                     .orElseThrow(() -> new RuntimeException("Staff member not found"));
 
             // Check if user has permission to view this staff member
@@ -163,14 +163,14 @@ public class StaffController {
             @RequestBody Map<String, Boolean> request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            User currentUserEntity = userRepository.findById(currentUser.getId())
+            User currentUserEntity = userRepository.findByIdWithOrganization(currentUser.getId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             if (!currentUserEntity.getUserType().equals(User.UserType.ORGANIZATION_ADMIN)) {
                 return ResponseEntity.status(403).body(Map.of("message", "Access denied"));
             }
 
-            User staff = userRepository.findById(id)
+            User staff = userRepository.findByIdWithOrganization(id)
                     .orElseThrow(() -> new RuntimeException("Staff member not found"));
 
             if (!currentUserEntity.getOrganization().equals(staff.getOrganization())) {

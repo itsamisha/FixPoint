@@ -44,7 +44,7 @@ public class NotificationController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size);
@@ -65,7 +65,7 @@ public class NotificationController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Notification> notifications = notificationService.getUnreadNotifications(user);
@@ -89,7 +89,7 @@ public class NotificationController {
             return ResponseEntity.ok(response);
         }
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         long count = notificationService.getUnreadNotificationCount(user);
@@ -127,7 +127,7 @@ public class NotificationController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         notificationService.markAllAsRead(user);
@@ -145,7 +145,7 @@ public class NotificationController {
     public ResponseEntity<List<NotificationResponse>> getRecentNotifications(
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Notification> notifications = notificationService.getRecentNotifications(user);
@@ -163,7 +163,7 @@ public class NotificationController {
     public ResponseEntity<Map<String, String>> clearAllNotifications(
             @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            User user = userRepository.findById(currentUser.getId())
+            User user = userRepository.findByIdWithOrganization(currentUser.getId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             
             notificationService.clearAllNotifications(user.getId());
@@ -187,7 +187,7 @@ public class NotificationController {
             @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestBody Map<String, Object> request) {
         try {
-            User user = userRepository.findById(currentUser.getId())
+            User user = userRepository.findByIdWithOrganization(currentUser.getId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             
             String title = (String) request.get("title");
@@ -219,7 +219,7 @@ public class NotificationController {
             @AuthenticationPrincipal UserPrincipal currentUser,
             @RequestBody Map<String, Object> request) {
         try {
-            User user = userRepository.findById(currentUser.getId())
+            User user = userRepository.findByIdWithOrganization(currentUser.getId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
             
             String title = (String) request.get("title");

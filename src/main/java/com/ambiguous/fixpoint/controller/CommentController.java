@@ -92,7 +92,7 @@ public class CommentController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Report report = reportRepository.findByIdWithRelations(reportId)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
-        Comment parentComment = commentRepository.findById(commentId)
+        Comment parentComment = commentRepository.findByIdWithRelations(commentId)
                 .orElseThrow(() -> new RuntimeException("Parent comment not found"));
 
         Comment reply = new Comment(request.getContent(), report, user, parentComment);
@@ -115,7 +115,7 @@ public class CommentController {
     ) {
         User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        Comment comment = commentRepository.findById(commentId)
+        Comment comment = commentRepository.findByIdWithRelations(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
 
         // Check if user already reacted
@@ -144,7 +144,7 @@ public class CommentController {
             @PathVariable Long reportId,
             @PathVariable Long commentId,
             @AuthenticationPrincipal UserPrincipal currentUser) {
-        Comment parentComment = commentRepository.findById(commentId)
+        Comment parentComment = commentRepository.findByIdWithRelations(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
         
         User user = currentUser != null ? 

@@ -50,7 +50,7 @@ public class ReportController {
             @RequestParam(required = false) MultipartFile image,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         try {
@@ -77,7 +77,7 @@ public class ReportController {
                 Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        User user = userRepository.findById(currentUser.getId()).orElse(null);
+        User user = userRepository.findByIdWithOrganization(currentUser.getId()).orElse(null);
 
         Page<ReportSummary> reports;
         if (status != null) {
@@ -96,7 +96,7 @@ public class ReportController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user = userRepository.findById(currentUser.getId()).orElse(null);
+        User user = userRepository.findByIdWithOrganization(currentUser.getId()).orElse(null);
         Optional<ReportSummary> report = reportService.getReportById(id, user);
 
         if (report.isPresent()) {
@@ -120,7 +120,7 @@ public class ReportController {
                 Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        User user = userRepository.findById(currentUser.getId()).orElse(null);
+        User user = userRepository.findByIdWithOrganization(currentUser.getId()).orElse(null);
         Page<ReportSummary> reports = reportService.getReportsWithImages(pageable, user);
 
         return ResponseEntity.ok(reports);
@@ -132,7 +132,7 @@ public class ReportController {
             @RequestParam(defaultValue = "10") int size,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -149,7 +149,7 @@ public class ReportController {
             @RequestParam Double maxLng,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user = userRepository.findById(currentUser.getId()).orElse(null);
+        User user = userRepository.findByIdWithOrganization(currentUser.getId()).orElse(null);
         List<ReportSummary> reports = reportService.getReportsInArea(minLat, maxLat, minLng, maxLng, user);
 
         return ResponseEntity.ok(reports);
@@ -180,7 +180,7 @@ public class ReportController {
             @RequestParam(required = false) String resolutionNotes,
             @AuthenticationPrincipal UserPrincipal currentUser) {
 
-        User user = userRepository.findById(currentUser.getId())
+        User user = userRepository.findByIdWithOrganization(currentUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Only admins and NGO staff can update status
