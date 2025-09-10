@@ -60,8 +60,8 @@ _Comprehensive report form with image upload, location mapping, and detailed des
 ![AI Auto-Generated Description](./assets/4_AI_auto_generateddescriptionandvoicetotext.png)
 _AI automatically generates descriptions from images and converts voice to text_
 
-![AI Categorization & Priority](./assets/4_AIcategorizationand priority.png)
-_Smart categorization and priority assessment using AI analysis_
+![AI Categorization & Priority](./assets/4*AIcategorizationand priority.png)
+\_Smart categorization and priority assessment using AI analysis*
 
 ### 4. Interactive Map & Organization
 
