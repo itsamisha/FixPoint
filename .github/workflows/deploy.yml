@@ -28,8 +28,8 @@ jobs:
     # Create test application.properties to avoid database conflicts
     - name: Setup Test Configuration
       run: |
-        mkdir -p src/test/resources
-        cat > src/test/resources/application-test.properties << EOF
+        mkdir -p backend/src/test/resources
+        cat > backend/src/test/resources/application-test.properties << EOF
         # Test configuration
         spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
         spring.datasource.driver-class-name=org.h2.Driver
@@ -52,11 +52,13 @@ jobs:
         
     # Make Maven wrapper executable
     - name: Make Maven wrapper executable
-      run: chmod +x ./mvnw
+      run: chmod +x ./backend/mvnw
         
     # Run Backend Tests
     - name: Test Backend
-      run: ./mvnw test
+      run: |
+        cd backend
+        ./mvnw test
       env:
         SPRING_PROFILES_ACTIVE: test
         
@@ -103,11 +105,13 @@ jobs:
         
     # Make Maven wrapper executable
     - name: Make Maven wrapper executable
-      run: chmod +x ./mvnw
+      run: chmod +x ./backend/mvnw
         
     # Build Backend
     - name: Build Backend
-      run: ./mvnw clean package -DskipTests
+      run: |
+        cd backend
+        ./mvnw clean package -DskipTests
       
     # Build Frontend
     - name: Build Frontend
