@@ -16,7 +16,13 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     
     List<Comment> findByReportOrderByCreatedAtAsc(Report report);
     
+    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.user LEFT JOIN FETCH c.report WHERE c.report = :report AND c.parentComment IS NULL ORDER BY c.createdAt ASC")
+    List<Comment> findByReportAndParentCommentIsNullOrderByCreatedAtAscWithRelations(@Param("report") Report report);
+    
     List<Comment> findByReportAndParentCommentIsNullOrderByCreatedAtAsc(Report report);
+    
+    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.user LEFT JOIN FETCH c.report WHERE c.parentComment = :parentComment ORDER BY c.createdAt ASC")
+    List<Comment> findByParentCommentOrderByCreatedAtAscWithRelations(@Param("parentComment") Comment parentComment);
     
     List<Comment> findByParentCommentOrderByCreatedAtAsc(Comment parentComment);
     

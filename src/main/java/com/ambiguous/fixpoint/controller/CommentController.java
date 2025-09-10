@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ public class CommentController {
     private NotificationService notificationService;
 
     @GetMapping
+    @Transactional(readOnly = true)
     public ResponseEntity<List<CommentResponse>> listComments(
             @PathVariable Long reportId,
             @AuthenticationPrincipal UserPrincipal currentUser) {
@@ -54,7 +56,7 @@ public class CommentController {
         User user = currentUser != null ? 
                 userRepository.findByIdWithOrganization(currentUser.getId()).orElse(null) : null;
         
-        List<Comment> comments = commentRepository.findByReportAndParentCommentIsNullOrderByCreatedAtAsc(report);
+        List<Comment> comments = commentRepository.findByReportAndParentCommentIsNullOrderByCreatedAtAscWithRelations(report);
         List<CommentResponse> response = comments.stream()
                 .map(comment -> toResponse(comment, user))
                 .collect(Collectors.toList());
@@ -62,6 +64,7 @@ public class CommentController {
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<CommentResponse> addComment(
             @PathVariable Long reportId,
             @Valid @RequestBody CommentRequest request,
@@ -82,6 +85,7 @@ public class CommentController {
     }
 
     @PostMapping("/{commentId}/replies")
+    @Transactional
     public ResponseEntity<CommentResponse> addReply(
             @PathVariable Long reportId,
             @PathVariable Long commentId,
@@ -107,6 +111,7 @@ public class CommentController {
     }
 
     @PostMapping("/{commentId}/reactions")
+    @Transactional
     public ResponseEntity<CommentResponse> toggleReaction(
             @PathVariable Long reportId,
             @PathVariable Long commentId,
@@ -140,6 +145,7 @@ public class CommentController {
     }
 
     @GetMapping("/{commentId}/replies")
+    @Transactional(readOnly = true)
     public ResponseEntity<List<CommentResponse>> getReplies(
             @PathVariable Long reportId,
             @PathVariable Long commentId,
@@ -150,7 +156,7 @@ public class CommentController {
         User user = currentUser != null ? 
                 userRepository.findByIdWithOrganization(currentUser.getId()).orElse(null) : null;
         
-        List<Comment> replies = commentRepository.findByParentCommentOrderByCreatedAtAsc(parentComment);
+        List<Comment> replies = commentRepository.findByParentCommentOrderByCreatedAtAscWithRelations(parentComment);
         List<CommentResponse> response = replies.stream()
                 .map(reply -> toResponse(reply, user))
                 .collect(Collectors.toList());
