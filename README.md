@@ -1,5 +1,12 @@
 # FixPoint - Civic Issue Reporting Platform
 
+## Live Demo
+
+- **Frontend**: [https://fixpoint-frontend.vercel.app](https://fixpoint-frontend.vercel.app)
+- **Backend**: [https://fixpoint-backend.onrender.com](https://fixpoint-backend.onrender.com)
+- **Demo Video**: [YouTube Demo](https://youtube.com/watch?v=demo)
+
+
 FixPoint is a comprehensive web application that connects citizens with local authorities to report and resolve civic issues in their communities. Built with Spring Boot backend and React frontend, it promotes civic engagement, transparency, and collaborative problem-solving through AI-powered features and real-time communication.
 
 In many urban and semi-urban neighborhoods, small civic problems such as broken streetlights, potholes, garbage overflow, and stray animals often go unreported and unattended. Citizens are frequently unsure of where to report such problems, or they feel disheartened by the lack of visible response.
@@ -266,13 +273,6 @@ spring.jpa.hibernate.ddl-auto=validate
 jwt.secret=${JWT_SECRET}
 ai.provider=${AI_PROVIDER}
 ```
-
-## Live Demo
-
-- **Frontend**: [https://fixpoint-frontend.vercel.app](https://fixpoint-frontend.vercel.app)
-- **Backend**: [https://fixpoint-backend.onrender.com](https://fixpoint-backend.onrender.com)
-- **Demo Video**: [YouTube Demo](https://youtube.com/watch?v=demo)
-
 ---
 
 **Built with ❤️ by Team Ambiguous - Connecting Communities, One Issue at a Time**
