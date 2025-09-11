@@ -1,6 +1,6 @@
 # FixPoint Setup Guide
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -27,7 +27,7 @@ This will start:
 - Backend on `http://localhost:8080`
 - Frontend on `http://localhost:3000`
 
-## 🔧 Individual Setup
+## Individual Setup
 
 ### Backend Setup
 
@@ -77,7 +77,7 @@ This will start:
    npm start
    ```
 
-## 🤖 AI Services Setup
+## AI Services Setup
 
 ### Google Gemini (Recommended - FREE)
 
@@ -102,7 +102,7 @@ This will start:
    openai.api.key=sk-your-actual-api-key-here
    ```
 
-## 🎤 Speech Features Setup
+## Speech Features Setup
 
 ### Test Speech Features (No Backend Needed!)
 
@@ -124,7 +124,7 @@ frontend/public/speech-standalone.html
    google.cloud.credentials.path=path/to/credentials.json
    ```
 
-## 🗄️ Database Setup
+## Database Setup
 
 ### Default Admin User
 
@@ -142,7 +142,7 @@ The application includes dummy data for testing:
 - **Sample Reports**: Various test reports with different statuses
 - **Organizations**: Test organizations for assignment
 
-## 🌍 Environment Variables
+## Environment Variables
 
 ### Frontend Environment
 
@@ -176,7 +176,7 @@ spring.servlet.multipart.max-file-size=10MB
 spring.servlet.multipart.max-request-size=10MB
 ```
 
-## 🏗️ Building for Production
+## Building for Production
 
 ```bash
 # Build both backend and frontend
@@ -190,7 +190,7 @@ npm run build:backend
 npm run build:frontend
 ```
 
-## 📋 Available Scripts
+## Available Scripts
 
 - `npm start` - Start both backend and frontend
 - `npm run backend` - Start only backend
@@ -199,7 +199,7 @@ npm run build:frontend
 - `npm run test` - Run all tests
 - `npm run clean` - Clean build artifacts
 
-## 🧪 Testing
+## Testing
 
 ### Test AI Features
 
@@ -221,7 +221,7 @@ npm run build:frontend
 2. Use the 🎤 button next to the description field
 3. **Speech-to-Text works offline!**
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -263,13 +263,13 @@ curl -X POST http://localhost:8080/api/public/chatbot/chat \
   -d '{"message":"test"}'
 ```
 
-## 📚 Additional Resources
+## Additional Resources
 
 - **[Features Documentation](FEATURES.md)** - Detailed feature descriptions and screenshots
 - **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
-- **[AI Setup Guide](docs/setup/MULTI_AI_SETUP_GUIDE.md)** - Advanced AI configuration
-- **[Chatbot Setup](docs/setup/CHATBOT_SETUP_COMPLETE.md)** - Chatbot configuration
-- **[Speech Setup](docs/setup/SPEECH-SETUP.md)** - Speech features configuration
+- **[AI Setup Guide](setup/MULTI_AI_SETUP_GUIDE.md)** - Advanced AI configuration
+- **[Chatbot Setup](setup/CHATBOT_SETUP_COMPLETE.md)** - Chatbot configuration
+- **[Speech Setup](setup/SPEECH-SETUP.md)** - Speech features configuration
 
 ---
 

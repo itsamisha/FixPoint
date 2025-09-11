@@ -1,13 +1,13 @@
 # FixPoint Deployment Guide
 
-## 🚀 Production Deployment
+## Production Deployment
 
 ### Current Production URLs
 
 - **Frontend**: [https://itsamisha.github.io/FixPoint/](https://itsamisha.github.io/FixPoint/)
 - **Backend**: [https://fixpoint-ajtz.onrender.com](https://fixpoint-ajtz.onrender.com)
 
-## 🐳 Docker Deployment
+## Docker Deployment
 
 ### Backend Dockerfile
 
@@ -32,7 +32,7 @@ docker run -p 8080:8080 \
   fixpoint-backend
 ```
 
-## ☁️ Cloud Deployment Options
+## Cloud Deployment Options
 
 ### Railway (Backend)
 
@@ -96,7 +96,7 @@ docker run -p 8080:8080 \
    - Set build command: `npm run build`
    - Set publish directory: `build`
 
-## ⚙️ Production Configuration
+## Production Configuration
 
 ### Backend Configuration
 
@@ -139,7 +139,7 @@ const API_BASE_URL =
     : "http://localhost:8080";
 ```
 
-## 🗄️ Database Setup
+## Database Setup
 
 ### PostgreSQL (Recommended for Production)
 
@@ -167,7 +167,7 @@ DB_USERNAME=fixpoint_user
 DB_PASSWORD=secure_password
 ```
 
-## 🔐 Security Configuration
+## Security Configuration
 
 ### Environment Variables
 
@@ -196,7 +196,7 @@ FRONTEND_URL=https://your-frontend-domain.com
 - **GitHub Pages**: Automatically provides HTTPS
 - **Custom Domain**: Configure SSL certificate
 
-## 📊 Monitoring & Logging
+## Monitoring & Logging
 
 ### Health Checks
 
@@ -219,7 +219,7 @@ logging.file.name=logs/fixpoint.log
 logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss} - %msg%n
 ```
 
-## 🚨 Troubleshooting Production Issues
+## Troubleshooting Production Issues
 
 ### Common Issues
 
@@ -262,7 +262,7 @@ curl -X POST https://your-backend-url.com/api/public/chatbot/chat \
 curl https://your-backend-url.com/actuator/health
 ```
 
-## 📈 Performance Optimization
+## Performance Optimization
 
 ### Backend Optimization
 
@@ -278,7 +278,7 @@ curl https://your-backend-url.com/actuator/health
 - Implement lazy loading
 - Optimize images
 
-## 🔄 CI/CD Pipeline
+## CI/CD Pipeline
 
 ### GitHub Actions Example
 
@@ -307,7 +307,7 @@ jobs:
           # GitHub Pages deployment commands
 ```
 
-## 📋 Deployment Checklist
+## Deployment Checklist
 
 ### Pre-Deployment
 
@@ -327,7 +327,7 @@ jobs:
 - [ ] Test file uploads
 - [ ] Verify email notifications
 
-## 🆘 Support
+## Support
 
 ### Getting Help
 
@@ -344,4 +344,4 @@ jobs:
 
 ---
 
-**Deployment successful?** Your FixPoint application should now be live and accessible to users worldwide! 🌍
+**Deployment successful?** Your FixPoint application should now be live and accessible to users worldwide!

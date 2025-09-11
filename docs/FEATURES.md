@@ -1,6 +1,6 @@
 # FixPoint Features & Screenshots
 
-## 🏠 Homepage & Authentication
+## Homepage & Authentication
 
 **Welcome to FixPoint - Your Civic Engagement Platform**
 
@@ -10,7 +10,7 @@ _Clean, modern homepage with role-based authentication for Citizens, Admins, Sta
 ![Signup & Authentication](./assets/2_signup_auth.png)
 _Seamless user registration and login system with intuitive role selection_
 
-## 📝 Issue Reporting
+## Issue Reporting
 
 **From Problem to Solution - The Complete Reporting Experience**
 
@@ -26,7 +26,7 @@ _AI automatically generates descriptions from uploaded images and converts voice
 ![Duplicate Check](./assets/6_duplicatecheck.png)
 _Intelligent duplicate detection prevents spam and consolidates similar reports_
 
-## 🗺️ Interactive Mapping & Organization
+## Interactive Mapping & Organization
 
 **Visual Problem Tracking and Targeted Reporting**
 
@@ -36,7 +36,7 @@ _Interactive map interface with organization dropdown for targeted reporting_
 ![Task in Map View](./assets/taskinmapview.png)
 _Real-time map showing all community issues with filtering and status indicators_
 
-## 📊 Dashboard & Management
+## Dashboard & Management
 
 **Comprehensive Control Center for All Users**
 
@@ -49,7 +49,7 @@ _Detailed reports view with filtering, sorting, and bulk operations_
 ![Update Progress](./assets/8_updateprogress.png)
 _Real-time progress tracking and status updates for issue resolution_
 
-## 💬 Communication & Collaboration
+## Communication & Collaboration
 
 **Building Community Through Active Engagement**
 
@@ -74,7 +74,7 @@ _Community discussion and feedback system for each reported issue_
 ![Notifications](./assets/notification.png)
 _Real-time notifications keep users informed about report updates and community activities_
 
-## 🏆 Recognition & Documentation
+## Recognition & Documentation
 
 **Celebrating Community Contributions**
 
@@ -84,7 +84,7 @@ _Automated certificate generation for volunteers and contributors_
 ![PDF Reports](./assets/reportpdf.png)
 _Professional PDF export functionality for reports and analytics_
 
-## 🚀 Key Features Overview
+## Key Features Overview
 
 ### For Citizens
 
@@ -114,7 +114,7 @@ _Professional PDF export functionality for reports and analytics_
 - **AI Chatbot**: Interactive assistant for civic engagement guidance
 - **Auto-Translation**: Seamless Bangla ↔ English translation
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Frontend
 
@@ -146,4 +146,4 @@ _Professional PDF export functionality for reports and analytics_
 
 ---
 
-**Built with ❤️ by Team Ambiguous - Connecting Communities, One Issue at a Time**
+**Built by Team Ambiguous - Connecting Communities, One Issue at a Time**
