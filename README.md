@@ -10,9 +10,13 @@
 - **Backend**: [https://fixpoint-ajtz.onrender.com](https://fixpoint-ajtz.onrender.com)
 - **Demo Video**: [YouTube Demo](https://youtube.com/watch?v=demo)
 
-FixPoint is a comprehensive web application that connects citizens with local authorities to report and resolve civic issues in their communities. Built with Spring Boot backend and React frontend, it promotes civic engagement, transparency, and collaborative problem-solving through AI-powered features and real-time communication.
+> **FixPoint** is a comprehensive web application that connects citizens with local authorities to report and resolve civic issues in their communities. Built with Spring Boot backend and React frontend, it promotes civic engagement, transparency, and collaborative problem-solving through AI-powered features and real-time communication.
+
+## The Problem
 
 In many urban and semi-urban neighborhoods, small civic problems such as broken streetlights, potholes, garbage overflow, and stray animals often go unreported and unattended. Citizens are frequently unsure of where to report such problems, or they feel disheartened by the lack of visible response.
+
+## Our Solution
 
 **FixPoint addresses this challenge by providing a user-friendly web application that enables residents to report local issues quickly and easily.**
 
@@ -30,8 +34,10 @@ npm start
 
 **Access the application:**
 
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:8080`
+- **Frontend**: `http://localhost:3000`
+- **Backend**: `http://localhost:8080`
+
+> **Note**: Make sure you have Java 17+ and Node.js 16+ installed before running the application.
 
 ## Key Features
 
@@ -77,11 +83,19 @@ npm start
 
 ## Available Scripts
 
-- `npm start` - Start both backend and frontend
-- `npm run build` - Build for production
-- `npm run test` - Run all tests
-- `npm run clean` - Clean build artifacts
+| Command         | Description                     |
+| --------------- | ------------------------------- |
+| `npm start`     | Start both backend and frontend |
+| `npm run build` | Build for production            |
+| `npm run test`  | Run all tests                   |
+| `npm run clean` | Clean build artifacts           |
 
 ---
 
-**Built by Team Ambiguous - Connecting Communities, One Issue at a Time**
+<div align="center">
+
+**Built with ❤️ by Team Ambiguous**
+
+_Connecting Communities, One Issue at a Time_
+
+</div>

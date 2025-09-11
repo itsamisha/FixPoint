@@ -71,15 +71,15 @@ The system automatically tries providers in this order:
 
 > "**Large pothole approximately 24 inches in diameter** visible on asphalt road surface. The cavity shows **significant depth with exposed aggregate base material** and **jagged edges** that pose a serious risk to vehicle tires and suspension systems. **Located in the primary traffic lane** where vehicles commonly travel. **Immediate repair recommended** to prevent vehicle damage and potential accidents. The surrounding pavement displays **stress cracking patterns** indicating underlying structural weakness. Priority: **HIGH**"
 
-## **📊 API Usage Comparison**
+## API Usage Comparison
 
-| **Provider** | **Free Tier**     | **Quality**  | **Quota Issues** | **Setup Difficulty** |
-| ------------ | ----------------- | ------------ | ---------------- | -------------------- |
-| **Gemini**   | 🟢 Yes (Generous) | 🟢 Excellent | 🟢 Rare          | 🟢 Easy              |
-| **OpenAI**   | 🔴 No             | 🟢 Excellent | 🔴 Common        | 🟡 Medium            |
-| **Fallback** | 🟢 Always Free    | 🟡 Good      | 🟢 Never         | 🟢 None              |
+| **Provider** | **Free Tier**  | **Quality** | **Quota Issues** | **Setup Difficulty** |
+| ------------ | -------------- | ----------- | ---------------- | -------------------- |
+| **Gemini**   | Yes (Generous) | Excellent   | Rare             | Easy                 |
+| **OpenAI**   | No             | Excellent   | Common           | Medium               |
+| **Fallback** | Always Free    | Good        | Never            | None                 |
 
-## **🔧 Advanced Configuration**
+## Advanced Configuration
 
 ### **Multiple Provider Setup**
 
@@ -100,47 +100,47 @@ openai.api.key=sk-proj-YOUR-OPENAI-KEY
 - **OpenAI**: Excellent overall quality, but paid
 - **Fallback**: Category-specific templates, always available
 
-## **🚨 Troubleshooting**
+## Troubleshooting
 
-### **"Quota Exceeded" Error**
+### "Quota Exceeded" Error
 
-✅ **Solution**: Switch to Gemini API (free tier)
+**Solution**: Switch to Gemini API (free tier)
 
 ```properties
 ai.provider=gemini
 gemini.api.key=YOUR_GEMINI_KEY
 ```
 
-### **"API Key Not Configured"**
+### "API Key Not Configured"
 
-✅ **Solution**: Check your `application.properties` file:
+**Solution**: Check your `application.properties` file:
 
 ```properties
 gemini.api.key=AIzaSyBl-YOUR-ACTUAL-KEY-HERE
 ```
 
-### **"Generic Descriptions"**
+### "Generic Descriptions"
 
-✅ **Solution**: Ensure you're selecting a category before AI analysis
+**Solution**: Ensure you're selecting a category before AI analysis
 
-### **"Service Unavailable"**
+### "Service Unavailable"
 
-✅ **Solution**: The system automatically falls back to enhanced descriptions
+**Solution**: The system automatically falls back to enhanced descriptions
 
-## **💡 Pro Tips**
+## Pro Tips
 
 1. **Always select a category** before generating AI descriptions for better results
 2. **Gemini is recommended** for most users due to the generous free tier
 3. **The system gracefully handles failures** - if one provider fails, it tries the next
 4. **Enhanced fallback provides good descriptions** even without any API keys
 
-## **🎉 Benefits of the New System**
+## Benefits of the New System
 
-- ✅ **No more quota issues** - multiple providers with fallback
-- ✅ **Better descriptions** - category-specific prompts
-- ✅ **Free to use** - Gemini's generous free tier
-- ✅ **Always works** - enhanced fallback ensures system never fails
-- ✅ **Easy setup** - just one API key needed
-- ✅ **Smart routing** - automatically uses the best available provider
+- **No more quota issues** - multiple providers with fallback
+- **Better descriptions** - category-specific prompts
+- **Free to use** - Gemini's generous free tier
+- **Always works** - enhanced fallback ensures system never fails
+- **Easy setup** - just one API key needed
+- **Smart routing** - automatically uses the best available provider
 
-Your FixPoint application is now **quota-proof** and will provide excellent AI descriptions regardless of API limitations! 🚀
+Your FixPoint application is now **quota-proof** and will provide excellent AI descriptions regardless of API limitations!
