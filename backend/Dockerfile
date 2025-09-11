@@ -8,11 +8,11 @@ RUN apk add --no-cache maven
 WORKDIR /app
 
 # Copy pom.xml and download dependencies first (for better caching)
-COPY backend/pom.xml .
+COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
 # Copy source code and build
-COPY backend/src ./src
+COPY src ./src
 RUN mvn clean package -DskipTests -B
 
 # Runtime stage
@@ -23,8 +23,8 @@ WORKDIR /app
 # Copy the JAR file
 COPY --from=build /app/target/fixpoint-0.0.1-SNAPSHOT.jar app.jar
 
-# Create data directory for H2 database
-RUN mkdir -p /app/data
+# Create data directory for H2 database and uploads directory for file storage
+RUN mkdir -p /app/data /app/uploads
 
 # Expose port (Render will set PORT environment variable)
 EXPOSE $PORT
