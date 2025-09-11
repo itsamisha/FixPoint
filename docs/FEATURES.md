@@ -20,8 +20,8 @@ _Comprehensive report form with image upload, GPS location mapping, and detailed
 ![AI Auto-Generated Description](../assets/4_AI_auto_generateddescriptionandvoicetotext.png)
 _AI automatically generates descriptions from uploaded images and converts voice to text and vice-versa_
 
-![AI Categorization & Priority](../assets/4_AIcategorizationand priority.png)
-\_Smart categorization and priority assessment using advanced AI analysis\*
+![AI Categorization & Priority](../assets/4*AIcategorizationand priority.png)
+\_Smart categorization and priority assessment using advanced AI analysis*
 
 ![Duplicate Check](../assets/6_duplicatecheck.png)
 _Intelligent duplicate detection prevents spam and consolidates similar reports_

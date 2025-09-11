@@ -63,33 +63,17 @@ npm start
 - **AI Chatbot**: Interactive assistant for civic engagement guidance
 - **Auto-Translation**: Seamless Bangla ↔ English translation
 
-## Technology Stack
-
-**Frontend:** React.js, React Router, Leaflet Maps, Axios, jsPDF  
-**Backend:** Spring Boot, Spring Security, JWT, WebSocket  
-**Database:** H2 (Development), PostgreSQL/MySQL (Production)  
-**AI Services:** Google Gemini, OpenAI, Google Cloud Speech
-
 ## Documentation
 
-- **[Features & Screenshots](docs/FEATURES.md)** - Complete feature overview with screenshots
-- **[Setup Guide](docs/SETUP.md)** - Detailed installation and configuration
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
-- **[AI Setup](docs/setup/MULTI_AI_SETUP_GUIDE.md)** - AI services configuration
-- **[Chatbot Setup](docs/setup/CHATBOT_SETUP_COMPLETE.md)** - Chatbot configuration
-- **[Speech Setup](docs/setup/SPEECH-SETUP.md)** - Speech features setup
-
-## Project Structure
-
-```
-FixPoint/
-├── backend/          # Spring Boot backend
-├── frontend/         # React frontend
-├── docs/            # Detailed documentation
-├── assets/          # Screenshots and images
-├── scripts/         # Build and utility scripts
-└── tests/           # Test files and data
-```
+| Document                                                  | Description                                |
+| --------------------------------------------------------- | ------------------------------------------ |
+| **[Features & Screenshots](docs/FEATURES.md)**            | Complete feature overview with screenshots |
+| **[Setup Guide](docs/SETUP.md)**                          | Detailed installation and configuration    |
+| **[Deployment Guide](docs/DEPLOYMENT.md)**                | Production deployment instructions         |
+| **[Technology Stack](docs/TECHNOLOGY_STACK.md)**          | Complete technology overview               |
+| **[AI Setup](docs/setup/MULTI_AI_SETUP_GUIDE.md)**        | AI services configuration                  |
+| **[Chatbot Setup](docs/setup/CHATBOT_SETUP_COMPLETE.md)** | Chatbot configuration                      |
+| **[Speech Setup](docs/setup/SPEECH-SETUP.md)**            | Speech features setup                      |
 
 ## Available Scripts
 

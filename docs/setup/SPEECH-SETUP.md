@@ -1,8 +1,8 @@
-# 🎤 Speech-to-Text Setup Guide
+# Speech-to-Text Setup Guide
 
-## 🚀 **EASIEST WAY - Test Right Now!**
+## Quick Start
 
-### **1. Test Speech Features (No Backend Needed!)**
+### 1. Test Speech Features (No Backend Needed)
 
 Open this file in your browser:
 
@@ -10,13 +10,13 @@ Open this file in your browser:
 frontend/public/speech-standalone.html
 ```
 
-This standalone page proves everything works without any backend!
+This standalone page demonstrates the speech features without requiring backend setup.
 
-### **2. Start Frontend (Already Done!)**
+### 2. Start Frontend
 
-✅ Frontend is starting up at `http://localhost:3000`
+Frontend should be running at `http://localhost:3000`
 
-### **3. Test in Main App**
+### 3. Test in Main App
 
 - Go to `http://localhost:3000`
 - Navigate to "Report Issue"
