@@ -2,7 +2,9 @@ services:
   # Backend Service
   - type: web
     name: fixpoint-backend
-    env: java
+    env: docker
+    dockerfilePath: ./config/Dockerfile
+    dockerContext: .
     buildCommand: ./mvnw clean package -DskipTests
     startCommand: java -jar target/fixpoint-0.0.1-SNAPSHOT.jar
     envVars:
