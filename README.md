@@ -157,36 +157,6 @@ _Professional PDF export functionality for reports and analytics_
 - **PostgreSQL/MySQL** - Production Database Options
 - **Local File System** - Image Storage (Max 10MB)
 
-## Project Structure
-
-```
-FixPoint/
-├── backend/                    # Spring Boot backend
-│   ├── src/                   # Source code
-│   ├── target/                # Build output
-│   ├── pom.xml               # Maven configuration
-│   └── mvnw*                 # Maven wrapper
-├── frontend/                  # React frontend
-│   ├── src/                  # Source code
-│   ├── public/               # Static assets
-│   └── package.json          # Dependencies
-├── docs/                     # Documentation
-│   ├── features/             # Feature documentation
-│   ├── setup/                # Setup guides
-│   └── deployment/           # Deployment guides
-├── scripts/                  # Build and utility scripts
-│   ├── build/                # Build scripts
-│   ├── database/             # Database scripts
-│   └── deployment/           # Deployment scripts
-├── tests/                    # Test files
-│   ├── html/                 # HTML test files
-│   ├── data/                 # Test data
-│   └── python/               # Python test scripts
-├── assets/                   # Images and static assets
-├── uploads/                  # User uploaded files
-├── data/                     # Database files
-└── config/                   # Configuration files
-```
 
 ## Getting Started
 
@@ -271,14 +241,6 @@ FixPoint/
    ```bash
    npm start
    ```
-
-### Default Admin User
-
-On first run, create an admin user through the registration form, then update the role in the database:
-
-```sql
-UPDATE users SET role = 'ADMIN' WHERE username = 'your-admin-username';
-```
 
 ### Building for Production
 
