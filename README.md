@@ -1,5 +1,9 @@
 # FixPoint - Civic Issue Reporting Platform
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20Website-blue)](https://itsamisha.github.io/FixPoint/)
+[![Backend API](https://img.shields.io/badge/Backend%20API-Production-green)](https://fixpoint-ajtz.onrender.com)
+[![Demo Video](https://img.shields.io/badge/Demo%20Video-Watch%20Now-red)](https://youtube.com/watch?v=demo)
+
 ### Visit Our Website :
 
 - **Frontend**: [https://itsamisha.github.io/FixPoint/](https://itsamisha.github.io/FixPoint/)

@@ -4,49 +4,49 @@
 
 **Welcome to FixPoint - Your Civic Engagement Platform**
 
-![Homepage](./assets/homepage.png)
+![Homepage](../assets/homepage.png)
 _Clean, modern homepage with role-based authentication for Citizens, Admins, Staff, and Volunteers_
 
-![Signup & Authentication](./assets/2_signup_auth.png)
+![Signup & Authentication](../assets/2_signup_auth.png)
 _Seamless user registration and login system with intuitive role selection_
 
 ## Issue Reporting
 
 **From Problem to Solution - The Complete Reporting Experience**
 
-![Issue Reporting by Citizen](./assets/3_reporting_issue_by_citizen.png)
+![Issue Reporting by Citizen](../assets/3_reporting_issue_by_citizen.png)
 _Comprehensive report form with image upload, GPS location mapping, and detailed descriptions_
 
-![AI Auto-Generated Description](./assets/4_AI_auto_generateddescriptionandvoicetotext.png)
+![AI Auto-Generated Description](../assets/4_AI_auto_generateddescriptionandvoicetotext.png)
 _AI automatically generates descriptions from uploaded images and converts voice to text and vice-versa_
 
-![AI Categorization & Priority](./assets/4*AIcategorizationand priority.png)
-\_Smart categorization and priority assessment using advanced AI analysis*
+![AI Categorization & Priority](../assets/4_AIcategorizationand priority.png)
+\_Smart categorization and priority assessment using advanced AI analysis\*
 
-![Duplicate Check](./assets/6_duplicatecheck.png)
+![Duplicate Check](../assets/6_duplicatecheck.png)
 _Intelligent duplicate detection prevents spam and consolidates similar reports_
 
 ## Interactive Mapping & Organization
 
 **Visual Problem Tracking and Targeted Reporting**
 
-![Map and Organization Selection](./assets/5_mapandorganizationselect.png)
+![Map and Organization Selection](../assets/5_mapandorganizationselect.png)
 _Interactive map interface with organization dropdown for targeted reporting_
 
-![Task in Map View](./assets/taskinmapview.png)
+![Task in Map View](../assets/taskinmapview.png)
 _Real-time map showing all community issues with filtering and status indicators_
 
 ## Dashboard & Management
 
 **Comprehensive Control Center for All Users**
 
-![Dashboard](./assets/7_dashboard.png)
+![Dashboard](../assets/7_dashboard.png)
 _Unified dashboard providing overview of reports, statistics, and quick actions_
 
-![Reports Overview](./assets/8_reportshpw.png)
+![Reports Overview](../assets/8_reportshpw.png)
 _Detailed reports view with filtering, sorting, and bulk operations_
 
-![Update Progress](./assets/8_updateprogress.png)
+![Update Progress](../assets/8_updateprogress.png)
 _Real-time progress tracking and status updates for issue resolution_
 
 ## Communication & Collaboration
@@ -57,31 +57,31 @@ _Real-time progress tracking and status updates for issue resolution_
   <table>
     <tr>
       <td align="center" width="50%">
-        <img src="./assets/AIchatbot.png" alt="AI Chatbot" width="100%"/>
+        <img src="../assets/AIchatbot.png" alt="AI Chatbot" width="100%"/>
         <br><em>Intelligent AI assistant providing guidance on civic engagement, issue reporting, and community participation</em>
       </td>
       <td align="center" width="50%">
-        <img src="./assets/chat.png" alt="Chat System" width="100%"/>
+        <img src="../assets/chat.png" alt="Chat System" width="100%"/>
         <br><em>Built-in messaging system for seamless communication between users, admins, and volunteers</em>
       </td>
     </tr>
   </table>
 </div>
 
-![Comments](./assets/comment.png)
+![Comments](../assets/comment.png)
 _Community discussion and feedback system for each reported issue_
 
-![Notifications](./assets/notification.png)
+![Notifications](../assets/notification.png)
 _Real-time notifications keep users informed about report updates and community activities_
 
 ## Recognition & Documentation
 
 **Celebrating Community Contributions**
 
-![Certificate Generation](./assets/cirtificate.png)
+![Certificate Generation](../assets/cirtificate.png)
 _Automated certificate generation for volunteers and contributors_
 
-![PDF Reports](./assets/reportpdf.png)
+![PDF Reports](../assets/reportpdf.png)
 _Professional PDF export functionality for reports and analytics_
 
 ## Key Features Overview
