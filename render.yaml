@@ -10,9 +10,23 @@ services:
         value: production
       - key: PORT
         value: 10000
+      # Email Configuration - Set these in Render Dashboard
       - key: EMAIL_USERNAME
-        value: tahseennabiha35@gmail.com
+        sync: false  # This tells Render to get it from environment
       - key: EMAIL_PASSWORD
-        value: gfltqeedcqqrqqtb
+        sync: false  # This tells Render to get it from environment
+      # AI API Keys - Set these in Render Dashboard
       - key: GEMINI_API_KEY
-        value: AIzaSyAmpBVl_Bp20E7ojhzrbsY2nyVH1TqYyow
+        sync: false  # This tells Render to get it from environment
+      - key: OPENAI_API_KEY
+        sync: false  # This tells Render to get it from environment
+      - key: AI_PROVIDER
+        value: gemini
+      # JWT Security - Set this in Render Dashboard
+      - key: JWT_SECRET
+        sync: false  # Set this in Render Dashboard
+      - key: JWT_EXPIRATION
+        value: 86400000
+      # CORS Configuration
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://itsamisha.github.io,http://localhost:3000

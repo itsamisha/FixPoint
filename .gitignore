@@ -100,8 +100,16 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.local
+.env.development.local
 .env.test
+.env.test.local
 .env.production
+.env.production.local
+
+# Sensitive configuration files
+**/src/main/resources/application-local.properties
+**/src/main/resources/application-secrets.properties
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
