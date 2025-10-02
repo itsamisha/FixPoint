@@ -65,7 +65,7 @@ public class MultiAIService {
      * Generate description using Google Gemini Vision API
      */
     private String generateWithGemini(MultipartFile image, String category) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
         
         String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
         String prompt = buildPromptForCategory(category);
@@ -405,7 +405,7 @@ public class MultiAIService {
      * Translate text using Google Gemini
      */
     private String translateWithGemini(String text) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
         
         String prompt = "Translate the following English text to Bangla (Bengali). Provide only the translation without any additional text or explanations:\n\n" + text;
         
@@ -519,7 +519,7 @@ public class MultiAIService {
                 return "AI service not configured";
             }
 
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
             
             Map<String, Object> requestBody = new HashMap<>();
             List<Map<String, Object>> contents = new ArrayList<>();
@@ -630,7 +630,7 @@ public class MultiAIService {
             
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
             
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + geminiApiKey;
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
             
             if (response.getBody() != null) {
@@ -993,7 +993,7 @@ public class MultiAIService {
      * Generate chat response using Google Gemini API
      */
     private String generateChatWithGemini(String prompt) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
         
         Map<String, Object> requestBody = new HashMap<>();
         
