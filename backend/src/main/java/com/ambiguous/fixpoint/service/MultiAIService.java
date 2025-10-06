@@ -65,7 +65,7 @@ public class MultiAIService {
      * Generate description using Google Gemini Vision API
      */
     private String generateWithGemini(MultipartFile image, String category) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" + geminiApiKey;
         
         String base64Image = Base64.getEncoder().encodeToString(image.getBytes());
         String prompt = buildPromptForCategory(category);
@@ -99,8 +99,22 @@ public class MultiAIService {
         // Generation config for better responses
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("temperature", 0.3);
-        generationConfig.put("maxOutputTokens", 1500);
+        generationConfig.put("maxOutputTokens", 400);  // Further reduced for efficiency
+        generationConfig.put("topP", 0.8);
+        generationConfig.put("topK", 40);
         requestBody.put("generationConfig", generationConfig);
+        
+        // Add safety settings to prevent blocks
+        List<Map<String, Object>> safetySettings = new ArrayList<>();
+        String[] harmCategories = {"HARM_CATEGORY_HARASSMENT", "HARM_CATEGORY_HATE_SPEECH", 
+                              "HARM_CATEGORY_SEXUALLY_EXPLICIT", "HARM_CATEGORY_DANGEROUS_CONTENT"};
+        for (String harmCategory : harmCategories) {
+            Map<String, Object> setting = new HashMap<>();
+            setting.put("category", harmCategory);
+            setting.put("threshold", "BLOCK_NONE");
+            safetySettings.add(setting);
+        }
+        requestBody.put("safetySettings", safetySettings);
         
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
@@ -111,7 +125,7 @@ public class MultiAIService {
         System.out.println("Request body size: " + requestBody.toString().length() + " characters");
         
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
             
             System.out.println("Gemini API response status: " + response.getStatusCode());
             System.out.println("Gemini API response body: " + response.getBody());
@@ -180,6 +194,48 @@ public class MultiAIService {
             throw new Exception("Unable to parse Gemini response");
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse Gemini response", e);
+        }
+    }
+
+    /**
+     * Parse Gemini API response from Map object
+     */
+    private String parseGeminiResponse(Map<String, Object> responseBody) {
+        try {
+            // Handle new Gemini 2.5 response structure
+            if (responseBody.containsKey("candidates")) {
+                List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
+                if (candidates != null && !candidates.isEmpty()) {
+                    Map<String, Object> candidate = candidates.get(0);
+                    
+                    // Check finish reason
+                    String finishReason = (String) candidate.get("finishReason");
+                    if ("MAX_TOKENS".equals(finishReason)) {
+                        System.out.println("Warning: Response was truncated due to max tokens limit");
+                    }
+                    
+                    if (candidate.containsKey("content")) {
+                        Map<String, Object> content = (Map<String, Object>) candidate.get("content");
+                        if (content != null && content.containsKey("parts")) {
+                            List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+                            if (parts != null && !parts.isEmpty()) {
+                                Map<String, Object> part = parts.get(0);
+                                if (part.containsKey("text")) {
+                                    String text = (String) part.get("text");
+                                    return text != null ? text.trim() : "";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Fallback - return a message indicating the response was incomplete
+            return "AI analysis incomplete - response was truncated or malformed. Please try with a smaller image or different content.";
+            
+        } catch (Exception e) {
+            System.err.println("Error parsing Gemini response: " + e.getMessage());
+            return "Unable to generate AI description due to parsing error. Please try again.";
         }
     }
 
@@ -993,7 +1049,7 @@ public class MultiAIService {
      * Generate chat response using Google Gemini API
      */
     private String generateChatWithGemini(String prompt) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=" + geminiApiKey;
         
         Map<String, Object> requestBody = new HashMap<>();
         
@@ -1013,16 +1069,16 @@ public class MultiAIService {
         // Generation config for chat responses
         Map<String, Object> generationConfig = new HashMap<>();
         generationConfig.put("temperature", 0.7);
+        generationConfig.put("maxOutputTokens", 400);  // Reduced for efficiency
         generationConfig.put("topP", 0.8);
         generationConfig.put("topK", 40);
-        // Remove maxOutputTokens to allow full responses
         requestBody.put("generationConfig", generationConfig);
         
         HttpHeaders headers = new HttpHeaders();
         headers.set("Content-Type", "application/json");
         
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
         
         return parseGeminiResponse(response.getBody());
     }
